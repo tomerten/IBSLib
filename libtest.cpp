@@ -95,9 +95,23 @@ int main() {
   double cyy = 8, tl1 = 9, tl2 = 10, tx1 = 11, tx2 = 12, ty1 = 13, ty2 = 14;
   SimpsonDecade(a, b, c, c1, cx, cy, cprime, cyy, tl1, tl2, tx1, tx2, ty1, ty2,
                 tau);
+  printf("SimpsonDecade madx...\n");
   printf("%-30s %20.6e (%s)\n", "al :", tau[0], "");
   printf("%-30s %20.6e (%s)\n", "ax :", tau[1], "");
   printf("%-30s %20.6e (%s)\n", "ay :", tau[2], "");
+  printf("\n\n");
 
+  printf("%-30s %20.6e (%s)\n",
+         "Variable integrand :", IBSIntegralIntegrand(1, 2, 3, 4, 5, 6), "");
+  printf("%-30s %20.6e (%s)\n", "Standard Simpson integral :",
+         simpson(IBSIntegralIntegrand, 1, 2, 3, 4, 5, 6, 7, 10), "");
+
+  printf("\n\n");
+  printf("Standar SimpsonDecade ...\n");
+  intSimpson(IBSIntegralIntegrand, 1, 2, 3, 4, 6, 7, 8, 9, 10, tau);
+  printf("%-30s %20.6e (%s)\n", "al :", tau[0], "");
+  printf("%-30s %20.6e (%s)\n", "ax :", tau[1], "");
+  printf("%-30s %20.6e (%s)\n", "ay :", tau[2], "");
+  printf("\n\n");
   return 0;
 }

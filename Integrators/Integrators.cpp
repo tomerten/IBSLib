@@ -133,3 +133,103 @@ void SimpsonDecade(double a, double b, double c, double cl, double cx,
     tau[2] = 0.0;
   }
 }
+/*
+------------------------------------------------------------------------------
+VERSION 1.0 : IBS INTEGRALS INTEGRAND AS FUNCTION TO BE ABLE TO ADD
+              CONTE-MARTINI AND BJORKEN-MTINGWA - NORMAL SIMPSON GIVES TOO
+              LARGE DEVIATIONS COMPARED TO SIMPSON DECADE.
+
+AUTHOR    : TOM MERTENS
+DATE      : 16/02/2021
+OPYRIGHT  : HZB
+
+    DESCRIPTION :
+        IBS INTEGRALS INTEGRAND
+
+-------------------------------------------------------------------------------
+a (double)       : lambda**2 coefficient integral denominator
+b (double)       : lambda coefficient integral denominator
+c (double)       : constant integral denominator
+ax (double)      : lambda coefficient integral numerator
+bx (double)      : constant term integral numerator
+lambda (double)  : integration variable
+-------------------------------------------------------------------------------
+*/
+
+double IBSIntegralIntegrand(double lambda, double ax, double bx, double a,
+                            double b, double c) {
+  double num = sqrt(lambda) * (ax * lambda + bx);
+  double term = lambda * lambda * lambda + a * lambda * lambda + b * lambda + c;
+  double denom = sqrt(term * term * term);
+  return num / denom;
+}
+
+double simpson(double ibsintegrand(double, double, double, double, double,
+                                   double),
+               double ax, double bx, double a, double b, double c, double al,
+               double bl, int n) {
+  double h, integral, x, sum = 0.0;
+  int i;
+
+  h = fabs(bl - al) / n;
+  for (i = 0; i < n; i++) {
+    x = al + i * h;
+    if (i % 2 == 0) {
+      sum += 2.0 * ibsintegrand(x, ax, bx, a, b, c);
+    } else {
+      sum += 4.0 * ibsintegrand(x, ax, bx, a, b, c);
+    }
+  }
+
+  double fa = ibsintegrand(al, ax, bx, a, b, c);
+  double fb = ibsintegrand(bl, ax, bx, a, b, c);
+
+  integral = (h / 3.0) * (fa + fb + sum);
+
+  return integral;
+}
+
+void intSimpson(double BjorkenMtingwaIntegrand(double, double, double, double,
+                                               double, double),
+                double ax, double bx, double ay, double by, double as,
+                double bs, double a, double b, double c, double *integral) {
+  double al[31], bl[30], aloop, bloop;
+
+  int maxdec = 30, ns = 50;
+  double test = 1.0e-7;
+  bool flag = 0;
+  // double integral[3] = {0.0,0.0,0.0};
+
+  al[0] = 0.0;
+  for (int iloop = 0; iloop < maxdec; iloop++) {
+    bl[iloop] = pow(10.0, iloop);
+    al[iloop + 1] = bl[iloop];
+    aloop = al[iloop];
+    bloop = bl[iloop];
+
+    double nintx =
+        simpson(BjorkenMtingwaIntegrand, ax, bx, a, b, c, aloop, bloop, ns);
+    double ninty =
+        simpson(BjorkenMtingwaIntegrand, ay, by, a, b, c, aloop, bloop, ns);
+    double nints =
+        simpson(BjorkenMtingwaIntegrand, as, bs, a, b, c, aloop, bloop, ns);
+
+    integral[0] += nints;
+    integral[1] += nintx;
+    integral[2] += ninty;
+
+    if ((fabs(nints / integral[0]) < test) &
+        (fabs(nintx / integral[1]) < test) & (fabs(ninty / integral[2]) < test)
+
+    ) {
+      flag = 1;
+      break;
+    }
+  }
+  if (flag == 0) {
+    integral[0] = 0.0;
+    integral[1] = 0.0;
+    integral[2] = 0.0;
+  }
+  // return integral;
+}
