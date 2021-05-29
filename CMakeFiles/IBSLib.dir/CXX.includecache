@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mti/github-tomerten/IBSlib/libtest.cpp
+CoulombLogFunctions.hpp
+/home/mti/github-tomerten/IBSlib/CoulombLogFunctions.hpp
+NumericFunctions.hpp
+/home/mti/github-tomerten/IBSlib/NumericFunctions.hpp
+stdio.h
+-
+
+CoulombLog/CoulombLogFunctions.hpp
+
+NumericFunctions/NumericFunctions.hpp
+

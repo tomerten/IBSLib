@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.10.2)
+
+project(IBSLib VERSION 0.1.0)
+include(GNUInstallDirs)
+
+add_library(IBSLib SHARED
+    src/IbsLib/NumericFunctions.cpp
+    src/IbsLib/Integrators.cpp
+    src/IbsLib/IbsModels.cpp
+)
+
+set_target_properties(IBSLib PROPERTIES 
+    VERSION ${PROJECT_VERSION} 
+    SOVERSION 1
+    PUBLIC_HEADER include/IbsModels.hpp)
+configure_file(IBSLib.pc.in IBSLib.pc @ONLY)
+target_include_directories(IBSLib PRIVATE .)
+
+install(TARGETS IBSLib
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(FILES ${CMAKE_BINARY_DIR}/IBSLib.pc
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
