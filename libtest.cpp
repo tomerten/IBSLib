@@ -1,4 +1,5 @@
 #include "CoulombLogFunctions.hpp"
+#include "Integrators.hpp"
 #include "NumericFunctions.hpp"
 #include <stdio.h>
 
@@ -79,6 +80,24 @@ int main() {
   printf("\nWith Tailcut...\n");
   TailCutCoulombLog(1e10, ex, ey, twissheader, sige, sigt, 0.005, 0.008, 0.01,
                     r0, printout, clog);
+  /*
+   ================================================================================
+   COULOMB LOG FUNCTIONS
+   ================================================================================
+   */
+  printf("\n\n");
+  printf("Integrator Functions\n");
+  printf("====================\n");
+  double tau[3];
+  a = 1, b = 2;
+  double c = 3;
+  double c1 = 4, cx = 5, cy = 6, cprime = 7;
+  double cyy = 8, tl1 = 9, tl2 = 10, tx1 = 11, tx2 = 12, ty1 = 13, ty2 = 14;
+  SimpsonDecade(a, b, c, c1, cx, cy, cprime, cyy, tl1, tl2, tx1, tx2, ty1, ty2,
+                tau);
+  printf("%-30s %20.6e (%s)\n", "al :", tau[0], "");
+  printf("%-30s %20.6e (%s)\n", "ax :", tau[1], "");
+  printf("%-30s %20.6e (%s)\n", "ay :", tau[2], "");
 
   return 0;
 }

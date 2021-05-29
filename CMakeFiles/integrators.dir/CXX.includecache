@@ -6,19 +6,17 @@
 
 #IncludeRegexTransform: 
 
-/home/mti/github-tomerten/IBSlib/libtest.cpp
+/home/mti/github-tomerten/IBSlib/Integrators/Integrators.cpp
 CoulombLogFunctions.hpp
-/home/mti/github-tomerten/IBSlib/CoulombLogFunctions.hpp
-Integrators.hpp
-/home/mti/github-tomerten/IBSlib/Integrators.hpp
+/home/mti/github-tomerten/IBSlib/Integrators/CoulombLogFunctions.hpp
 NumericFunctions.hpp
-/home/mti/github-tomerten/IBSlib/NumericFunctions.hpp
+/home/mti/github-tomerten/IBSlib/Integrators/NumericFunctions.hpp
+math.h
+-
 stdio.h
 -
 
 CoulombLog/CoulombLogFunctions.hpp
-
-Integrators/Integrators.hpp
 
 NumericFunctions/NumericFunctions.hpp
 

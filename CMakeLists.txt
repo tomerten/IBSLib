@@ -22,9 +22,19 @@ add_library(clog SHARED
     CoulombLog/CoulombLogFunctions
 )
 
+# integrators lib
+add_library(integrators SHARED
+    Integrators/Integrators
+)
+
 target_include_directories(numfunc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/NumericFunctions)
 target_include_directories(clog PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CoulombLog)
+target_include_directories(integrators PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Integrators)
 
 target_link_libraries(clog numfunc)
+target_link_libraries(integrators clog numfunc)
+#target_link_libraries(integrators clog)
+
 target_link_libraries(${PROJECT_NAME} numfunc)
 target_link_libraries(${PROJECT_NAME} clog)
+target_link_libraries(${PROJECT_NAME} integrators)

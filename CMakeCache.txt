@@ -193,6 +193,9 @@ IBSLib_SOURCE_DIR:STATIC=/home/mti/github-tomerten/IBSlib
 //Dependencies for the target
 clog_LIB_DEPENDS:STATIC=general;numfunc;
 
+//Dependencies for the target
+integrators_LIB_DEPENDS:STATIC=general;clog;general;numfunc;
+
 //Dependencies for target
 numfunc_LIB_DEPENDS:STATIC=
 
