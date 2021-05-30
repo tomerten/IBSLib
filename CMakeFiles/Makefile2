@@ -141,7 +141,7 @@ clean: CMakeFiles/clog.dir/clean
 CMakeFiles/numfunc.dir/all:
 	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/depend
 	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/mti/github-tomerten/IBSlib/CMakeFiles --progress-num=7,8 "Built target numfunc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/mti/github-tomerten/IBSlib/CMakeFiles --progress-num=9,10 "Built target numfunc"
 .PHONY : CMakeFiles/numfunc.dir/all
 
 # Include target in all.
@@ -172,12 +172,52 @@ clean: CMakeFiles/numfunc.dir/clean
 .PHONY : clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/models.dir
+
+# All Build rule for target.
+CMakeFiles/models.dir/all: CMakeFiles/integrators.dir/all
+CMakeFiles/models.dir/all: CMakeFiles/clog.dir/all
+CMakeFiles/models.dir/all: CMakeFiles/numfunc.dir/all
+	$(MAKE) -f CMakeFiles/models.dir/build.make CMakeFiles/models.dir/depend
+	$(MAKE) -f CMakeFiles/models.dir/build.make CMakeFiles/models.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/mti/github-tomerten/IBSlib/CMakeFiles --progress-num=7,8 "Built target models"
+.PHONY : CMakeFiles/models.dir/all
+
+# Include target in all.
+all: CMakeFiles/models.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/models.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mti/github-tomerten/IBSlib/CMakeFiles 8
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/models.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mti/github-tomerten/IBSlib/CMakeFiles 0
+.PHONY : CMakeFiles/models.dir/rule
+
+# Convenience name for target.
+models: CMakeFiles/models.dir/rule
+
+.PHONY : models
+
+# clean rule for target.
+CMakeFiles/models.dir/clean:
+	$(MAKE) -f CMakeFiles/models.dir/build.make CMakeFiles/models.dir/clean
+.PHONY : CMakeFiles/models.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/models.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/IBSLib.dir
 
 # All Build rule for target.
 CMakeFiles/IBSLib.dir/all: CMakeFiles/integrators.dir/all
 CMakeFiles/IBSLib.dir/all: CMakeFiles/clog.dir/all
 CMakeFiles/IBSLib.dir/all: CMakeFiles/numfunc.dir/all
+CMakeFiles/IBSLib.dir/all: CMakeFiles/models.dir/all
 	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/depend
 	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/mti/github-tomerten/IBSlib/CMakeFiles --progress-num=1,2 "Built target IBSLib"
@@ -190,7 +230,7 @@ all: CMakeFiles/IBSLib.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/IBSLib.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mti/github-tomerten/IBSlib/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mti/github-tomerten/IBSlib/CMakeFiles 10
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/IBSLib.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/mti/github-tomerten/IBSlib/CMakeFiles 0
 .PHONY : CMakeFiles/IBSLib.dir/rule

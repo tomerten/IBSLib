@@ -150,6 +150,19 @@ numfunc/fast:
 .PHONY : numfunc/fast
 
 #=============================================================================
+# Target rules for targets named models
+
+# Build rule for target.
+models: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 models
+.PHONY : models
+
+# fast build rule for target.
+models/fast:
+	$(MAKE) -f CMakeFiles/models.dir/build.make CMakeFiles/models.dir/build
+.PHONY : models/fast
+
+#=============================================================================
 # Target rules for targets named IBSLib
 
 # Build rule for target.
@@ -216,6 +229,33 @@ Integrators/Integrators.cpp.s:
 	$(MAKE) -f CMakeFiles/integrators.dir/build.make CMakeFiles/integrators.dir/Integrators/Integrators.cpp.s
 .PHONY : Integrators/Integrators.cpp.s
 
+Models/Models.o: Models/Models.cpp.o
+
+.PHONY : Models/Models.o
+
+# target to build an object file
+Models/Models.cpp.o:
+	$(MAKE) -f CMakeFiles/models.dir/build.make CMakeFiles/models.dir/Models/Models.cpp.o
+.PHONY : Models/Models.cpp.o
+
+Models/Models.i: Models/Models.cpp.i
+
+.PHONY : Models/Models.i
+
+# target to preprocess a source file
+Models/Models.cpp.i:
+	$(MAKE) -f CMakeFiles/models.dir/build.make CMakeFiles/models.dir/Models/Models.cpp.i
+.PHONY : Models/Models.cpp.i
+
+Models/Models.s: Models/Models.cpp.s
+
+.PHONY : Models/Models.s
+
+# target to generate assembly for a file
+Models/Models.cpp.s:
+	$(MAKE) -f CMakeFiles/models.dir/build.make CMakeFiles/models.dir/Models/Models.cpp.s
+.PHONY : Models/Models.cpp.s
+
 NumericFunctions/NumericFunctions.o: NumericFunctions/NumericFunctions.cpp.o
 
 .PHONY : NumericFunctions/NumericFunctions.o
@@ -281,6 +321,7 @@ help:
 	@echo "... integrators"
 	@echo "... clog"
 	@echo "... numfunc"
+	@echo "... models"
 	@echo "... IBSLib"
 	@echo "... CoulombLog/CoulombLogFunctions.o"
 	@echo "... CoulombLog/CoulombLogFunctions.i"
@@ -288,6 +329,9 @@ help:
 	@echo "... Integrators/Integrators.o"
 	@echo "... Integrators/Integrators.i"
 	@echo "... Integrators/Integrators.s"
+	@echo "... Models/Models.o"
+	@echo "... Models/Models.i"
+	@echo "... Models/Models.s"
 	@echo "... NumericFunctions/NumericFunctions.o"
 	@echo "... NumericFunctions/NumericFunctions.i"
 	@echo "... NumericFunctions/NumericFunctions.s"

@@ -6,5 +6,5 @@ CXX_FLAGS =  -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/mti/github-tomerten/IBSlib/NumericFunctions -I/home/mti/github-tomerten/IBSlib/CoulombLog -I/home/mti/github-tomerten/IBSlib/Integrators 
+CXX_INCLUDES = -I/home/mti/github-tomerten/IBSlib/NumericFunctions -I/home/mti/github-tomerten/IBSlib/CoulombLog -I/home/mti/github-tomerten/IBSlib/Integrators -I/home/mti/github-tomerten/IBSlib/Models 
 

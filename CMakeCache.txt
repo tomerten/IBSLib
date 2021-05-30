@@ -196,6 +196,9 @@ clog_LIB_DEPENDS:STATIC=general;numfunc;
 //Dependencies for the target
 integrators_LIB_DEPENDS:STATIC=general;clog;general;numfunc;
 
+//Dependencies for the target
+models_LIB_DEPENDS:STATIC=general;integrators;general;clog;general;numfunc;
+
 //Dependencies for target
 numfunc_LIB_DEPENDS:STATIC=
 

@@ -3,4 +3,5 @@
 /home/mti/github-tomerten/IBSlib/CMakeFiles/integrators.dir
 /home/mti/github-tomerten/IBSlib/CMakeFiles/clog.dir
 /home/mti/github-tomerten/IBSlib/CMakeFiles/numfunc.dir
+/home/mti/github-tomerten/IBSlib/CMakeFiles/models.dir
 /home/mti/github-tomerten/IBSlib/CMakeFiles/IBSLib.dir
