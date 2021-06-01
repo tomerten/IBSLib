@@ -91,6 +91,7 @@ IBSLib_EXTERNAL_OBJECTS =
 IBSLib: CMakeFiles/IBSLib.dir/libtest.cpp.o
 IBSLib: CMakeFiles/IBSLib.dir/build.make
 IBSLib: libmodels.so
+IBSLib: libtwiss.so
 IBSLib: libintegrators.so
 IBSLib: libclog.so
 IBSLib: libnumfunc.so

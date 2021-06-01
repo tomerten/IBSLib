@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mti/github-tomerten/IBSlib/Twiss/Twiss.cpp
+algorithm
+-
+cstdlib
+-
+fstream
+-
+iostream
+-
+iterator
+-
+list
+-
+map
+-
+sstream
+-
+stdio.h
+-
+string
+-
+unordered_map
+-
+vector
+-
+

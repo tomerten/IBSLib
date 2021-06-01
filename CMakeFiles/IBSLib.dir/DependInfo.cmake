@@ -14,11 +14,13 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "CoulombLog"
   "Integrators"
   "Models"
+  "Twiss"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
   "/home/mti/github-tomerten/IBSlib/CMakeFiles/models.dir/DependInfo.cmake"
+  "/home/mti/github-tomerten/IBSlib/CMakeFiles/twiss.dir/DependInfo.cmake"
   "/home/mti/github-tomerten/IBSlib/CMakeFiles/integrators.dir/DependInfo.cmake"
   "/home/mti/github-tomerten/IBSlib/CMakeFiles/clog.dir/DependInfo.cmake"
   "/home/mti/github-tomerten/IBSlib/CMakeFiles/numfunc.dir/DependInfo.cmake"

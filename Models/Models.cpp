@@ -314,14 +314,13 @@ rmsx     : RMS x
 rmsy     : RMX y
 r0       : classical radius
 ---------------------------------------------------------------------------------------------------------------
-
+*/
 double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
                                 double sigs, double dponp,
                                 double twissheader[5], int n,
-                                double (*twissdata)[n], // shape [6,n]
+                                double (*twissdata)[6], // shape [6,n]
                                 double r0) {
-  const double c = 299792458.0;
-  const double pi = 3.141592653589793;
+  const double c = clight;
 
   static double output[3];
   double gamma = twissheader[0];
@@ -343,23 +342,30 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
 
 #pragma omp parallel for shared(twissdata) reduction(+ : alfax0, alfay0, alfap0)
   for (int i = 0; i < n; i++) {
+    // local naming
+    double L = twissdata[i][0];
+    double bx = twissdata[i][1];
+    double by = twissdata[i][2];
+    double dx = twissdata[i][3];
+    double dpx = twissdata[i][4];
+    double alfx = twissdata[i][5];
+
     // fmohl accuracy
     int npp = 1000;
 
-    double H0 = twissdata[3][i];
-    double H1 =
-        twissdata[1][i] * twissdata[4][i] + twissdata[5][i] * twissdata[3][i];
-    double H = (H0 * H0 + H1 * H1) / twissdata[1][i];
+    double H0 = dx;
+    double H1 = bx * dpx + alfx * dx;
+    double H = (H0 * H0 + H1 * H1) / bx;
 
-    double rmsx = sqrt(twissdata[1][i] * ex);
-    double rmsy = sqrt(twissdata[2][i] * ey);
+    double rmsx = sqrt(bx * ex);
+    double rmsy = sqrt(by * ey);
     double d = (rmsx <= rmsy) ? rmsx : rmsy;
 
     double sigh2inv = (1.0f / (dponp * dponp)) + (H / ex);
     double sigh = 1.0f / sqrt(sigh2inv);
 
-    double a = sigh * twissdata[1][i] / (gamma * rmsx);
-    double b = sigh * twissdata[2][i] / (gamma * rmsy);
+    double a = sigh * bx / (gamma * rmsx);
+    double b = sigh * by / (gamma * rmsy);
     double q = sigh * betar * sqrt(2.0f * d / r0);
 
     // calc fmohl values
@@ -368,12 +374,10 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
     double fmohly = fmohl(1 / b, a / b, q / b, npp);
 
     // calc IBS growth times ( AMPLITUDE - NOT EMITTANCE )
-    alfap0 += ca * fmohlp * (sigh * sigh / (dponp * dponp)) * twissdata[0][i];
-    alfax0 += ca *
-              (fmohlx + fmohlp * twissdata[3][i] * twissdata[3][i] * sigh *
-                            sigh / (rmsx * rmsx)) *
-              twissdata[0][i];
-    alfay0 += ca * fmohly * twissdata[0][i];
+    alfap0 += ca * fmohlp * (sigh * sigh / (dponp * dponp)) * L;
+    alfax0 +=
+        ca * (fmohlx + fmohlp * dx * dx * sigh * sigh / (rmsx * rmsx)) * L;
+    alfay0 += ca * fmohly * L;
   }
 
   output[0] = alfap0 / len;
@@ -382,16 +386,14 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
 
   return output;
 }
-*/
+
 /*
 ---------------------------------------------------------------------------------------------------------------
 ORIGINAL AUTHORS : RODERIK BRUCE, TOM MERTENS
 ---------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 06/02/2021
-COPYRIGHT : CERN / HZB
+VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE
+TYPES (P-PB) AUTHOR    : TOM MERTENS DATE      : 06/02/2021 COPYRIGHT : CERN
+/ HZB
 
     DESCRIPTION :
       IBS ROUTINE NAGAITSEV
@@ -425,9 +427,9 @@ sigs (double)           : bunch length
 dponp (double)          : momentum spread
 twissheader (double[4]) : twiss header containing (see details above)
 n (int)                 : number of columns in the twiss data table
-twiss (double[])        : twiss table data for the required columns (see DETAILS
-above) aatom (double)          : atomic number - for electrons this is
-electron_mass_energy_MeV / proton_mass_energy_MeV
+twiss (double[])        : twiss table data for the required columns (see
+DETAILS above) aatom (double)          : atomic number - for electrons this
+is electron_mass_energy_MeV / proton_mass_energy_MeV
 ---------------------------------------------------------------------------------------------------------------
 output (double[3])      : growth rates
     0 -> ap
@@ -485,8 +487,8 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
   double gamma5 = gamma * gamma * gamma * gamma * gamma;
 
 #pragma omp parallel for shared(twissdata,len) reduction(+: alfap0, alfax0,
-alfay0) for (int i = 0; i < n; i++) { double bx = twissdata[1][i]; double by =
-twissdata[2][i]; double dx = twissdata[3][i];
+alfay0) for (int i = 0; i < n; i++) { double bx = twissdata[1][i]; double by
+= twissdata[2][i]; double dx = twissdata[3][i];
 
     double phi = twissdata[4][i] +
                  (twissdata[5][i] * (twissdata[3][i] / twissdata[1][i]));

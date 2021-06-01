@@ -7,3 +7,4 @@ CMakeFiles/IBSLib.dir/libtest.cpp.o
  Integrators/Integrators.hpp
  Models/Models.hpp
  NumericFunctions/NumericFunctions.hpp
+ Twiss/Twiss.hpp
