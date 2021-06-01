@@ -277,31 +277,19 @@ void BjorkenMtingwaInt(double pnumber, double ex, double ey, double sigs,
                        double sige, double gammas, double betx, double bety,
                        double alx, double aly, double dx, double dpx, double dy,
                        double dpy, double *tau) {
-  // const int maxdec = 30, ns = 50;
-
-  // const double zero = 0.0;
   const double one = 1.0;
   const double two = 2.0;
   const double three = 3.0;
-  // const double four = 4.0;
-  // const double six = 6.0;
-  // const double eight = 8.0;
   const double ten = 10.0;
-
-  // const double onetominus20 = 1.0e-20;
   const double tstlog = 74.0, power = -two / three;
-  // const double coeff[2] = {2.0, 4.0};
-
-  // bool flag = 0;
 
   double a, b, c, ax, bx, ay, by, al, bl, c1, c3, c2, cx, cy, cyy;
   double cscale, chklog, cprime;
   double phix, tl1, tl2, tx1, tx2, ty1, ty2;
-  // double aarr[31], barr[30], h, aloop;
   double cl;
+
   // temp variable for reducing typing
   phix = dpx + (alx * dx / betx);
-  // phiy = dpy + (aly * dy / bety);
 
   c1 = (gammas * dx) * (gammas * dx) / (ex * betx);
   c3 = betx / ex;
