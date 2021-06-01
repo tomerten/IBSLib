@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g  -shared -Wl,-soname,libmodels.so -o libmodels.so CMakeFiles/models.dir/Models/Models.cpp.o -Wl,-rpath,/home/mti/github-tomerten/IBSlib libintegrators.so libclog.so libnumfunc.so 

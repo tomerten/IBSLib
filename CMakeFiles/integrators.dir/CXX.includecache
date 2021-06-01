@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mti/github-tomerten/IBSlib/Integrators/Integrators.cpp
+CoulombLogFunctions.hpp
+/home/mti/github-tomerten/IBSlib/Integrators/CoulombLogFunctions.hpp
+NumericFunctions.hpp
+/home/mti/github-tomerten/IBSlib/Integrators/NumericFunctions.hpp
+math.h
+-
+stdio.h
+-
+
+CoulombLog/CoulombLogFunctions.hpp
+
+NumericFunctions/NumericFunctions.hpp
+
