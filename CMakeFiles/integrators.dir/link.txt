@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g  -shared -Wl,-soname,libintegrators.so -o libintegrators.so CMakeFiles/integrators.dir/Integrators/Integrators.cpp.o -Wl,-rpath,/home/mti/github-tomerten/IBSlib libclog.so libnumfunc.so 

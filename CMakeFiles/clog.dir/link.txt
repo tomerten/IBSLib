@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g  -shared -Wl,-soname,libclog.so -o libclog.so CMakeFiles/clog.dir/CoulombLog/CoulombLogFunctions.cpp.o -Wl,-rpath,/home/mti/github-tomerten/IBSlib libnumfunc.so 
