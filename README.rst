@@ -36,3 +36,10 @@ Integration methods
 - Simpson (standard) implementation)
 - Simspon per decade for covering large spread in integration ranges (ususally 50 orders of magnitude difference between low and high)
 - TWINT, based on GSL QUAD method
+
+Radiation Damping
+=================
+
+- Radiation Damping using smooth lattice approximation 
+- Radiation Damping element by element
+- Equilibrium from pure radiation damping and exitation (taux, tauy, taus, exinf, eyinf, sigeoe2, jx, jy)
