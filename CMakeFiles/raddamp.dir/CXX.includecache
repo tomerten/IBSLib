@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mti/github-tomerten/IBSlib/RadiationDamping/RadiationDamping.cpp
+NumericFunctions.hpp
+/home/mti/github-tomerten/IBSlib/RadiationDamping/NumericFunctions.hpp
+iostream
+-
+math.h
+-
+stdio.h
+-
+
+NumericFunctions/NumericFunctions.hpp
+

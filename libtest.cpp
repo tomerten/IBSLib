@@ -2,6 +2,7 @@
 #include "Integrators.hpp"
 #include "Models.hpp"
 #include "NumericFunctions.hpp"
+#include "RadiationDamping.hpp"
 #include "Twiss.hpp"
 #include <stdio.h>
 void red() { printf("\033[1;31m"); }
@@ -903,5 +904,22 @@ int main() {
                 twissarrmadx1, r0);
   printouts(res);
 
+  /*
+  ================================================================================
+
+  RADIATION DAMPING METHODS
+
+  ================================================================================
+  */
+  yellow();
+  printf("Radiation Damping\n");
+  printf("=================\n");
+  green();
+  printf("Radiation Smooth Ring Approximation\n");
+  reset();
+  double *radint;
+  radint = RadiationDampingApprox(twissheadernagaitsev[2],
+                                  twissheaderpiwismooth[2], 4.35, 2.13, 5.66);
+  printradint(radint);
   return 0;
 }

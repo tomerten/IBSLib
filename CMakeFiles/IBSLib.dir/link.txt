@@ -1,1 +1,1 @@
-/usr/bin/c++   -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g   -fopenmp CMakeFiles/IBSLib.dir/libtest.cpp.o  -o IBSLib -Wl,-rpath,/home/mti/github-tomerten/IBSlib libmodels.so libtwiss.so libintegrators.so libclog.so libnumfunc.so 
+/usr/bin/c++   -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g   -fopenmp CMakeFiles/IBSLib.dir/libtest.cpp.o  -o IBSLib -Wl,-rpath,/home/mti/github-tomerten/IBSlib libmodels.so libtwiss.so libraddamp.so libintegrators.so libclog.so libnumfunc.so 

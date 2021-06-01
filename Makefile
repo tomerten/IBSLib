@@ -124,6 +124,19 @@ twiss/fast:
 .PHONY : twiss/fast
 
 #=============================================================================
+# Target rules for targets named raddamp
+
+# Build rule for target.
+raddamp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 raddamp
+.PHONY : raddamp
+
+# fast build rule for target.
+raddamp/fast:
+	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/build
+.PHONY : raddamp/fast
+
+#=============================================================================
 # Target rules for targets named integrators
 
 # Build rule for target.
@@ -296,6 +309,33 @@ NumericFunctions/NumericFunctions.cpp.s:
 	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/NumericFunctions/NumericFunctions.cpp.s
 .PHONY : NumericFunctions/NumericFunctions.cpp.s
 
+RadiationDamping/RadiationDamping.o: RadiationDamping/RadiationDamping.cpp.o
+
+.PHONY : RadiationDamping/RadiationDamping.o
+
+# target to build an object file
+RadiationDamping/RadiationDamping.cpp.o:
+	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/RadiationDamping/RadiationDamping.cpp.o
+.PHONY : RadiationDamping/RadiationDamping.cpp.o
+
+RadiationDamping/RadiationDamping.i: RadiationDamping/RadiationDamping.cpp.i
+
+.PHONY : RadiationDamping/RadiationDamping.i
+
+# target to preprocess a source file
+RadiationDamping/RadiationDamping.cpp.i:
+	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/RadiationDamping/RadiationDamping.cpp.i
+.PHONY : RadiationDamping/RadiationDamping.cpp.i
+
+RadiationDamping/RadiationDamping.s: RadiationDamping/RadiationDamping.cpp.s
+
+.PHONY : RadiationDamping/RadiationDamping.s
+
+# target to generate assembly for a file
+RadiationDamping/RadiationDamping.cpp.s:
+	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/RadiationDamping/RadiationDamping.cpp.s
+.PHONY : RadiationDamping/RadiationDamping.cpp.s
+
 Twiss/Twiss.o: Twiss/Twiss.cpp.o
 
 .PHONY : Twiss/Twiss.o
@@ -359,6 +399,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... twiss"
+	@echo "... raddamp"
 	@echo "... integrators"
 	@echo "... clog"
 	@echo "... numfunc"
@@ -376,6 +417,9 @@ help:
 	@echo "... NumericFunctions/NumericFunctions.o"
 	@echo "... NumericFunctions/NumericFunctions.i"
 	@echo "... NumericFunctions/NumericFunctions.s"
+	@echo "... RadiationDamping/RadiationDamping.o"
+	@echo "... RadiationDamping/RadiationDamping.i"
+	@echo "... RadiationDamping/RadiationDamping.s"
 	@echo "... Twiss/Twiss.o"
 	@echo "... Twiss/Twiss.i"
 	@echo "... Twiss/Twiss.s"

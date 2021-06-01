@@ -31,6 +31,10 @@ add_library(integrators SHARED
 add_library(models SHARED
     Models/Models
 )
+# add radiation damping lib
+add_library(raddamp SHARED 
+    RadiationDamping/RadiationDamping
+)
 
 # add twiss read lib
 add_library(twiss SHARED Twiss/Twiss)
@@ -40,9 +44,11 @@ target_include_directories(clog PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CoulombLog)
 target_include_directories(integrators PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Integrators)
 target_include_directories(models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Models)
 target_include_directories(twiss PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Twiss)
+target_include_directories(raddamp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/RadiationDamping)
 
 target_link_libraries(clog numfunc)
 target_link_libraries(integrators clog numfunc)
+target_link_libraries(raddamp numfunc)
 target_link_libraries(models integrators clog numfunc)
 #target_link_libraries(integrators clog)
 
@@ -51,3 +57,4 @@ target_link_libraries(${PROJECT_NAME} clog)
 target_link_libraries(${PROJECT_NAME} integrators)
 target_link_libraries(${PROJECT_NAME} models)
 target_link_libraries(${PROJECT_NAME} twiss)
+target_link_libraries(${PROJECT_NAME} raddamp)
