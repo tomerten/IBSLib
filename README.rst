@@ -43,3 +43,4 @@ Radiation Damping
 - Radiation Damping using smooth lattice approximation 
 - Radiation Damping element by element
 - Equilibrium from pure radiation damping and exitation (taux, tauy, taus, exinf, eyinf, sigeoe2, jx, jy)
+- Radiation losses per turn
