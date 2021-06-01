@@ -44,3 +44,4 @@ Radiation Damping
 - Radiation Damping element by element
 - Equilibrium from pure radiation damping and exitation (taux, tauy, taus, exinf, eyinf, sigeoe2, jx, jy)
 - Radiation losses per turn
+- Critical omega, theta, photon energy
