@@ -33,6 +33,6 @@ Current Supported Models
 Integration methods
 ===================
 
-- Simpson (stnadard implementation)
+- Simpson (standard) implementation)
 - Simspon per decade for covering large spread in integration ranges (ususally 50 orders of magnitude difference between low and high)
 - TWINT, based on GSL QUAD method
