@@ -3,14 +3,15 @@
 #include <math.h>
 #include <stdio.h>
 
-void printradint(double out[5]) {
+void printradint(double out[6]) {
   printf("\n");
   printf("    Radiation Integrals \n");
-  printf("    I1 = %15.6f\n", out[0]);
-  printf("    I2 = %15.6f\n", out[1]);
-  printf("    I3 = %15.6f\n", out[2]);
-  printf("    I4 = %15.6f\n", out[3]);
-  printf("    I5 = %15.6f\n", out[4]);
+  printf("    I2  = %15.6f\n", out[0]);
+  printf("    I3  = %15.6f\n", out[1]);
+  printf("    I4x = %15.6f\n", out[2]);
+  printf("    I4y = %15.6f\n", out[3]);
+  printf("    I5x = %15.6f\n", out[5]);
+  printf("    I5y = %15.6f\n", out[6]);
 }
 /*
 ---------------------------------------------------------------------------------------------------------------
@@ -96,18 +97,18 @@ DESCRIPTION :
 
 DETAILS:
     TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-        0 -> angle
-        1 -> l
-        2 -> k1l
+        0 -> l
+        1 -> betx
+        2 -> bety
         3 -> dx
-        4 -> dy
-        5 -> k1sl
-        6 -> alphax
-        7 -> alphay
-        8 -> betax
-        9 -> betay
-        10-> dpx
-        11-> dpy
+        4 -> dpx
+        5 -> dy
+        6 -> dpy
+        7 -> alfx
+        8 -> alfy
+        9 -> angle
+        10-> k1l
+        11-> k1ls
 ---------------------------------------------------------------------------------------------------------------
 twissdata  (double[])       : twiss table data for the required columns (see
 DETAILS above) rows (int)                  : number of rows in twissdata cols
@@ -121,9 +122,9 @@ radiationIntegrals (double[6])  :
     4 -> I5x
     5 -> I5y
 ---------------------------------------------------------------------------------------------------------------
+*/
 
-
-double *RadiationDampingLattice(double **twissdata, int rows, int cols) {
+double *RadiationDampingLattice(int rows, double (*twissdata)[12]) {
   static double radiationIntegrals[6];
   double I2 = 0.0;
   double I3 = 0.0;
@@ -135,41 +136,48 @@ double *RadiationDampingLattice(double **twissdata, int rows, int cols) {
   double rhoi, ki, gammax, gammay, hx, hy;
   double rhoi2, rhoi3;
 
-#pragma omp parallel for shared(twissdata) reduction(+: I2, I3, I4x, I4y, I5x,
-I5y) for (int i = 0; i < cols; i++) {
+#pragma omp parallel for shared(twissdata) reduction(+ : I2, I3, I4x, I4y, I5x,I5y)
+  for (int i = 0; i < rows; i++) {
+    // local copies
+    double *l = &(twissdata[i][0]);
+    double *bx = &(twissdata[i][1]);
+    double *by = &(twissdata[i][2]);
+    double *dx = &(twissdata[i][3]);
+    double *dpx = &(twissdata[i][4]);
+    double *dy = &(twissdata[i][5]);
+    double *dpy = &(twissdata[i][6]);
+    double *ax = &(twissdata[i][7]);
+    double *ay = &(twissdata[i][8]);
+    double *angle = &(twissdata[i][9]);
+    double *k1l = &(twissdata[i][10]);
+    double *k1sl = &(twissdata[i][11]);
+
     // calculate local bending radius
-    rhoi = (twissdata[0][i] == 0.0) ? 0.0 : twissdata[1][i] / twissdata[0][i];
+    rhoi = (*angle == 0.0) ? 0.0 : *l / *angle;
     rhoi2 = rhoi * rhoi;
     rhoi3 = rhoi2 * rhoi;
 
     // strength per length unit
-    ki = (twissdata[1][i] == 0.0) ? 0.0 : twissdata[2][i] / twissdata[1][i];
+    ki = (*l == 0.0) ? 0.0 : *k1l / *l;
 
     // first for integrals
-    I2 += (rhoi == 0.0) ? 0.0 : twissdata[1][i] / rhoi2;
-    I3 += (rhoi == 0.0) ? 0.0 : twissdata[1][i] / rhoi3;
-    I4x += (rhoi == 0.0)
-               ? 0.0
-               : (twissdata[3][i] / rhoi3) * twissdata[1][i] +
-                     (2.0f / rhoi) *
-                         (ki * twissdata[3][i] +
-                          twissdata[5][i] * twissdata[4][i] * twissdata[1][i]);
+    I2 += (rhoi == 0.0) ? 0.0 : *l / rhoi2;
+    I3 += (rhoi == 0.0) ? 0.0 : *l / rhoi3;
+    I4x += (rhoi == 0.0) ? 0.0
+                         : (*dx / rhoi3) * *l +
+                               (2.0f / rhoi) * (ki * *dx + *k1sl * *dy * *l);
     I4y += 0.0;
 
     // Courant-Snyder gamma
-    gammax = (1.0f + twissdata[6][i] * twissdata[6][i]) / twissdata[8][i];
-    gammay = (1.0f + twissdata[7][i] * twissdata[7][i]) / twissdata[9][i];
+    gammax = (1.0f + *ax * *ax) / *bx;
+    gammay = (1.0f + *ay * *ay) / *by;
 
     // curly H
-    hx = twissdata[8][i] * twissdata[10][i] * twissdata[10][i] +
-         2.0f * twissdata[6][i] * twissdata[3][i] * twissdata[10][i] +
-         gammax * twissdata[3][i] * twissdata[3][i];
-    hy = twissdata[9][i] * twissdata[11][i] * twissdata[11][i] +
-         2.0f * twissdata[7][i] * twissdata[4][i] * twissdata[11][i] +
-         gammay * twissdata[4][i] * twissdata[4][i];
+    hx = *bx * *dpx * *dpx + 2.0f * *ax * *dx * *dpx + gammax * *dx * *dx;
+    hy = *by * *dpy * *dpy + 2.0f * *ay * *dy * *dpy + gammay * *dy * *dy;
 
-    I5x += (rhoi == 0) ? 0.0 : hx * twissdata[1][i] / rhoi3;
-    I5y += (rhoi == 0) ? 0.0 : hy * twissdata[1][i] / rhoi3;
+    I5x += (rhoi == 0) ? 0.0 : hx * *l / rhoi3;
+    I5y += (rhoi == 0) ? 0.0 : hy * *l / rhoi3;
   }
 
   radiationIntegrals[0] = I2;
@@ -181,7 +189,7 @@ I5y) for (int i = 0; i < cols; i++) {
 
   return radiationIntegrals;
 }
-*/
+
 /*
 ---------------------------------------------------------------------------------------------------------------
 ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
@@ -226,10 +234,10 @@ output (double[8])
     6 -> jx
     7 -> jy
 ---------------------------------------------------------------------------------------------------------------
-
+*/
 
 double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
-    double twiss[], double radiationIntegrals[6], double aatom) {
+    double twiss[5], double radiationIntegrals[6], double aatom) {
   const double c = 299792458.0f;
   const double hbar = 1.0545718176461565e-34;
   const double pi = 3.141592653589793f;
@@ -244,31 +252,12 @@ double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
   double charge = twiss[4] * 1.0f;
 
   double particle_radius = charge * charge / aatom * 1.54e-18;
-
-  if (DEBUG) {
-    printf("charge         : %12.8f\n", charge);
-    printf("aatom          : %12.8f\n", aatom);
-    printf("radius         : %.8e\n", particle_radius);
-    printf("p0             : %.8e\n", p0);
-    printf("len            : %12.8f\n", len);
-    printf("restE          : %.8e\n", restE);
-    printf("CalphaEC num   : %.8e\n", particle_radius * c);
-    printf("CalphaEC denom : %.8e\n", (3.0f * restE * restE * restE));
-    printf("CalphaEC factor: %.8e\n", (p0 * p0 * p0 / len));
-  }
-
   double CalphaEC = particle_radius * c / (3.0f * restE * restE * restE) *
                     (p0 * p0 * p0 / len);
 
   // transverse partition numbers
   double jx = 1.0f - radiationIntegrals[3] / radiationIntegrals[0];
   double jy = 1.0f - radiationIntegrals[4] / radiationIntegrals[0];
-
-  if (DEBUG) {
-    printf("gamma   : %12.8f\n", gamma);
-    printf("CalphaEC: %.8e\n", CalphaEC);
-    printf("I2      : %12.8f\n", radiationIntegrals[0]);
-  }
 
   double alphax = 2.0f * CalphaEC * radiationIntegrals[0] * jx;
   double alphay = 2.0f * CalphaEC * radiationIntegrals[0] * jy;
@@ -303,7 +292,7 @@ double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
 
   return output;
 }
-*/
+
 /*
 ---------------------------------------------------------------------------------------------------------------
 ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
