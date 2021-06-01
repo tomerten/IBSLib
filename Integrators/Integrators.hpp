@@ -18,3 +18,28 @@ void intSimpson(double ibsintegrand(double, double, double, double, double,
                                     double),
                 double ax, double bx, double ay, double by, double as,
                 double bs, double a, double b, double ci, double *integral);
+
+/*
+==============================================================================
+
+MODEL INTEGRATORS
+
+==============================================================================
+*/
+void BjorkenMtingwaInt(double pnumber, double ex, double ey, double sigs,
+                       double sige, double gammas, double betx, double bety,
+                       double alx, double aly, double dx, double dpx, double dy,
+                       double dpy, double *tau);
+
+void ConteMartiniInt(double pnumber, double ex, double ey, double sigs,
+                     double sige, double gammas, double betx, double bety,
+                     double alx, double aly, double dx, double dpx, double dy,
+                     double dpy, double *tau);
+
+void MadxInt(double pnumber, double ex, double ey, double sigs, double sige,
+             double gammas, double betx, double bety, double alx, double aly,
+             double dx, double dpx, double dy, double dpy, double *tau);
+
+void twsint(double pnumber, double ex, double ey, double sigs, double sige,
+            double gammas, double betax, double betay, double alx, double aly,
+            double dx, double dpx, double dy, double dpy, double *tau);
