@@ -11,10 +11,8 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
                                 double twissheader[5], int n,
                                 double (*twissdata)[6], // shape [6,n]
                                 double r0);
-/*
 
 double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
                   double dponp, double twissheader[5], int n,
-                  double (*twissdata)[n], // shape [6,n]
+                  double (*twissdata)[6], // shape [6,n]
                   double r0);
-*/

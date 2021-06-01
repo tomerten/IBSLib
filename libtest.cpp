@@ -1995,13 +1995,13 @@ int main() {
   cyan();
   printf("Piwinski Lattice modified...\n");
   reset();
-
-  res = PiwinskiLatticeModified(1e10, ex, ey, sigt, sige, twissheaderpiwismooth,
-                                610, twissplm, r0);
-  printf("%-30s %20.6e (%s)\n", "al :", res[0], "");
-  printf("%-30s %20.6e (%s)\n", "ax :", res[1], "");
-  printf("%-30s %20.6e (%s)\n", "ay :", res[2], "");
-
+  /*
+ res = PiwinskiLatticeModified(1e10, ex, ey, sigt, sige, twissheaderpiwismooth,
+                               610, twissplm, r0);
+ printf("%-30s %20.6e (%s)\n", "al :", res[0], "");
+ printf("%-30s %20.6e (%s)\n", "ax :", res[1], "");
+ printf("%-30s %20.6e (%s)\n", "ay :", res[2], "");
+ */
   vector<vector<double>> twisstable;
   vector<string> cols;
   cols.push_back("L");
@@ -2012,15 +2012,42 @@ int main() {
   cols.push_back("ALFX");
   twisstable = GetTable("b2_design_lattice_1996.twiss", cols);
 
-  double twissarr[twisstable.size()][twisstable[0].size()];
+  int nrows = static_cast<int>(twisstable.size());
+  double twissarr[nrows][6];
 
   // copy to arr
   for (int i = 0; i < twisstable.size(); ++i) {
     for (int j = 0; j < twisstable[0].size(); ++j) {
       twissarr[i][j] = twisstable[i][j];
-      cout << twissarr[i][j] << " ";
+      // cout << twissarr[i][j] << " ";
     }
-    cout << endl;
+    // cout << endl;
   }
+
+  res = PiwinskiLatticeModified(1e10, ex, ey, sigt, sige, twissheaderpiwismooth,
+                                610, twissarr, r0);
+
+  printf("%-30s %20.6e (%s)\n", "al :", res[0], "");
+  printf("%-30s %20.6e (%s)\n", "ax :", res[1], "");
+  printf("%-30s %20.6e (%s)\n", "ay :", res[2], "");
+
+  cyan();
+  printf("Nagaitsev...\n");
+  reset();
+
+  double twissheadernagaitsev[5] = {
+      3.32681701e03, // gamma
+      -1.0,          // charge
+      2.40000000e02, // length
+      1.7,           // energy
+      5.10998950e-04 // mass
+  };
+
+  res = Nagaitsev(1e10, ex, ey, sigt, sige, twissheadernagaitsev, nrows,
+                  twissarr, r0);
+  printf("%-30s %20.6e (%s)\n", "al :", res[0], "");
+  printf("%-30s %20.6e (%s)\n", "ax :", res[1], "");
+  printf("%-30s %20.6e (%s)\n", "ay :", res[2], "");
+
   return 0;
 }

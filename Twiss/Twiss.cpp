@@ -81,7 +81,6 @@ vector<vector<double>> GetTable(string filename, vector<string> columns) {
       if (counter > 48) {
         istringstream iss(line);
         int colcounter = 0;
-        int seccolcounter = 0;
         do {
           string sub;
           iss >> sub;
@@ -90,8 +89,7 @@ vector<vector<double>> GetTable(string filename, vector<string> columns) {
           if (iti != labels.end()) {
             // cout << counter << " " << counter - 49 << " " << sub;
             // output[counter - 49].push_back(stod(sub));
-            output[counter - 49][seccolcounter] = stod(sub);
-            ++seccolcounter;
+            output[counter - 49][colmap[colcounter]] = stod(sub);
           }
           ++colcounter;
         } while (iss);
