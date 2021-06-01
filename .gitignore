@@ -1,5 +1,5 @@
 .vcscode/
-Cmakefiles/
+CMakeFiles/
 CmakeCache.txt
 # Byte-compiled / optimized / DLL files
 __pycache__/

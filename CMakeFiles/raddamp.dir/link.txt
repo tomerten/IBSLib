@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g  -shared -Wl,-soname,libraddamp.so -o libraddamp.so CMakeFiles/raddamp.dir/RadiationDamping/RadiationDamping.cpp.o -Wl,-rpath,/home/mti/github-tomerten/IBSlib libnumfunc.so 

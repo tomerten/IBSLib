@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -fopenmp -D use_openmp -Ofast -march=native -ffast-math -g  -shared -Wl,-soname,libtwiss.so -o libtwiss.so CMakeFiles/twiss.dir/Twiss/Twiss.cpp.o 
