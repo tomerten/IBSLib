@@ -365,11 +365,10 @@ output:
     3 -> average energy per photon
     4 -> average number of photons emitted per turn
 ---------------------------------------------------------------------------------------------------------------
-
+*/
 
 double *RadiationCriticalEnergy(double rho, double gamma, double omega) {
-  const double c = 299792458.0f;
-  const double pi = 3.141592653589793f;
+  const double c = clight;
   const double alphafine = 7.297352569300000e-03;
   const double h = 6.626070150000000e-34;
   const double twoOthree = 2.0f / 3.0f;
@@ -385,4 +384,3 @@ double *RadiationCriticalEnergy(double rho, double gamma, double omega) {
 
   return output;
 }
-*/

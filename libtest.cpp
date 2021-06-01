@@ -222,6 +222,18 @@ int main() {
   printf("%-30s %10.6e (%s)\n", "U0 :",
          RadiationLossesPerTurn(twissheaderrad, radint[0], emass / pmass),
          "eV/Turn");
+
+  green();
+  printf("Critical Energy Calculations. \n");
+  reset();
+  double *critical;
+  critical = RadiationCriticalEnergy(4.35, twissheaderrad[0], 2 * pi * 1.25e6);
+  printf("%-30s %10.6e (%s)\n", "omega_crit :", critical[0], "");
+  printf("%-30s %10.6e (%s)\n", "Theta_crit :", critical[1], "");
+  printf("%-30s %10.6e (%s)\n", "E_crit :", critical[2], "eV");
+  printf("%-30s %10.6e (%s)\n", "E_per_photon_avg :", critical[3], "eV/photon");
+  printf("%-30s %10.6e (%s)\n", "N_photons_avg_per_turn :", critical[4],
+         "1/turn");
   /*
    ================================================================================
    COULOMB LOG FUNCTIONS
