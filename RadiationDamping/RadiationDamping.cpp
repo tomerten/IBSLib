@@ -320,11 +320,10 @@ DETAILS above) I2 (double)                     : radiation integrals aatom
 (double)                  : atomic A - for electrons this is
 electron_mass_energy_MeV / proton_mass_energy_MeV
 ---------------------------------------------------------------------------------------------------------------
+*/
 
-
-double RadiationLossesPerTurn(double twiss[], double I2, double aatom) {
-  const double c = 299792458.0f;
-  const double pi = 3.141592653589793f;
+double RadiationLossesPerTurn(double twiss[5], double I2, double aatom) {
+  const double c = clight;
 
   double gamma = twiss[0];
   double p0 = twiss[1];
@@ -341,7 +340,7 @@ double RadiationLossesPerTurn(double twiss[], double I2, double aatom) {
   return (c * cgamma) / (2.0f * pi * len) * p0 * p0 * p0 * p0 * I2 * 1.0e9 *
          trev;
 }
-*/
+
 /*
 *
 ---------------------------------------------------------------------------------------------------------------

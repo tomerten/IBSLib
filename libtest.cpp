@@ -216,6 +216,12 @@ int main() {
   printf("%-30s %10.6e (%s)\n", "jx :", equi[6], "");
   printf("%-30s %10.6e (%s)\n", "jy :", equi[7], "");
 
+  green();
+  printf("Radiation Losses per turn. \n");
+  reset();
+  printf("%-30s %10.6e (%s)\n", "U0 :",
+         RadiationLossesPerTurn(twissheaderrad, radint[0], emass / pmass),
+         "eV/Turn");
   /*
    ================================================================================
    COULOMB LOG FUNCTIONS

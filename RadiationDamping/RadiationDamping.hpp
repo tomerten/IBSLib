@@ -5,8 +5,7 @@ double *RadiationDampingApprox(double latticeLength, double gammaTransition,
 double *RadiationDampingLattice(int rows, double (*twissdata)[12]);
 double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
     double twiss[5], double radiationIntegrals[6], double aatom);
+double RadiationLossesPerTurn(double twiss[5], double I2, double aatom);
 /*
-double twiss[], double radiationIntegrals[6], double aatom);
-double RadiationLossesPerTurn(double twiss[], double I2, double aatom);
 double *RadiationCriticalEnergy(double rho, double gamma, double omega);
 */
