@@ -5,8 +5,9 @@ const double clight = 299792458.0;
 const double hbar = 6.582119569e-25; // Reduced Planck Constant in GeV !!!!
 const double emass = 0.51099895000e-3;
 const double pmass = 0.93827208816;
-const double nmass = 0.93956542052; // GeV CODATA 2018
-const double mumass = 0.1056583755; //     ! GeV CODATA 2018
+const double nmass = 0.93956542052;          // GeV CODATA 2018
+const double mumass = 0.1056583755;          //     ! GeV CODATA 2018
+const double atomicmassunit = 0.93149410242; // GeV scipy constants
 const double pi = 3.141592653589793;
 const double ec = 1.602176634e-19;
 

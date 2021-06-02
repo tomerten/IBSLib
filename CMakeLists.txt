@@ -46,9 +46,9 @@ target_include_directories(models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Models)
 target_include_directories(twiss PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Twiss)
 target_include_directories(raddamp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/RadiationDamping)
 
-target_link_libraries(clog numfunc)
-target_link_libraries(integrators clog numfunc)
 target_link_libraries(raddamp numfunc)
+target_link_libraries(clog raddamp numfunc)
+target_link_libraries(integrators clog numfunc)
 target_link_libraries(models integrators clog numfunc)
 #target_link_libraries(integrators clog)
 

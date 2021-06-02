@@ -345,7 +345,6 @@ int main() {
                                 twissheaderpiwismooth, 610, twiss_piwimodified,
                                 r0);
   printouts(res);
-
   cyan();
   printf("Nagaitsev...\n");
   reset();
@@ -354,7 +353,16 @@ int main() {
                   nrows, twiss_piwimodified, r0);
   printouts(res);
 
+  cyan();
+  printf("Nagaitsev... with tailcut\n");
+  reset();
+
+  res =
+      Nagaitsevtailcut(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev,
+                       nrows, twiss_rad, r0, emass / pmass);
+  printouts(res);
   /*
+
   ================================================================================
 
   IBS METHODS WITH DEDICATED INTEGRATORS
@@ -364,12 +372,18 @@ int main() {
   green();
   printf("IBS Madx...\n");
   red();
-  printf(
-      "Growth rates are double as it uses full Coulomblog and not tailcut.\n");
   reset();
 
   res = ibsmadx(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev, nrows,
                 twiss_bm, r0, true);
+  green();
+  printf("IBS Madx... with tailcut\n");
+  red();
+  reset();
+
+  res = ibsmadxtailcut(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev,
+                       nrows, twiss_rad, r0, emass / pmass);
+  printouts(res);
 
   yellow();
   printf("IBS Bjorken-Mtingwa... Failing\n");

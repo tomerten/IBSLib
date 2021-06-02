@@ -271,9 +271,8 @@ output (double[8])
 
 double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
     double twiss[5], double radiationIntegrals[6], double aatom) {
-  const double c = 299792458.0f;
+  const double c = clight;
   const double hbar = 1.0545718176461565e-34;
-  const double pi = 3.141592653589793f;
   const double electron_volt_joule_relationship = 1.602176634e-19;
 
   static double output[8];
@@ -286,37 +285,37 @@ double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
 
   double particle_radius = charge * charge / aatom * 1.54e-18;
 
-  double CalphaEC = particle_radius * c / (3.0f * restE * restE * restE) *
+  double CalphaEC = particle_radius * c / (3.0 * restE * restE * restE) *
                     (p0 * p0 * p0 / len);
 
   // transverse partition numbers
-  double jx = 1.0f - radiationIntegrals[3] / radiationIntegrals[0];
-  double jy = 1.0f - radiationIntegrals[4] / radiationIntegrals[0];
-  double alphax = 2.0f * CalphaEC * radiationIntegrals[0] * jx;
-  double alphay = 2.0f * CalphaEC * radiationIntegrals[0] * jy;
-  double alphas = 2.0f * CalphaEC * radiationIntegrals[0] * (jx + jy);
+  double jx = 1.0 - radiationIntegrals[3] / radiationIntegrals[0];
+  double jy = 1.0 - radiationIntegrals[4] / radiationIntegrals[0];
+  double alphax = 2.0 * CalphaEC * radiationIntegrals[0] * jx;
+  double alphay = 2.0 * CalphaEC * radiationIntegrals[0] * jy;
+  double alphas = 2.0 * CalphaEC * radiationIntegrals[0] * (jx + jy);
 
   // mc**2 expressed in Joule to match units of cq
   double mass = restE * electron_volt_joule_relationship;
-  double cq = 55.0f / (32.0f * sqrt(3)) * (hbar * c) / mass;
+  double cq = 55.0 / (32.0 * sqrt(3.0)) * (hbar * c) / mass;
 
   double sigE0E2 = cq * gamma * gamma * radiationIntegrals[1] /
-                   (2.0f * radiationIntegrals[0] + radiationIntegrals[3] +
+                   (2.0 * radiationIntegrals[0] + radiationIntegrals[3] +
                     radiationIntegrals[4]);
   double exinf =
       cq * gamma * gamma * radiationIntegrals[4] / (jx * radiationIntegrals[0]);
   double eyinf =
       cq * gamma * gamma * radiationIntegrals[5] / (jx * radiationIntegrals[0]);
 
-  double betaAvg = len / (twiss[5] * 2 * pi);
+  double betaAvg = len / (twiss[5] * 2.0 * pi);
 
-  eyinf = (eyinf == 0.0f) ? cq * betaAvg * radiationIntegrals[1] /
-                                (2.0f * jy * radiationIntegrals[0])
-                          : eyinf;
+  eyinf = (eyinf == 0.0) ? cq * betaAvg * radiationIntegrals[1] /
+                               (2.0 * jy * radiationIntegrals[0])
+                         : eyinf;
 
-  output[0] = 1.0f / alphax;
-  output[1] = 1.0f / alphay;
-  output[2] = 1.0f / alphas;
+  output[0] = 1.0 / alphax;
+  output[1] = 1.0 / alphay;
+  output[2] = 1.0 / alphas;
   output[3] = exinf;
   output[4] = eyinf;
   output[5] = sigE0E2;

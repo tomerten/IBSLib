@@ -18,17 +18,18 @@ double *arraytest(int array[][4]) {
 }
 */
 void printouts(double output[3]) {
+  // factor 2 and 0.5 are for converting to emittance values from sigma values
   printf("\n");
-  printf("    (Weighted) average rates (1/sec)\n");
-  printf("    Longitudinal = %15.6f\n", output[0]);
-  printf("    Horizontal   = %15.6f\n", output[1]);
-  printf("    Vertical     = %15.6f\n", output[2]);
+  printf("    (Weighted) average rates - emittances (1/sec)\n");
+  printf("    Longitudinal = %15.6f\n", 2.0 * output[0]);
+  printf("    Horizontal   = %15.6f\n", 2.0 * output[1]);
+  printf("    Vertical     = %15.6f\n", 2.0 * output[2]);
 
   printf("\n");
-  printf("    (Weighted) average lifetimes (sec)\n");
-  printf("    Longitudinal = %15.6f\n", 1 / output[0]);
-  printf("    Horizontal   = %15.6f\n", 1 / output[1]);
-  printf("    Vertical     = %15.6f\n", 1 / output[2]);
+  printf("    (Weighted) average lifetimes - emittances (sec)\n");
+  printf("    Longitudinal = %15.6f\n", 0.5 / output[0]);
+  printf("    Horizontal   = %15.6f\n", 0.5 / output[1]);
+  printf("    Vertical     = %15.6f\n", 0.5 / output[2]);
 }
 
 /*
@@ -132,10 +133,10 @@ double *PiwinskiSmooth(double pnumber, double ex, double ey, double sigs,
 
   // calc IBS growth times ( AMPLITUDE - NOT EMITTANCE )
   // factor two is to convert to emit growth rates
-  output[0] = 2.0 * ca * fmohlp * (sigh * sigh / (dponp * dponp));
-  output[1] = 2.0 * ca *
-              (fmohlx + fmohlp * xdisp * xdisp * sigh * sigh / (rmsx * rmsx));
-  output[2] = 2.0 * ca * fmohly;
+  output[0] = ca * fmohlp * (sigh * sigh / (dponp * dponp));
+  output[1] =
+      ca * (fmohlx + fmohlp * xdisp * xdisp * sigh * sigh / (rmsx * rmsx));
+  output[2] = ca * fmohly;
 
   return output;
 }
@@ -260,9 +261,9 @@ double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
     alfay0 += ca * fmohly * L;
   }
   // factor two is to convert to emittance growth rates
-  output[0] = 2.0 * alfap0 / len;
-  output[1] = 2.0 * alfax0 / len;
-  output[2] = 2.0 * alfay0 / len;
+  output[0] = alfap0 / len;
+  output[1] = alfax0 / len;
+  output[2] = alfay0 / len;
 
   return output;
 }
@@ -396,9 +397,9 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
   }
 
   // factor two is to convert to emittance growth rates
-  output[0] = 2.0 * alfap0 / len;
-  output[1] = 2.0 * alfax0 / len;
-  output[2] = 2.0 * alfay0 / len;
+  output[0] = alfap0 / len;
+  output[1] = alfax0 / len;
+  output[2] = alfay0 / len;
 
   return output;
 }
@@ -481,8 +482,7 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
                   double dponp, double twissheader[5], int n,
                   double (*twissdata)[6], // shape [6,n]
                   double r0) {
-  const double c = 299792458.0f;
-  const double pi = 3.141592653589793f;
+  const double c = clight;
 
   static double output[3];
   double gamma = twissheader[0];
@@ -529,24 +529,23 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
     double lambda2 = a1 + b1;
     double lambda3 = a1 - b1;
 
-    double R1 = (1.0f / lambda1) *
-                rds((1.0f / lambda2), (1.0f / lambda3), (1.0f / lambda1));
-    double R2 = (1.0f / lambda2) *
-                rds((1.0f / lambda3), (1.0f / lambda1), (1.0f / lambda2));
-    double R3 = 3.0f * sqrt((lambda1 * lambda2) / lambda3) -
+    double R1 = (1.0 / lambda1) *
+                rds((1.0 / lambda2), (1.0 / lambda3), (1.0 / lambda1));
+    double R2 = (1.0 / lambda2) *
+                rds((1.0 / lambda3), (1.0 / lambda1), (1.0 / lambda2));
+    double R3 = 3.0 * sqrt((lambda1 * lambda2) / lambda3) -
                 (lambda1 / lambda3) * R1 - (lambda2 / lambda3) * R2;
 
-    double sp =
-        (gamma * gamma / 2.0f) * (2.0f * R1 - R2 * (1.0f - 3.0f * a2 / b1) -
-                                  R3 * (1.0f + 3.0f * a2 / b1));
-    double sx = 0.5f * (2.0f * R1 - R2 * (1.0f + 3.0f * a2 / b1) -
-                        R3 * (1.0f - 3.0f * a2 / b1));
-    double sxp = (3.0f * gamma * gamma * phi * phi * axx) / b1 * (R3 - R2);
+    double sp = (gamma * gamma / 2.0) * (2.0 * R1 - R2 * (1.0 - 3.0 * a2 / b1) -
+                                         R3 * (1.0 + 3.0 * a2 / b1));
+    double sx = 0.5 * (2.0 * R1 - R2 * (1.0 + 3.0 * a2 / b1) -
+                       R3 * (1.0 - 3.0 * a2 / b1));
+    double sxp = (3.0 * gamma * gamma * phi * phi * axx) / b1 * (R3 - R2);
 
     double alfapp = sp / (sigmax * sigmay);
     double alfaxx = (bx / (sigmax * sigmay)) *
                     (sx + sxp + sp * (dx * dx / (bx * bx) + phi * phi));
-    double alfayy = (by / (sigmax * sigmay)) * (-2.0f * R1 + R2 + R3);
+    double alfayy = (by / (sigmax * sigmay)) * (-2.0 * R1 + R2 + R3);
 
     double clog[2];
     twclog(pnumber, bx, by, dx, 0.0, ex, ey, r0, gamma, charge, en0, amass,
@@ -554,6 +553,108 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
     alfap0 += (alfapp * L * clog[0]);
     alfax0 += (alfaxx * L * clog[0]);
     alfay0 += (alfayy * L * clog[0]);
+    // printf("clog %12.6e\n", clog[0]);
+  }
+
+  output[0] = alfap0 / (dponp * dponp) * (pnumber * r0 * r0 * c) /
+              (12.0 * pi * betar3 * gamma5 * sigs) / 2.0 / len;
+  output[1] = alfax0 / ex * (pnumber * r0 * r0 * c) /
+              (12.0 * pi * betar3 * gamma5 * sigs) / 2.0 / len;
+  output[2] = alfay0 / ey * (pnumber * r0 * r0 * c) /
+              (12.0 * pi * betar3 * gamma5 * sigs) / 2.0 / len;
+
+  return output;
+}
+
+// doubling of code to avoid large amount of if evaluations when
+// runnig long simulations
+double *Nagaitsevtailcut(double pnumber, double ex, double ey, double sigs,
+                         double dponp, double twissheader[5], int n,
+                         double (*twissdata)[12], // shape [6,n]
+                         double r0, double aatom) {
+  const double c = clight;
+
+  static double output[3];
+  double gamma = twissheader[0];
+  double charge = twissheader[1];
+  double len = twissheader[2];
+  double en0 = twissheader[3];
+  double amass = twissheader[4];
+
+  // necessary parameters
+  // double r0 = charge * charge / aatom * 1.54e-18;
+
+  // initialize
+  double alfax0 = 0.0f;
+  double alfay0 = 0.0f;
+  double alfap0 = 0.0f;
+  double betar = sqrt(1 - 1 / (gamma * gamma));
+  double betar3 = betar * betar * betar;
+  double gamma5 = gamma * gamma * gamma * gamma * gamma;
+
+#pragma omp parallel for shared(twissdata,len) reduction(+: alfap0, alfax0,alfay0)
+  for (int i = 0; i < n; i++) {
+    // local naming
+    double *L = &(twissdata[i][0]);
+    double *bx = &(twissdata[i][1]);
+    double *by = &(twissdata[i][2]);
+    double *dx = &(twissdata[i][3]);
+    double *dpx = &(twissdata[i][4]);
+    double *dy = &(twissdata[i][5]);
+    double *dpy = &(twissdata[i][6]);
+    double *ax = &(twissdata[i][7]);
+    double *ay = &(twissdata[i][8]);
+    double *angle = &(twissdata[i][9]);
+    double *k1l = &(twissdata[i][10]);
+    double *k1sl = &(twissdata[i][11]);
+
+    double phi = *dpx + (*ax * (*dx / *bx));
+    double axx = *bx / ex;
+    double ayy = *by / ey;
+
+    double sigmax = sqrt(*dx * *dx * dponp * dponp + ex * *bx);
+    double sigmay = sqrt(ey * *by);
+
+    double as =
+        axx * (*dx * *dx / (*bx * *bx) + phi * phi) + (1.0 / (dponp * dponp));
+    double a1 = 0.5 * (axx + gamma * gamma * as);
+    double a2 = 0.5 * (axx - gamma * gamma * as);
+    double b1 = sqrt(a2 * a2 + gamma * gamma * axx * axx * phi * phi);
+
+    double lambda1 = ayy;
+    double lambda2 = a1 + b1;
+    double lambda3 = a1 - b1;
+
+    double R1 = (1.0f / lambda1) *
+                rds((1.0f / lambda2), (1.0f / lambda3), (1.0f / lambda1));
+    double R2 = (1.0f / lambda2) *
+                rds((1.0f / lambda3), (1.0f / lambda1), (1.0f / lambda2));
+    double R3 = 3.0f * sqrt((lambda1 * lambda2) / lambda3) -
+                (lambda1 / lambda3) * R1 - (lambda2 / lambda3) * R2;
+
+    double sp = (gamma * gamma / 2.0) * (2.0 * R1 - R2 * (1.0 - 3.0 * a2 / b1) -
+                                         R3 * (1.0 + 3.0 * a2 / b1));
+    double sx = 0.5 * (2.0 * R1 - R2 * (1.0 + 3.0 * a2 / b1) -
+                       R3 * (1.0 - 3.0 * a2 / b1));
+    double sxp = (3.0 * gamma * gamma * phi * phi * axx) / b1 * (R3 - R2);
+
+    double alfapp = sp / (sigmax * sigmay);
+    double alfaxx = (*bx / (sigmax * sigmay)) *
+                    (sx + sxp + sp * (*dx * *dx / (*bx * *bx) + phi * phi));
+    double alfayy = (*by / (sigmax * sigmay)) * (-2.0 * R1 + R2 + R3);
+
+    double clog[2];
+    twclogtail(pnumber, *L, *bx, *by, *dx, *dpx, *dy, *dpy, *ax, *ay, *angle,
+               *k1l, *k1sl, ex, ey, r0, aatom, gamma, en0, len, amass, charge,
+               dponp, sigs, clog);
+    alfap0 += (alfapp * *L * clog[0]);
+    alfax0 += (alfaxx * *L * clog[0]);
+    alfay0 += (alfayy * *L * clog[0]);
+    // printf("clog %12.6e\n", clog[0]);
+    // twclog(pnumber, *bx, *by, *dx, 0.0, ex, ey, r0, gamma, charge, en0,
+    // amass,
+    //     dponp, sigs, clog);
+    // printf("clog %12.6e\n", clog[0]);
   }
 
   output[0] = alfap0 / (dponp * dponp) * (pnumber * r0 * r0 * c) /
@@ -627,7 +728,7 @@ twiss (double[])        : twiss table data for the required columns (see
 DETAILS above) aatom (double)          : atomic number - for electrons this
 is electron_mass_energy_MeV / proton_mass_energy_MeV
 ---------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates
+output (double[3])      : growth rates for emittances
     0 -> ap
     1 -> ax
     2 -> ay
@@ -842,9 +943,9 @@ double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
     // growth rates / times for emit or sig
     printf("\n");
     printf("    (Weighted) average rates (1/sec)\n");
-    printf("    Longitudinal = %15.6f\n", output[0] * 2.0);
-    printf("    Horizontal   = %15.6f\n", output[1] * 2.0);
-    printf("    Vertical     = %15.6f\n", output[2] * 2.0);
+    printf("    Longitudinal = %15.6f\n", 2.0 * output[0]);
+    printf("    Horizontal   = %15.6f\n", 2.0 * output[1]);
+    printf("    Vertical     = %15.6f\n", 2.0 * output[2]);
 
     printf("\n");
     printf("    (Weighted) average lifetimes (sec)\n");
@@ -852,6 +953,162 @@ double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
     printf("    Horizontal   = %15.6f\n", 0.5 / output[1]);
     printf("    Vertical     = %15.6f\n", 0.5 / output[2]);
   }
+
+  return output;
+}
+
+double *ibsmadxtailcut(double pnumber, double ex, double ey, double sigs,
+                       double sige, double twissheader[5], int n,
+                       double (*twissdata)[12], double r0, double aatom) {
+  const double zero = 0.0;
+  const double one = 1.0;
+  const double two = 2.0;
+
+  static double output[3];
+
+  double gamma = twissheader[0];
+  double charge = twissheader[1];
+  double circ = twissheader[2];
+  double en0 = twissheader[3];
+  double amass = twissheader[4];
+
+  // relativistic beta
+  double betar = sqrt(1 - 1 / (gamma * gamma));
+  // NOTE:
+  // ****************************************************************
+  // Sige is the dE/E. dp/p needed as input for the IBS calculations
+  //   dp/p= (dE/E)/beta**2
+  // *****************************************************************
+
+  // sige /= (betar * betar);
+
+  // initialize
+  double alfax0 = 0.0;
+  double alfay0 = 0.0;
+  double alfap0 = 0.0;
+  double alfas[3];
+
+  double sbxb = zero;
+  double sbxinv = zero;
+  double sbyb = zero;
+  double sbyinv = zero;
+  double salxb = zero;
+  double salyb = zero;
+  double sdxb = zero;
+  double sdpxb = zero;
+  double sdyb = zero;
+  double sdpyb = zero;
+  double wnorm = zero;
+  double dxwtd = zero;
+  double dpxwtd = zero;
+  double dywtd = zero;
+  double dpywtd = zero;
+  double bywtd = zero;
+  double alxwtd = zero;
+  double alywtd = zero;
+  // double hscrpt  = zero;
+  // double hscrpty = zero;
+  double hscwtd = zero;
+  double hscwtdy = zero;
+
+  // CoulombLog(pnumber, ex, ey, twissheader, sige, sigs, aatom, 0, clog);
+
+#pragma omp parallel for shared(twissdata,circ, alfas) reduction(+: alfap0, alfax0, alfay0, sbxb, sbyb, salxb, salyb,sdxb, sdyb )
+  for (int i = 0; i < n; i++) {
+    // local naming
+    double *L = &(twissdata[i][0]);
+    double *bx = &(twissdata[i][1]);
+    double *by = &(twissdata[i][2]);
+    double *dx = &(twissdata[i][3]);
+    double *dpx = &(twissdata[i][4]);
+    double *dy = &(twissdata[i][5]);
+    double *dpy = &(twissdata[i][6]);
+    double *ax = &(twissdata[i][7]);
+    double *ay = &(twissdata[i][8]);
+    double *angle = &(twissdata[i][9]);
+    double *k1l = &(twissdata[i][10]);
+    double *k1sl = &(twissdata[i][11]);
+
+    sbxb = sbxb + *bx * *L;
+    sbxinv = sbxinv + *L / *bx;
+    sbyb = sbyb + *by * *L;
+    sbyinv = sbyinv + *L / *by;
+    salxb = salxb + *ax * *L;
+    salyb = salyb + *ay * *L;
+    sdxb = sdxb + *dx * *L;
+    sdpxb = sdpxb + *dpx * *L;
+    sdyb = sdyb + *dy * *L;
+    sdpyb = sdpyb + *dpy * *L;
+
+    //---- Calculate weighted average in region of non-zero DX's.
+    //     These values are used to calculate "average" ring lifetimes
+    //     in TWSINT.
+    if (*dx > zero) {
+      double wnorm = wnorm + *L;
+      double dxwtd = dxwtd + *L * *dx;
+      double dpxwtd = dpxwtd + *L * *dpx;
+      double dywtd = dywtd + *L * *dy;
+      double dpywtd = dpywtd + *L * *dpy;
+      double bywtd = bywtd + *L / sqrt(*by);
+      double alxwtd = alxwtd + *L * *ax;
+      double alywtd = alywtd + *L * *ay;
+      double hscrpt = *bx * *dpx * *dpx + two * *ax * *dx * *dpx +
+                      (one + *ax * *ax) * *dx * *dx / *bx;
+      double hscrpty = *by * *dpy * *dpy + two * *ay * *dy * *dpy +
+                       (one + *ay * *ay) * *dy * *dy / *by;
+      double hscwtd = hscwtd + *L * sqrt(hscrpt);
+      double hscwtdy = hscwtdy + *L * sqrt(hscrpty);
+    }
+
+    //---- IBSIntegrator calculates the Bjorken/Mtingwa integral.
+    twsint(pnumber, ex, ey, sigs, sige, gamma, *bx, *by, *ax, *ay, *dx, *dpx,
+           *dy, *dpy, alfas);
+    double clog[2];
+    twclogtail(pnumber, *L, *bx, *by, *dx, *dpx, *dy, *dpy, *ax, *ay, *angle,
+               *k1l, *k1sl, ex, ey, r0, aatom, gamma, en0, circ, amass, charge,
+               sige, sigs, clog);
+    alfap0 += alfas[0] * *L * clog[1];
+    alfax0 += alfas[1] * *L * clog[1];
+    alfay0 += alfas[2] * *L * clog[1];
+  }
+
+  // ---- We have finished reading the lattice
+  double bxbar = sbxb / circ;
+  double bybar = sbyb / circ;
+  double alxbar = salxb / circ;
+  double alybar = salyb / circ;
+  double dxbar = sdxb / circ;
+  double dpxbr = sdpxb / circ;
+  double dybar = sdyb / circ;
+  double dpybr = sdpyb / circ;
+  // double bxinv  = sbxinv / circ;
+  // double byinv  = sbyinv / circ;
+
+  dxwtd = dxwtd / wnorm;
+  dpxwtd = dpxwtd / wnorm;
+  dywtd = dywtd / wnorm;
+  dpywtd = dpywtd / wnorm;
+  bywtd = bywtd / wnorm;
+  bywtd = one / (bywtd * bywtd);
+  alxwtd = alxwtd / wnorm;
+  alywtd = alywtd / wnorm;
+  hscwtd = (hscwtd / wnorm) * (hscwtd / wnorm);
+
+  double beteff = dxwtd * dxwtd / hscwtd;
+  double beteffy = (hscwtdy != 0.0) ? dywtd * dywtd / hscwtdy : bywtd;
+  double tbar[3], twtd[3];
+
+  tbar[0] = zero;
+  tbar[1] = zero;
+  tbar[2] = zero;
+
+  twtd[0] = zero;
+  twtd[1] = zero;
+  twtd[2] = zero;
+
+  output[0] = alfap0 / circ / 2.0;
+  output[1] = alfax0 / circ / 2.0;
+  output[2] = alfay0 / circ / 2.0;
 
   return output;
 }
@@ -1018,7 +1275,6 @@ TYPES (P-PB)
 double *BjorkenMtingwa(double pnumber, double ex, double ey, double sigs,
                        double dponp, double twissheader[], int n,
                        double (*twissdata)[9], double r0) {
-
   // constants
   const double gamma = twissheader[0];
   const double charge = twissheader[1];
@@ -1113,7 +1369,6 @@ TYPES (P-PB)
 double *ConteMartini(double pnumber, double ex, double ey, double sigs,
                      double dponp, double twissheader[], int n,
                      double (*twissdata)[9], double r0) {
-
   // constants
   const double gamma = twissheader[0];
   const double charge = twissheader[1];

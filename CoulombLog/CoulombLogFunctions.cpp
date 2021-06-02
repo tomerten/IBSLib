@@ -1,4 +1,5 @@
 #include "NumericFunctions.hpp"
+#include "RadiationDamping.hpp"
 #include <math.h>
 #include <stdio.h>
 /*
@@ -65,7 +66,6 @@ void twclog(double pnumber, double bx, double by, double dx, double dy,
   double rminqm = hbar * c * ot5 / (two * sqrt(ttm3 * etrans * amass));
   double rmin = max(rmincl, rminqm);
   double coulog = log(rmax / rmin);
-
   // calculate coulomb log constant pre-factor
   double constt = pnumber * coulog * r0 * r0 * c /
                   (eight * pi * betar * betar * betar * gamma * gamma * gamma *
@@ -74,12 +74,13 @@ void twclog(double pnumber, double bx, double by, double dx, double dy,
   clog[0] = coulog;
   clog[1] = constt;
 }
-/*
+
 void twclogtail(double pnumber, double l, double bx, double by, double dx,
                 double dpx, double dy, double dpy, double ax, double ay,
-                double angle, double k1l, double k1s, double ex, double ey,
-                double r0, double gamma, double charge, double en0,
-                double amass, double sige, double sigt, double *clog) {
+                double angle, double k1l, double k1sl, double ex, double ey,
+                double r0, double aatom, double gamma, double en0, double len,
+                double amass, double charge, double sige, double sigt,
+                double *clog) {
   // constants
   const double ot2 = 1.0e2;
   const double ft8 = 5.0e8;
@@ -88,42 +89,29 @@ void twclogtail(double pnumber, double l, double bx, double by, double dx,
   const double fac1 = 743.4;
   const double fac2 = 1.44e-7;
   const double c = clight;
+  // const double hbar = 1.0545718176461565e-34;
+  const double electron_volt_joule_relationship = 1.602176634e-19;
 
   // For tailcut we need local radiation integrals
-  double I2 = 0.0;
-  double I3 = 0.0;
-  double I4x = 0.0;
-  double I4y = 0.0;
-  double I5x = 0.0;
+  double *radint = RadiationDampingElement(l, bx, by, dx, dpx, dy, dpy, ax, ay,
+                                           angle, k1l, k1sl);
 
-  double rhoi, ki, gammax, gammay, hx, hy;
-  double rhoi2, rhoi3;
+  double p0 = en0 * 1.0e9;
+  double restE = amass * 1.0e9;
+  double particle_radius = charge * charge / aatom * 1.54e-18;
+  double CalphaEC = particle_radius * c / (3.0 * restE * restE * restE) *
+                    (p0 * p0 * p0 / len);
 
-  // calculate local bending radius
-  rhoi = (angle == 0.0) ? 0.0 : l / angle;
-  rhoi2 = rhoi * rhoi;
-  rhoi3 = rhoi2 * rhoi;
-
-  // strength per length unit
-  ki = (l == 0.0) ? 0.0 : k1l / l;
-
-  // first for integrals
-  I2 += (rhoi == 0.0) ? 0.0 : *l / rhoi2;
-  I3 += (rhoi == 0.0) ? 0.0 : *l / rhoi3;
-  I4x += (rhoi == 0.0) ? 0.0
-                       : (*dx / rhoi3) * *l +
-                             (2.0f / rhoi) * (ki * *dx + *k1sl * *dy * *l);
-  I4y += 0.0;
-
-  // Courant-Snyder gamma
-  gammax = (1.0f + *ax * *ax) / *bx;
-  gammay = (1.0f + *ay * *ay) / *by;
-
-  // curly H
-  hx = *bx * *dpx * *dpx + 2.0f * *ax * *dx * *dpx + gammax * *dx * *dx;
-  hy = *by * *dpy * *dpy + 2.0f * *ay * *dy * *dpy + gammay * *dy * *dy;
-
-  I5x += (rhoi == 0) ? 0.0 : hx * *l / rhoi3;
+  // transverse partition numbers
+  double jx = 1.0 - radint[3] / radint[0];
+  double jy = 1.0 - radint[4] / radint[0];
+  double alphax = 2.0 * CalphaEC * radint[0] * jx;
+  double alphay = 2.0 * CalphaEC * radint[0] * jy;
+  double alphas = 2.0 * CalphaEC * radint[0] * (jx + jy);
+  double tauradxbunch = (1.0 / alphax) / gamma;
+  double tauradybunch = (1.0 / alphay) / gamma;
+  double tauradsbunch = (1.0 / alphas) / gamma;
+  double tauradmax = max(max(tauradxbunch, tauradybunch), tauradsbunch);
   //-----------------------------------------------------------------------------
   //-----------------------------------------------------------------------------
   // IMPORTANT: HBAR USED HERE IS REDUCED PLANCK CONSTANT IN GEV!!!!
@@ -155,7 +143,20 @@ void twclogtail(double pnumber, double l, double bx, double by, double dx,
   //     or quantum mechanical diffraction limit from nuclear radius.
   double rmincl = fac2 * qion * qion / tempev;
   double rminqm = hbar * c * ot5 / (two * sqrt(ttm3 * etrans * amass));
-  double rmin = max(rmincl, rminqm);
+  double rmin;
+  if (tauradmax > 0.0) {
+    double rmintailcut =
+        1.0f / sqrt(pnumber * pi * tauradmax * c * gamma * sqrt(ex / bx));
+    rmin = max(max(rmincl, rminqm), rmintailcut);
+    // printf("rmax %12.6e   rmin %12.6e rmincl %12.6e rminqm %12.6e rmintailcut
+    // "
+    //       "%12.6e\n",
+    //       rmax, rmin, rmincl, rminqm, rmintailcut);
+  } else {
+    rmin = max(rmincl, rminqm);
+    // printf("rmax %12.6e   rmin %12.6e rmincl %12.6e rminqm %12.6e\n", rmax,
+    //       rmin, rmincl, rminqm);
+  }
   double coulog = log(rmax / rmin);
 
   // calculate coulomb log constant pre-factor
@@ -166,7 +167,7 @@ void twclogtail(double pnumber, double l, double bx, double by, double dx,
   clog[0] = coulog;
   clog[1] = constt;
 }
-*/
+
 /*
 -------------------------------------------------------------------------------
 ORIGINAL AUTHORS : MADX AUTHORS COPYRIGHT CERN
@@ -387,8 +388,8 @@ void TailCutCoulombLog(double pnumber, double ex, double ey,
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
   double betar = sqrt(1 - 1 / (gamma * gamma));
-  double bxbar = len / (2.0f * pi * q1); // avg betax
-  double bybar = len / (2.0f * pi * q2); // avgbety
+  double bxbar = len / (2.0 * pi * q1); // avg betax
+  double bybar = len / (2.0 * pi * q2); // avgbety
 
   double tauradxbunch = tauradx / gamma;
   double tauradybunch = taurady / gamma;
@@ -418,7 +419,7 @@ void TailCutCoulombLog(double pnumber, double ex, double ey,
   double rmincl = fac2 * qion * qion / tempev;
   double rminqm = hbar * c * ot5 / (two * sqrt(ttm3 * etrans * amass));
   double rmintailcut =
-      1.0f / sqrt(pnumber * pi * tauradmax * c * gamma * sqrt(ex / bxbar));
+      1.0 / sqrt(pnumber * pi * tauradmax * c * gamma * sqrt(ex / bxbar));
   double rmin = max(max(rmincl, rminqm), rmintailcut);
   double coulog = log(rmax / rmin);
 
