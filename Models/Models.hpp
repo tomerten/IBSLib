@@ -54,6 +54,10 @@ double *ConteMartini(double pnumber, double ex, double ey, double sigs,
                      double dponp, double twissheader[5], int n,
                      double (*twissdata)[9], double r0);
 
+double *ConteMartinitailcut(double pnumber, double ex, double ey, double sigs,
+                            double dponp, double twissheader[], int n,
+                            double (*twissdata)[12], double r0, double aatom);
+
 double *MadxIBS(double pnumber, double ex, double ey, double sigs, double dponp,
                 double twissheader[5], int n, double (*twissdata)[9],
                 double r0);
