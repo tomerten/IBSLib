@@ -504,22 +504,22 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
 #pragma omp parallel for shared(twissdata,len) reduction(+: alfap0, alfax0,alfay0)
   for (int i = 0; i < n; i++) {
     // local naming
-    double L = twissdata[i][0];
-    double bx = twissdata[i][1];
-    double by = twissdata[i][2];
-    double dx = twissdata[i][3];
-    double dpx = twissdata[i][4];
-    double alfx = twissdata[i][5];
+    double *L = &twissdata[i][0];
+    double *bx = &twissdata[i][1];
+    double *by = &twissdata[i][2];
+    double *dx = &twissdata[i][3];
+    double *dpx = &twissdata[i][4];
+    double *alfx = &twissdata[i][5];
 
-    double phi = dpx + (alfx * (dx / bx));
-    double axx = bx / ex;
-    double ayy = by / ey;
+    double phi = *dpx + (*alfx * (*dx / *bx));
+    double axx = *bx / ex;
+    double ayy = *by / ey;
 
-    double sigmax = sqrt(dx * dx * dponp * dponp + ex * bx);
-    double sigmay = sqrt(ey * by);
+    double sigmax = sqrt(*dx * *dx * dponp * dponp + ex * *bx);
+    double sigmay = sqrt(ey * *by);
 
     double as =
-        axx * (dx * dx / (bx * bx) + phi * phi) + (1.0f / (dponp * dponp));
+        axx * (*dx * *dx / (*bx * *bx) + phi * phi) + (1.0 / (dponp * dponp));
     double a1 = 0.5 * (axx + gamma * gamma * as);
     double a2 = 0.5 * (axx - gamma * gamma * as);
     double b1 = sqrt(a2 * a2 + gamma * gamma * axx * axx * phi * phi);
@@ -542,19 +542,20 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
     double sxp = (3.0 * gamma * gamma * phi * phi * axx) / b1 * (R3 - R2);
 
     double alfapp = sp / (sigmax * sigmay);
-    double alfaxx = (bx / (sigmax * sigmay)) *
-                    (sx + sxp + sp * (dx * dx / (bx * bx) + phi * phi));
-    double alfayy = (by / (sigmax * sigmay)) * (-2.0 * R1 + R2 + R3);
+    double alfaxx = (*bx / (sigmax * sigmay)) *
+                    (sx + sxp + sp * (*dx * *dx / (*bx * *bx) + phi * phi));
+    double alfayy = (*by / (sigmax * sigmay)) * (-2.0 * R1 + R2 + R3);
 
     double clog[2];
-    twclog(pnumber, bx, by, dx, 0.0, ex, ey, r0, gamma, charge, en0, amass,
+    twclog(pnumber, *bx, *by, *dx, 0.0, ex, ey, r0, gamma, charge, en0, amass,
            dponp, sigs, clog);
-    alfap0 += (alfapp * L * clog[0]);
-    alfax0 += (alfaxx * L * clog[0]);
-    alfay0 += (alfayy * L * clog[0]);
+    alfap0 += (alfapp * *L * clog[0]);
+    alfax0 += (alfaxx * *L * clog[0]);
+    alfay0 += (alfayy * *L * clog[0]);
     // printf("clog %12.6e\n", clog[0]);
   }
 
+  // factor 2.0 is due to converstion to amplitudes from emittances
   output[0] = alfap0 / (dponp * dponp) * (pnumber * r0 * r0 * c) /
               (12.0 * pi * betar3 * gamma5 * sigs) / 2.0 / len;
   output[1] = alfax0 / ex * (pnumber * r0 * r0 * c) /
