@@ -359,30 +359,30 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
 #pragma omp parallel for shared(twissdata) reduction(+ : alfax0, alfay0, alfap0)
   for (int i = 0; i < n; i++) {
     // local naming
-    double L = twissdata[i][0];
-    double bx = twissdata[i][1];
-    double by = twissdata[i][2];
-    double dx = twissdata[i][3];
-    double dpx = twissdata[i][4];
-    double alfx = twissdata[i][5];
+    double *L = &twissdata[i][0];
+    double *bx = &twissdata[i][1];
+    double *by = &twissdata[i][2];
+    double *dx = &twissdata[i][3];
+    double *dpx = &twissdata[i][4];
+    double *alfx = &twissdata[i][5];
 
     // fmohl accuracy
     int npp = 1000;
 
-    double H0 = dx;
-    double H1 = bx * dpx + alfx * dx;
-    double H = (H0 * H0 + H1 * H1) / bx;
+    double H0 = *dx;
+    double H1 = *bx * *dpx + *alfx * *dx;
+    double H = (H0 * H0 + H1 * H1) / *bx;
 
-    double rmsx = sqrt(bx * ex);
-    double rmsy = sqrt(by * ey);
+    double rmsx = sqrt(*bx * ex);
+    double rmsy = sqrt(*by * ey);
     double d = (rmsx <= rmsy) ? rmsx : rmsy;
 
-    double sigh2inv = (1.0f / (dponp * dponp)) + (H / ex);
-    double sigh = 1.0f / sqrt(sigh2inv);
+    double sigh2inv = (1.0 / (dponp * dponp)) + (H / ex);
+    double sigh = 1.0 / sqrt(sigh2inv);
 
-    double a = sigh * bx / (gamma * rmsx);
-    double b = sigh * by / (gamma * rmsy);
-    double q = sigh * betar * sqrt(2.0f * d / r0);
+    double a = sigh * *bx / (gamma * rmsx);
+    double b = sigh * *by / (gamma * rmsy);
+    double q = sigh * betar * sqrt(2.0 * d / r0);
 
     // calc fmohl values
     double fmohlp = fmohl(a, b, q, npp);
@@ -390,13 +390,12 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
     double fmohly = fmohl(1 / b, a / b, q / b, npp);
 
     // calc IBS growth times ( AMPLITUDE - NOT EMITTANCE )
-    alfap0 += ca * fmohlp * (sigh * sigh / (dponp * dponp)) * L;
+    alfap0 += ca * fmohlp * (sigh * sigh / (dponp * dponp)) * *L;
     alfax0 +=
-        ca * (fmohlx + fmohlp * dx * dx * sigh * sigh / (rmsx * rmsx)) * L;
-    alfay0 += ca * fmohly * L;
+        ca * (fmohlx + fmohlp * *dx * *dx * sigh * sigh / (rmsx * rmsx)) * *L;
+    alfay0 += ca * fmohly * *L;
   }
 
-  // factor two is to convert to emittance growth rates
   output[0] = alfap0 / len;
   output[1] = alfax0 / len;
   output[2] = alfay0 / len;
