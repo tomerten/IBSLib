@@ -256,7 +256,7 @@ int main() {
       3.32681701e03,  // gamma
       -1.00000000e00, // charge
       2.40000000e02,  // length
-      1.69999992e00,  // pc
+      1.7,            // energy
       5.10998950e-04, // mass
       1.78499656e01,  // q1
       6.74303147e00,  // q2
@@ -267,14 +267,15 @@ int main() {
   double sigt = 0.005;
   double r0 = erad;
   bool printout = true;
-  CoulombLog(1e10, ex, ey, twissheader, sige, sigt, r0, printout, clog);
+  CoulombLog(1e10, equi[3], equi[4], twissheader, sige, sigt, r0, printout,
+             clog);
 
   yellow();
   printf("\nWith Tailcut...\n");
   reset();
 
-  TailCutCoulombLog(1e10, ex, ey, twissheader, sige, sigt, 0.005, 0.008, 0.01,
-                    r0, printout, clog);
+  TailCutCoulombLog(1e10, equi[3], equi[4], twissheader, sige, sigt, equi[0],
+                    equi[1], equi[2], r0, printout, clog);
   /*
    ================================================================================
    INTEGRATOR FUNCTIONS
@@ -324,31 +325,33 @@ int main() {
   printf("Piwinski Smooth ...\n");
   reset();
   double *res;
-  res = PiwinskiSmooth(1e10, ex, ey, sigt, sige, twissheaderpiwismooth, r0);
+  res = PiwinskiSmooth(1e10, equi[3], equi[4], sigt, sige,
+                       twissheaderpiwismooth, r0);
   printouts(res);
 
   cyan();
   printf("Piwinski Lattice ...\n");
   reset();
 
-  res = PiwinskiLattice(1e10, ex, ey, sigt, sige, twissheaderpiwismooth, 610,
-                        twiss_piwilattice, r0);
+  res = PiwinskiLattice(1e10, equi[3], equi[4], sigt, sige,
+                        twissheaderpiwismooth, 610, twiss_piwilattice, r0);
   printouts(res);
 
   cyan();
   printf("Piwinski Lattice modified...\n");
   reset();
 
-  res = PiwinskiLatticeModified(1e10, ex, ey, sigt, sige, twissheaderpiwismooth,
-                                610, twiss_piwimodified, r0);
+  res = PiwinskiLatticeModified(1e10, equi[3], equi[4], sigt, sige,
+                                twissheaderpiwismooth, 610, twiss_piwimodified,
+                                r0);
   printouts(res);
 
   cyan();
   printf("Nagaitsev...\n");
   reset();
 
-  res = Nagaitsev(1e10, ex, ey, sigt, sige, twissheadernagaitsev, nrows,
-                  twiss_piwimodified, r0);
+  res = Nagaitsev(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev,
+                  nrows, twiss_piwimodified, r0);
   printouts(res);
 
   /*
@@ -365,8 +368,8 @@ int main() {
       "Growth rates are double as it uses full Coulomblog and not tailcut.\n");
   reset();
 
-  res = ibsmadx(1e10, ex, ey, sigt, sige, twissheadernagaitsev, nrows, twiss_bm,
-                r0, true);
+  res = ibsmadx(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev, nrows,
+                twiss_bm, r0, true);
 
   yellow();
   printf("IBS Bjorken-Mtingwa... Failing\n");
@@ -374,22 +377,22 @@ int main() {
   printf("Growth rates have no meaning - using standards Simpson integration "
          "does not work !!!.\n");
   reset();
-  res = BjorkenMtingwa2(1e10, ex, ey, sigt, sige, twissheadernagaitsev, nrows,
-                        twiss_piwimodified, r0);
+  res = BjorkenMtingwa2(1e10, equi[3], equi[4], sigt, sige,
+                        twissheadernagaitsev, nrows, twiss_piwimodified, r0);
   printouts(res);
 
   green();
   printf("IBS Bjorken-Mtingwa... now using simpson per decade integration \n");
   reset();
-  res = BjorkenMtingwa(1e10, ex, ey, sigt, sige, twissheadernagaitsev, nrows,
-                       twiss_bm, r0);
+  res = BjorkenMtingwa(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev,
+                       nrows, twiss_bm, r0);
   printouts(res);
 
   green();
   printf("IBS Conte-Martini...  using simpson per decade integration \n");
   reset();
-  res = ConteMartini(1e10, ex, ey, sigt, sige, twissheadernagaitsev, nrows,
-                     twiss_bm, r0);
+  res = ConteMartini(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev,
+                     nrows, twiss_bm, r0);
   printouts(res);
 
   green();
@@ -397,8 +400,8 @@ int main() {
   printf("IBS MADX...  uses a slightly different way of calculating the "
          "integrand than ibsmadx.\n");
   reset();
-  res = MadxIBS(1e10, ex, ey, sigt, sige, twissheadernagaitsev, nrows, twiss_bm,
-                r0);
+  res = MadxIBS(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev, nrows,
+                twiss_bm, r0);
   printouts(res);
 
   return 0;

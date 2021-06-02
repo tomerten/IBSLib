@@ -156,8 +156,8 @@ void CoulombLog(double pnumber, double ex, double ey, double twissheader[10],
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
   double betar = sqrt(1 - 1 / (gamma * gamma));
-  double bxbar = len / (2.0f * pi * q1); // avg betax
-  double bybar = len / (2.0f * pi * q2); // avgbety
+  double bxbar = len / (2.0 * pi * q1); // avg betax
+  double bybar = len / (2.0 * pi * q2); // avgbety
 
   //---- Calculate transverse temperature as 2*P*X',
   //     i.e., assume the transverse energy is temperature/2.
@@ -191,7 +191,7 @@ void CoulombLog(double pnumber, double ex, double ey, double twissheader[10],
 
   if (printout) {
     printf("Radius max          : %.8e\n", rmax);
-    printf("Density             : %.8e\n", pow(densty, -1.0f / 3.0f));
+    printf("Density             : %.8e\n", pow(densty, -1.0 / 3.0));
     printf("CONST               ; %.8e\n", constt);
     printf("ENERGY              ; %.8e GeV\n", en0);
     printf("BETA                ; %.8e\n", betar);

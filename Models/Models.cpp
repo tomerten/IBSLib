@@ -658,9 +658,9 @@ alfay0   : ver growth rate
 double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
                 double twissheader[5], int n, double (*twissdata)[9], double r0,
                 bool printout) {
-  const double zero = 0.0f;
-  const double one = 1.0f;
-  const double two = 2.0f;
+  const double zero = 0.0;
+  const double one = 1.0;
+  const double two = 2.0;
 
   static double output[3];
 
@@ -683,9 +683,9 @@ double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
   // sige /= (betar * betar);
 
   // initialize
-  double alfax0 = 0.0f;
-  double alfay0 = 0.0f;
-  double alfap0 = 0.0f;
+  double alfax0 = 0.0;
+  double alfay0 = 0.0;
+  double alfap0 = 0.0;
   double alfas[3];
 
   double sbxb = zero;
@@ -790,7 +790,7 @@ double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
   hscwtd = (hscwtd / wnorm) * (hscwtd / wnorm);
 
   double beteff = dxwtd * dxwtd / hscwtd;
-  double beteffy = (hscwtdy != 0.0f) ? dywtd * dywtd / hscwtdy : bywtd;
+  double beteffy = (hscwtdy != 0.0) ? dywtd * dywtd / hscwtdy : bywtd;
   double tbar[3], twtd[3];
 
   tbar[0] = zero;

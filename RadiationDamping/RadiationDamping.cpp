@@ -247,18 +247,18 @@ double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
 
   double gamma = twiss[0];
   double p0 = twiss[1] * 1.0e9;
-  double len = twiss[2] * 1.0f;
+  double len = twiss[2] * 1.0;
   double restE = twiss[3] * 1.0e9;
-  double charge = twiss[4] * 1.0f;
+  double charge = twiss[4] * 1.0;
 
   double particle_radius = charge * charge / aatom * 1.54e-18;
+
   double CalphaEC = particle_radius * c / (3.0f * restE * restE * restE) *
                     (p0 * p0 * p0 / len);
 
   // transverse partition numbers
   double jx = 1.0f - radiationIntegrals[3] / radiationIntegrals[0];
   double jy = 1.0f - radiationIntegrals[4] / radiationIntegrals[0];
-
   double alphax = 2.0f * CalphaEC * radiationIntegrals[0] * jx;
   double alphay = 2.0f * CalphaEC * radiationIntegrals[0] * jy;
   double alphas = 2.0f * CalphaEC * radiationIntegrals[0] * (jx + jy);
@@ -330,14 +330,13 @@ double RadiationLossesPerTurn(double twiss[5], double I2, double aatom) {
   double len = twiss[2];
   double mass = twiss[3];
   double charge = twiss[4];
-
   double particle_radius = charge * charge / aatom * 1.54e-18;
-  double cgamma = (4.0f * pi / 3.0f) * (particle_radius / (mass * mass * mass));
-  double betar = sqrt(1.0f - 1.0f / (gamma * gamma));
+  double cgamma = (4.0 * pi / 3.0) * (particle_radius / (mass * mass * mass));
+  double betar = sqrt(1.0 - 1.0 / (gamma * gamma));
   double vrev = c * betar;
   double trev = len / vrev;
 
-  return (c * cgamma) / (2.0f * pi * len) * p0 * p0 * p0 * p0 * I2 * 1.0e9 *
+  return (c * cgamma) / (2.0 * pi * len) * p0 * p0 * p0 * p0 * I2 * 1.0e9 *
          trev;
 }
 
