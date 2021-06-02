@@ -65,7 +65,7 @@ twiss (double[6])       : twiss header (see DETAILS above)
 aatom (double)          : atomic number - for electrons this is
 electron_mass_energy_MeV / proton_mass_energy_MeV
 -------------------------------------------------------------------------------
-output (double[3])      : growth rates
+output (double[3])      : growth rates for emittances
     0 -> ap
     1 -> ax
     2 -> ay
@@ -131,10 +131,11 @@ double *PiwinskiSmooth(double pnumber, double ex, double ey, double sigs,
   double fmohly = fmohl(1 / b, a / b, q / b, npp);
 
   // calc IBS growth times ( AMPLITUDE - NOT EMITTANCE )
-  output[0] = ca * fmohlp * (sigh * sigh / (dponp * dponp));
-  output[1] =
-      ca * (fmohlx + fmohlp * xdisp * xdisp * sigh * sigh / (rmsx * rmsx));
-  output[2] = ca * fmohly;
+  // factor two is to convert to emit growth rates
+  output[0] = 2.0 * ca * fmohlp * (sigh * sigh / (dponp * dponp));
+  output[1] = 2.0 * ca *
+              (fmohlx + fmohlp * xdisp * xdisp * sigh * sigh / (rmsx * rmsx));
+  output[2] = 2.0 * ca * fmohly;
 
   return output;
 }
@@ -180,7 +181,7 @@ twiss (double[])        : twiss table data for the required columns (see DETAILS
 above) aatom (double)          : atomic number - for electrons this is
 electron_mass_energy_MeV / proton_mass_energy_MeV
 ---------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates
+output (double[3])      : growth rates fro emittances
     0 -> ap
     1 -> ax
     2 -> ay
@@ -258,10 +259,10 @@ double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
         ca * (fmohlx + fmohlp * dx * dx * sigh * sigh / (rmsx * rmsx)) * L;
     alfay0 += ca * fmohly * L;
   }
-
-  output[0] = alfap0 / len;
-  output[1] = alfax0 / len;
-  output[2] = alfay0 / len;
+  // factor two is to convert to emittance growth rates
+  output[0] = 2.0 * alfap0 / len;
+  output[1] = 2.0 * alfax0 / len;
+  output[2] = 2.0 * alfay0 / len;
 
   return output;
 }
@@ -309,7 +310,7 @@ twiss (double[])        : twiss table data for the required columns (see DETAILS
 above) aatom (double)          : atomic number - for electrons this is
 electron_mass_energy_MeV / proton_mass_energy_MeV
 ---------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates
+output (double[3])      : growth rates for emittances
     0 -> ap
     1 -> ax
     2 -> ay
@@ -394,9 +395,10 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
     alfay0 += ca * fmohly * L;
   }
 
-  output[0] = alfap0 / len;
-  output[1] = alfax0 / len;
-  output[2] = alfay0 / len;
+  // factor two is to convert to emittance growth rates
+  output[0] = 2.0 * alfap0 / len;
+  output[1] = 2.0 * alfax0 / len;
+  output[2] = 2.0 * alfay0 / len;
 
   return output;
 }
@@ -445,7 +447,7 @@ twiss (double[])        : twiss table data for the required columns (see
 DETAILS above) aatom (double)          : atomic number - for electrons this
 is electron_mass_energy_MeV / proton_mass_energy_MeV
 ---------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates
+output (double[3])      : growth rates for emittances
     0 -> ap
     1 -> ax
     2 -> ay

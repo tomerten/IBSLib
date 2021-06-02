@@ -123,6 +123,56 @@ radiationIntegrals (double[6])  :
     5 -> I5y
 ---------------------------------------------------------------------------------------------------------------
 */
+double *RadiationDampingElement(double l, double bx, double by, double dx,
+                                double dpx, double dy, double dpy, double ax,
+                                double ay, double angle, double k1l,
+                                double k1sl) {
+  static double radiationIntegrals[6];
+  double I2 = 0.0;
+  double I3 = 0.0;
+  double I4x = 0.0;
+  double I4y = 0.0;
+  double I5x = 0.0;
+  double I5y = 0.0;
+
+  double rhoi, ki, gammax, gammay, hx, hy;
+  double rhoi2, rhoi3;
+  // calculate local bending radius
+  rhoi = (angle == 0.0) ? 0.0 : l / angle;
+  rhoi2 = rhoi * rhoi;
+  rhoi3 = rhoi2 * rhoi;
+
+  // strength per length unit
+  ki = (l == 0.0) ? 0.0 : k1l / l;
+
+  // first for integrals
+  I2 = (rhoi == 0.0) ? 0.0 : l / rhoi2;
+  I3 = (rhoi == 0.0) ? 0.0 : l / rhoi3;
+  I4x = (rhoi == 0.0)
+            ? 0.0
+            : (dx / rhoi3) * l + (2.0 / rhoi) * (ki * dx + k1sl * dy * l);
+  I4y = 0.0;
+
+  // Courant-Snyder gamma
+  gammax = (1.0 + ax * ax) / bx;
+  gammay = (1.0 + ay * ay) / by;
+
+  // curly H
+  hx = bx * dpx * dpx + 2.0 * ax * dx * dpx + gammax * dx * dx;
+  hy = by * dpy * dpy + 2.0 * ay * dy * dpy + gammay * dy * dy;
+
+  I5x = (rhoi == 0) ? 0.0 : hx * l / rhoi3;
+  I5y = (rhoi == 0) ? 0.0 : hy * l / rhoi3;
+
+  radiationIntegrals[0] = I2;
+  radiationIntegrals[1] = I3;
+  radiationIntegrals[2] = I4x;
+  radiationIntegrals[3] = I4y;
+  radiationIntegrals[4] = I5x;
+  radiationIntegrals[5] = I5y;
+
+  return radiationIntegrals;
+}
 
 double *RadiationDampingLattice(int rows, double (*twissdata)[12]) {
   static double radiationIntegrals[6];
@@ -152,32 +202,15 @@ double *RadiationDampingLattice(int rows, double (*twissdata)[12]) {
     double *k1l = &(twissdata[i][10]);
     double *k1sl = &(twissdata[i][11]);
 
-    // calculate local bending radius
-    rhoi = (*angle == 0.0) ? 0.0 : *l / *angle;
-    rhoi2 = rhoi * rhoi;
-    rhoi3 = rhoi2 * rhoi;
-
-    // strength per length unit
-    ki = (*l == 0.0) ? 0.0 : *k1l / *l;
-
-    // first for integrals
-    I2 += (rhoi == 0.0) ? 0.0 : *l / rhoi2;
-    I3 += (rhoi == 0.0) ? 0.0 : *l / rhoi3;
-    I4x += (rhoi == 0.0) ? 0.0
-                         : (*dx / rhoi3) * *l +
-                               (2.0f / rhoi) * (ki * *dx + *k1sl * *dy * *l);
-    I4y += 0.0;
-
-    // Courant-Snyder gamma
-    gammax = (1.0f + *ax * *ax) / *bx;
-    gammay = (1.0f + *ay * *ay) / *by;
-
-    // curly H
-    hx = *bx * *dpx * *dpx + 2.0f * *ax * *dx * *dpx + gammax * *dx * *dx;
-    hy = *by * *dpy * *dpy + 2.0f * *ay * *dy * *dpy + gammay * *dy * *dy;
-
-    I5x += (rhoi == 0) ? 0.0 : hx * *l / rhoi3;
-    I5y += (rhoi == 0) ? 0.0 : hy * *l / rhoi3;
+    double *radintelement;
+    radintelement = RadiationDampingElement(*l, *bx, *by, *dx, *dpx, *dy, *dpy,
+                                            *ax, *ay, *angle, *k1l, *k1sl);
+    I2 += radintelement[0];
+    I3 += radintelement[1];
+    I4x += radintelement[2];
+    I4y += radintelement[3];
+    I5x += radintelement[4];
+    I5y += radintelement[5];
   }
 
   radiationIntegrals[0] = I2;

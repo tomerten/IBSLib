@@ -74,7 +74,99 @@ void twclog(double pnumber, double bx, double by, double dx, double dy,
   clog[0] = coulog;
   clog[1] = constt;
 }
+/*
+void twclogtail(double pnumber, double l, double bx, double by, double dx,
+                double dpx, double dy, double dpy, double ax, double ay,
+                double angle, double k1l, double k1s, double ex, double ey,
+                double r0, double gamma, double charge, double en0,
+                double amass, double sige, double sigt, double *clog) {
+  // constants
+  const double ot2 = 1.0e2;
+  const double ft8 = 5.0e8;
+  const double ot5 = 1.0e5;
+  const double ttm3 = 2.0e-3;
+  const double fac1 = 743.4;
+  const double fac2 = 1.44e-7;
+  const double c = clight;
 
+  // For tailcut we need local radiation integrals
+  double I2 = 0.0;
+  double I3 = 0.0;
+  double I4x = 0.0;
+  double I4y = 0.0;
+  double I5x = 0.0;
+
+  double rhoi, ki, gammax, gammay, hx, hy;
+  double rhoi2, rhoi3;
+
+  // calculate local bending radius
+  rhoi = (angle == 0.0) ? 0.0 : l / angle;
+  rhoi2 = rhoi * rhoi;
+  rhoi3 = rhoi2 * rhoi;
+
+  // strength per length unit
+  ki = (l == 0.0) ? 0.0 : k1l / l;
+
+  // first for integrals
+  I2 += (rhoi == 0.0) ? 0.0 : *l / rhoi2;
+  I3 += (rhoi == 0.0) ? 0.0 : *l / rhoi3;
+  I4x += (rhoi == 0.0) ? 0.0
+                       : (*dx / rhoi3) * *l +
+                             (2.0f / rhoi) * (ki * *dx + *k1sl * *dy * *l);
+  I4y += 0.0;
+
+  // Courant-Snyder gamma
+  gammax = (1.0f + *ax * *ax) / *bx;
+  gammay = (1.0f + *ay * *ay) / *by;
+
+  // curly H
+  hx = *bx * *dpx * *dpx + 2.0f * *ax * *dx * *dpx + gammax * *dx * *dx;
+  hy = *by * *dpy * *dpy + 2.0f * *ay * *dy * *dpy + gammay * *dy * *dy;
+
+  I5x += (rhoi == 0) ? 0.0 : hx * *l / rhoi3;
+  //-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
+  // IMPORTANT: HBAR USED HERE IS REDUCED PLANCK CONSTANT IN GEV!!!!
+  //-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
+  // const double hbar = 6.582119569e-25; // 1.0545718176461565e-34;
+
+  const double two = 2.0;
+  const double eight = 8.0;
+
+  double betar = sqrt(1.0 - 1.0 / (gamma * gamma));
+  double qion = fabs(charge);
+  double etrans = ft8 * (gamma * en0 - amass) * (ex / bx);
+  double tempev = two * etrans;
+
+  //---- Calculate beam volume to get density (in cm**-3).
+  double sigxcm = ot2 * sqrt(ex * bx + (dx * dx * sige * sige));
+  double sigycm = ot2 * sqrt(ey * by + (dy * dy * sige * sige));
+  double sigtcm = ot2 * sigt;
+
+  double vol = eight * sqrt(pi * pi * pi) * sigxcm * sigycm * sigtcm;
+  double densty = pnumber / vol;
+
+  //---- Calculate RMAX as smaller of SIGXCM and DEBYE length.
+  double debyel = fac1 * sqrt(tempev / densty) / qion;
+  double rmax = min(sigxcm, debyel);
+
+  //---- Calculate RMIN as larger of classical distance of closest approach
+  //     or quantum mechanical diffraction limit from nuclear radius.
+  double rmincl = fac2 * qion * qion / tempev;
+  double rminqm = hbar * c * ot5 / (two * sqrt(ttm3 * etrans * amass));
+  double rmin = max(rmincl, rminqm);
+  double coulog = log(rmax / rmin);
+
+  // calculate coulomb log constant pre-factor
+  double constt = pnumber * coulog * r0 * r0 * c /
+                  (eight * pi * betar * betar * betar * gamma * gamma * gamma *
+                   gamma * ex * ey * sige * sigt);
+
+  clog[0] = coulog;
+  clog[1] = constt;
+}
+*/
 /*
 -------------------------------------------------------------------------------
 ORIGINAL AUTHORS : MADX AUTHORS COPYRIGHT CERN
