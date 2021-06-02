@@ -1072,6 +1072,7 @@ double *ibsmadxtailcut(double pnumber, double ex, double ey, double sigs,
     alfay0 += alfas[2] * *L * clog[1];
   }
 
+  // factor 2 for converting to amplitudes from emit growth rates
   output[0] = alfap0 / circ / 2.0;
   output[1] = alfax0 / circ / 2.0;
   output[2] = alfay0 / circ / 2.0;
@@ -1282,6 +1283,66 @@ double *BjorkenMtingwa(double pnumber, double ex, double ey, double sigs,
     alfay0 += l * integrals[2] * clog[1];
   }
 
+  alfap0 /= circ;
+  alfax0 /= circ;
+  alfay0 /= circ;
+
+  output[0] = alfap0 / 2.0;
+  output[1] = alfax0 / 2.0;
+  output[2] = alfay0 / 2.0;
+
+  return output;
+}
+double *BjorkenMtingwatailcut(double pnumber, double ex, double ey, double sigs,
+                              double dponp, double twissheader[], int n,
+                              double (*twissdata)[12], double r0,
+                              double aatom) {
+  // constants
+  const double gamma = twissheader[0];
+  const double charge = twissheader[1];
+  const double circ = twissheader[2];
+  double en0 = twissheader[3];
+  double amass = twissheader[4];
+
+  // initialize
+  double alfax0 = 0.0;
+  double alfay0 = 0.0;
+  double alfap0 = 0.0;
+  double betar = sqrt(1 - 1 / (gamma * gamma));
+
+  static double output[3];
+
+#pragma omp parallel for shared(twissdata) reduction(+ : alfap0, alfax0, alfay0)
+  for (int i = 0; i < n; i++) {
+    double *L = &(twissdata[i][0]);
+    double *bx = &(twissdata[i][1]);
+    double *by = &(twissdata[i][2]);
+    double *dx = &(twissdata[i][3]);
+    double *dpx = &(twissdata[i][4]);
+    double *dy = &(twissdata[i][5]);
+    double *dpy = &(twissdata[i][6]);
+    double *ax = &(twissdata[i][7]);
+    double *ay = &(twissdata[i][8]);
+    double *angle = &(twissdata[i][9]);
+    double *k1l = &(twissdata[i][10]);
+    double *k1sl = &(twissdata[i][11]);
+
+    double integrals[3];
+
+    BjorkenMtingwaInt(pnumber, ex, ey, sigs, betar * betar * dponp, gamma, *bx,
+                      *by, *ax, *ay, *dx, *dpx, *dy, *dpy, integrals);
+
+    double clog[2];
+    twclogtail(pnumber, *L, *bx, *by, *dx, *dpx, *dy, *dpy, *ax, *ay, *angle,
+               *k1l, *k1sl, ex, ey, r0, aatom, gamma, en0, circ, amass, charge,
+               dponp, sigs, clog);
+
+    alfap0 += *L * integrals[0] * clog[1];
+    alfax0 += *L * integrals[1] * clog[1];
+    alfay0 += *L * integrals[2] * clog[1];
+  }
+
+  // factor 2 for converting to amplitudes from emit growth rates
   alfap0 /= circ;
   alfax0 /= circ;
   alfay0 /= circ;

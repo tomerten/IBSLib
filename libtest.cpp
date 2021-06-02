@@ -432,6 +432,15 @@ int main() {
   printouts(res);
 
   green();
+  printf("IBS Bjorken-Mtingwa... now using simpson per decade integration with "
+         "tailcut \n");
+  reset();
+  res = BjorkenMtingwatailcut(1e10, equi[3], equi[4], sigt, sige,
+                              twissheadernagaitsev, nrows, twiss_rad, r0,
+                              emass / pmass);
+  printouts(res);
+
+  green();
   printf("IBS Conte-Martini...  using simpson per decade integration \n");
   reset();
   res = ConteMartini(1e10, equi[3], equi[4], sigt, sige, twissheadernagaitsev,
