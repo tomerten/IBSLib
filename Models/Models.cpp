@@ -233,20 +233,20 @@ double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
 
     // local naming of twiss data
     // making code more readable (?efficiency)
-    double L = twissdata[i][0];
-    double bx = twissdata[i][1];
-    double by = twissdata[i][2];
-    double dx = twissdata[i][3];
+    double *L = &twissdata[i][0];
+    double *bx = &twissdata[i][1];
+    double *by = &twissdata[i][2];
+    double *dx = &twissdata[i][3];
 
-    double rmsx = sqrt(bx * ex);
-    double rmsy = sqrt(by * ey);
+    double rmsx = sqrt(*bx * ex);
+    double rmsy = sqrt(*by * ey);
     double d = (rmsx <= rmsy) ? rmsx : rmsy;
 
-    double sigh2inv = (1.0 / (dponp * dponp)) + (dx * dx / (rmsx * rmsx));
+    double sigh2inv = (1.0 / (dponp * dponp)) + (*dx * *dx / (rmsx * rmsx));
     double sigh = 1.0 / sqrt(sigh2inv);
 
-    double a = sigh * bx / (gamma * rmsx);
-    double b = sigh * by / (gamma * rmsy);
+    double a = sigh * *bx / (gamma * rmsx);
+    double b = sigh * *by / (gamma * rmsy);
     double q = sigh * betar * sqrt(2.0 * d / r0);
 
     // calc fmohl values
@@ -255,10 +255,10 @@ double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
     double fmohly = fmohl(1 / b, a / b, q / b, npp);
 
     // calc IBS growth times ( AMPLITUDE - NOT EMITTANCE )
-    alfap0 += ca * fmohlp * (sigh * sigh / (dponp * dponp)) * L;
+    alfap0 += ca * fmohlp * (sigh * sigh / (dponp * dponp)) * *L;
     alfax0 +=
-        ca * (fmohlx + fmohlp * dx * dx * sigh * sigh / (rmsx * rmsx)) * L;
-    alfay0 += ca * fmohly * L;
+        ca * (fmohlx + fmohlp * *dx * *dx * sigh * sigh / (rmsx * rmsx)) * *L;
+    alfay0 += ca * fmohly * *L;
   }
   // factor two is to convert to emittance growth rates
   output[0] = alfap0 / len;
