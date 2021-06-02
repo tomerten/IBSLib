@@ -1072,40 +1072,6 @@ double *ibsmadxtailcut(double pnumber, double ex, double ey, double sigs,
     alfay0 += alfas[2] * *L * clog[1];
   }
 
-  // ---- We have finished reading the lattice
-  double bxbar = sbxb / circ;
-  double bybar = sbyb / circ;
-  double alxbar = salxb / circ;
-  double alybar = salyb / circ;
-  double dxbar = sdxb / circ;
-  double dpxbr = sdpxb / circ;
-  double dybar = sdyb / circ;
-  double dpybr = sdpyb / circ;
-  // double bxinv  = sbxinv / circ;
-  // double byinv  = sbyinv / circ;
-
-  dxwtd = dxwtd / wnorm;
-  dpxwtd = dpxwtd / wnorm;
-  dywtd = dywtd / wnorm;
-  dpywtd = dpywtd / wnorm;
-  bywtd = bywtd / wnorm;
-  bywtd = one / (bywtd * bywtd);
-  alxwtd = alxwtd / wnorm;
-  alywtd = alywtd / wnorm;
-  hscwtd = (hscwtd / wnorm) * (hscwtd / wnorm);
-
-  double beteff = dxwtd * dxwtd / hscwtd;
-  double beteffy = (hscwtdy != 0.0) ? dywtd * dywtd / hscwtdy : bywtd;
-  double tbar[3], twtd[3];
-
-  tbar[0] = zero;
-  tbar[1] = zero;
-  tbar[2] = zero;
-
-  twtd[0] = zero;
-  twtd[1] = zero;
-  twtd[2] = zero;
-
   output[0] = alfap0 / circ / 2.0;
   output[1] = alfax0 / circ / 2.0;
   output[2] = alfay0 / circ / 2.0;
@@ -1297,10 +1263,10 @@ double *BjorkenMtingwa(double pnumber, double ex, double ey, double sigs,
     double by = twissdata[i][2];
     double ax = twissdata[i][3];
     double ay = twissdata[i][4];
-    double dx = twissdata[i][5];
-    double dpx = twissdata[i][6];
-    double dy = twissdata[i][7];
-    double dpy = twissdata[i][8];
+    double dx = betar * twissdata[i][5];
+    double dpx = betar * twissdata[i][6];
+    double dy = betar * twissdata[i][7];
+    double dpy = betar * twissdata[i][8];
 
     double integrals[3];
 

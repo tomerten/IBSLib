@@ -276,6 +276,35 @@ int main() {
 
   TailCutCoulombLog(1e10, equi[3], equi[4], twissheader, sige, sigt, equi[0],
                     equi[1], equi[2], r0, printout, clog);
+
+  cyan();
+  printf("\nRing averaged Coulomblog...\n");
+  reset();
+  double avgclog = 0.0;
+  for (int i; i < nrows; ++i) {
+    twclog(pnumber, twiss_rad[i][1], twiss_rad[i][2], twiss_rad[i][3],
+           twiss_rad[i][4], equi[3], equi[4], r0, twissheader[0],
+           twissheader[1], twissheader[3], twissheader[4], sige, sigt, clog);
+    avgclog += twiss_rad[i][0] * clog[0];
+  }
+  avgclog /= twissheader[2];
+  printf("CoulombLog avg : %12.6e", avgclog);
+
+  cyan();
+  printf("\nRing averaged Coulomblog with Tailcut...\n");
+  reset();
+  for (int i; i < nrows; ++i) {
+    twclogtail(pnumber, twiss_rad[i][0], twiss_rad[i][1], twiss_rad[i][2],
+               twiss_rad[i][3], twiss_rad[i][4], twiss_rad[i][5],
+               twiss_rad[i][5], twiss_rad[i][7], twiss_rad[i][8],
+               twiss_rad[i][9], twiss_rad[i][10], twiss_rad[i][11], equi[3],
+               equi[4], r0, emass / pmass, twissheader[0], twissheader[3],
+               twissheader[2], twissheader[4], twissheader[1], sige, sigt,
+               clog);
+    avgclog += twiss_rad[i][0] * clog[0];
+  }
+  avgclog /= twissheader[2];
+  printf("CoulombLog avg : %12.6e", avgclog);
   /*
    ================================================================================
    INTEGRATOR FUNCTIONS
