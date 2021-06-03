@@ -29,6 +29,10 @@ double sigefromsigs(double omega0, double sigs, double qs, double eta) {
   return qs * omega0 * (sigs / (fabs(eta) * clight));
 }
 
+double sigsfromsige(double sige, double gamma, double gammatr, double omegas) {
+  // oemgas = omega0 * qs
+  return clight * fabs(eta(gamma, gammatr)) / omegas * sige;
+}
 /*
 --------------------------------------------------------------------------------
 AUTHOR  : TOM MERTENS
@@ -329,10 +333,10 @@ double VeffRFeVPotentialWellDistortionPrime(double phi, double U0,
              (sqrt(2.0 * pi) * sigs * sigs * sigs * pc * 1e9);
 }
 
-double synchronusphasewithPWD(double target, double init_phi, double U0,
-                              double charge, int nrf, double harmon[],
-                              double voltages[], double L, double N,
-                              double sigs, double pc, double epsilon) {
+double synchronuousphasewithPWD(double target, double init_phi, double U0,
+                                double charge, int nrf, double harmon[],
+                                double voltages[], double L, double N,
+                                double sigs, double pc, double epsilon) {
   // Set the initial option prices and volatility
   double y = VeffRFeVPotentialWellDistortion(init_phi, U0, charge, nrf, harmon,
                                              voltages, L, N, sigs, pc);
@@ -366,18 +370,14 @@ double synchrotronTunePWD(double omega0, double U0, double charge, int nrf,
               (2 * pi * pc * 1e9));
 }
 
-double csige(double v0, double h0, double sigs, double twissh[], double U0,
+double csige(double v0, double h0, double sigs, double U0, double gamma,
+             double gammatr, double pc, double circ, double phis,
              bool printout) {
-  double gamma = twissh[0];
-  double gammatr = twissh[1];
-  double pc = twissh[2] * 1.0e9;
-  double circ = twissh[3];
 
   double betar = sqrt(1 - 1 / (gamma * gamma));
   double trev = circ / (betar * clight);
   double frev = 1 / trev;
   double eta = (1.0 / (gammatr * gammatr)) - (1.0 / (gamma * gamma));
-  double phis = -asin(U0 / v0);
   double omega0 = 2 * pi / trev;
 
   double nus =

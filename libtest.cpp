@@ -2,10 +2,10 @@
 #include "Integrators.hpp"
 #include "Models.hpp"
 #include "NumericFunctions.hpp"
+#include "OrdDiffEq.hpp"
 #include "RadiationDamping.hpp"
 #include "Twiss.hpp"
 #include <stdio.h>
-
 void red() { printf("\033[1;31m"); }
 void yellow() { printf("\033[1;33m"); }
 void green() { printf("\033[0;32m"); }
@@ -39,6 +39,17 @@ int main() {
       -1.00000000e00, // charge
       1.78499656e01,  // q1
   };
+
+  double twissode[7] = {
+      3.32681701e03,  // gamma
+      1.69999992e00,  // pc
+      36.96878449,    // gammatr
+      5.10998950e-04, // mass
+      -1.00000000e00, // charge
+      1.78499656e01,  // q1
+      2.40000000e02,  // length
+  };
+
   vector<vector<double>> twisstable_piwilattice;
   vector<string> cols;
   cols.push_back("L");
@@ -196,6 +207,40 @@ int main() {
   printf("%-30s %20.6e (%s)\n", "synchronuousphase :",
          synchronuousphase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3), "");
 
+  double betar =
+      sqrt(1 - 1 / (twissheaderpiwismooth[0] * twissheaderpiwismooth[0]));
+  double trev = twissheaderpiwismooth[1] / (betar * clight);
+  double frev = 1 / trev;
+  double omega = 2 * pi * frev;
+  double etaa = eta(twissheaderpiwismooth[0], twissheaderpiwismooth[2]);
+  double Lpwd = 1e6;
+  printf("%-30s %20.6e (%s)\n", "synchrotronTune :",
+         synchrotronTune(
+             omega, U0, -1, 1, harmon, voltages,
+             synchronuousphase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3),
+             etaa, twissheaderrad[1]),
+         "");
+
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVPotentialWellDistortion :",
+         VeffRFeVPotentialWellDistortion(173, U0, -1, 1, harmon, voltages, Lpwd,
+                                         1, 0.005, twissheaderrad[1]),
+         "eV");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVPotentialWellDistortionPWD :",
+         VeffRFeVPotentialWellDistortionPrime(173, U0, -1, 1, harmon, voltages,
+                                              Lpwd, 1, 0.005,
+                                              twissheaderrad[1]),
+         "");
+  printf("%-30s %20.6e (%s)\n", "synchronuousphasewithPWD :",
+         synchronuousphasewithPWD(0.0, 173, U0, -1, 1, harmon, voltages, Lpwd,
+                                  1, 0.005, twissheaderrad[1], 1e-3),
+         "");
+  printf("%-30s %20.6e (%s)\n", "synchrotronTunePWD :",
+         synchrotronTunePWD(
+             omega, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005,
+             synchronuousphasewithPWD(0.0, 173, U0, -1, 1, harmon, voltages,
+                                      Lpwd, 1, 0.005, twissheaderrad[1], 1e-3),
+             etaa, twissheaderrad[1]),
+         "");
   /*
   ================================================================================
   RADIATION DAMPING METHODS
@@ -480,5 +525,23 @@ int main() {
                 twiss_bm, r0);
   printouts(res);
 
+  /*
+  ================================================================================
+  ODE
+  ================================================================================
+  */
+  vector<double> exa;
+  vector<double> eya;
+  vector<double> sigsa;
+  vector<double> sigea;
+  int maxsteps = 10;
+  double stepsize = 1.0;
+
+  exa.push_back(equi[3]);
+  eya.push_back(equi[4]);
+  sigsa.push_back(sigt);
+
+  ODE(twissode, nrows, twiss_rad, harmon, voltages, stepsize, maxsteps, exa,
+      eya, sigsa, sigea);
   return 0;
 }

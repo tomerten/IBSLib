@@ -18,6 +18,7 @@ const double erad = 2.8179403262e-15;
 double prad = erad * emass / pmass;
 
 double sigefromsigs(double omega0, double sigs, double qs, double eta);
+double sigsfromsige(double sige, double gamma, double gammatr, double omega);
 
 double eta(double gamma, double gammatr);
 
@@ -53,10 +54,10 @@ double VeffRFeVPotentialWellDistortionPrime(double phi, double U0,
                                             double L, double N, double sigs,
                                             double pc);
 
-double synchronusphasewithPWD(double target, double init_phi, double U0,
-                              double charge, int nrf, double harmon[],
-                              double voltages[], double L, double N,
-                              double sigs, double pc, double epsilon);
+double synchronuousphasewithPWD(double target, double init_phi, double U0,
+                                double charge, int nrf, double harmon[],
+                                double voltages[], double L, double N,
+                                double sigs, double pc, double epsilon);
 
 double synchrotronTune(double omega0, double U0, double charge, int nrf,
                        double harmon[], double voltages[], double phis,
@@ -66,7 +67,7 @@ double synchrotronTunePWD(double omega0, double U0, double charge, int nrf,
                           double harmon[], double voltages[], double L,
                           double N, double sigs, double phis, double eta,
                           double pc);
-
-double csige(double v0, double h0, double sigs, double twissh[], double U0,
+double csige(double v0, double h0, double sigs, double U0, double gamma,
+             double gammatr, double pc, double circ, double phis,
              bool printout);
 #endif
