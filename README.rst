@@ -45,3 +45,22 @@ Radiation Damping
 - Equilibrium from pure radiation damping and exitation (taux, tauy, taus, exinf, eyinf, sigeoe2, jx, jy)
 - Radiation losses per turn
 - Critical omega, theta, photon energy
+
+Numeric Functions
+=================
+
+- sigefromsigs
+- eta 
+- fmohl
+- particle_radius
+- BetaRelativisticFromGamma
+- rds 
+- VeffRFev
+- VeffRFeVPrime
+- synchronuousphase
+- VeffRFeVPotentialWellDistortion
+- VeffRFeVPotentialWellDistortionPrime
+- synchronuousphasewithPWD
+- synchrotronTune
+- synchrotronTunewithPWD
+- csige (calculates sige from RF settings, radiation losses and sigs)
