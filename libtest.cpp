@@ -178,7 +178,23 @@ int main() {
   printf("%-30s %20.6e (%s)\n", "Paricle Radius :", particle_radius(1, 1), "m");
   printf("%-30s %20.6e (%s)\n",
          "Relativistic beta from gamma :", BetaRelativisticFromGamma(1), "m/s");
-  printf("%-30s %20.6e (%s)\n\n", "Rds (Nagaitsev) :", rds(1, 2, 3), "");
+  printf("%-30s %20.6e (%s)\n", "Rds (Nagaitsev) :", rds(1, 2, 3), "");
+  double harmon[1];
+  double voltages[1];
+  harmon[0] = 400.;
+  voltages[0] = 4. * 350e3;
+  printf("%-30s %20.6e (%s)\n",
+         "VeffRFeV :", VeffRFeV(173, -1, 1, harmon, voltages), "eV");
+  printf("%-30s %20.6e (%s)\n",
+         "VeffRFeVPrime:", VeffRFeVPrime(173, -1, 1, harmon, voltages), "eV");
+
+  double *radint;
+  radint = RadiationDampingLattice(nrows, twiss_rad);
+  double U0 = RadiationLossesPerTurn(twissheaderrad, radint[0], emass / pmass);
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVRadlosses :",
+         VeffRFeVRadlosses(173, U0, -1, 1, harmon, voltages), "eV");
+  printf("%-30s %20.6e (%s)\n", "synchronuousphase :",
+         synchronuousphase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3), "");
 
   /*
   ================================================================================
@@ -191,7 +207,6 @@ int main() {
   green();
   printf("Radiation Smooth Ring Approximation\n");
   reset();
-  double *radint;
   radint = RadiationDampingApprox(twissheadernagaitsev[2],
                                   twissheaderpiwismooth[2], 4.35, 2.13, 5.66);
   printradint(radint);

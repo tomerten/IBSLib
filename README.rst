@@ -55,7 +55,7 @@ Numeric Functions
 - particle_radius
 - BetaRelativisticFromGamma
 - rds 
-- VeffRFev
+- VeffRFeV
 - VeffRFeVPrime
 - synchronuousphase
 - VeffRFeVPotentialWellDistortion

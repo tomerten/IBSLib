@@ -68,5 +68,5 @@ double synchrotronTunePWD(double omega0, double U0, double charge, int nrf,
                           double pc);
 
 double csige(double v0, double h0, double sigs, double twissh[], double U0,
-             bool printout)
+             bool printout);
 #endif
