@@ -255,3 +255,140 @@ double rds(double x, double y, double z) {
               delz * (c2 * ee + delz * (-c3 * ec + delz * c4 * ea))) /
              (ave * sqrt(ave));
 }
+
+double VeffRFeV(double phi, double charge, int nrf, double harmon[],
+                double voltages[]) {
+  double vrf = voltages[0] * sin(phi);
+  for (int i = 1; i < nrf; i++) {
+    vrf += voltages[i] * sin((harmon[i] / harmon[0]) * phi);
+  }
+  vrf *= charge;
+
+  return vrf;
+}
+
+double VeffRFeVPrime(double phi, double charge, int nrf, double harmon[],
+                     double voltages[]) {
+  double vrf = voltages[0] * cos(phi);
+  for (int i = 1; i < nrf; i++) {
+    vrf += voltages[i] * (harmon[i] / harmon[0]) *
+           cos((harmon[i] / harmon[0]) * phi);
+  }
+  vrf *= charge;
+
+  return vrf;
+}
+
+double VeffRFeVRadlosses(double phi, double U0, double charge, int nrf,
+                         double harmon[], double voltages[]) {
+  double vrf = VeffRFeV(phi, charge, nrf, harmon, voltages) - U0;
+  return vrf;
+}
+
+/*
+================================================================================
+
+REF :
+https://www.quantstart.com/articles/Implied-Volatility-in-C-using-Template-Functions-and-Newton-Raphson/
+
+================================================================================
+*/
+
+double synchronuousphase(double target, double init_phi, double U0,
+                         double charge, int nrf, double harmon[],
+                         double voltages[], double epsilon) {
+  // Set the initial option prices and volatility
+  double y = VeffRFeVRadlosses(init_phi, U0, charge, nrf, harmon, voltages);
+  double x = init_phi;
+
+  while (fabs(y - target) > epsilon) {
+    double d_x = VeffRFeVPrime(x, charge, nrf, harmon, voltages);
+    x += (target - y) / d_x;
+    y = VeffRFeVRadlosses(x, U0, charge, nrf, harmon, voltages);
+  }
+  return x;
+}
+
+double VeffRFeVPotentialWellDistortion(double phi, double U0, double charge,
+                                       int nrf, double harmon[],
+                                       double voltages[], double L, double N,
+                                       double sigs, double pc) {
+
+  return VeffRFeVRadlosses(phi, U0, charge, nrf, harmon, voltages) +
+         charge * L * N * ec * clight * clight /
+             (sqrt(2 * pi) * sigs * sigs * sigs * pc * 1e9);
+}
+
+double VeffRFeVPotentialWellDistortionPrime(double phi, double U0,
+                                            double charge, int nrf,
+                                            double harmon[], double voltages[],
+                                            double L, double N, double sigs,
+                                            double pc) {
+  return VeffRFeVPrime(phi, charge, nrf, harmon, voltages) +
+         charge * ec * L * N * clight * clight /
+             (sqrt(2.0 * pi) * sigs * sigs * sigs * pc * 1e9);
+}
+
+double synchronusphasewithPWD(double target, double init_phi, double U0,
+                              double charge, int nrf, double harmon[],
+                              double voltages[], double L, double N,
+                              double sigs, double pc, double epsilon) {
+  // Set the initial option prices and volatility
+  double y = VeffRFeVPotentialWellDistortion(init_phi, U0, charge, nrf, harmon,
+                                             voltages, L, N, sigs, pc);
+  double x = init_phi;
+
+  while (fabs(y - target) > epsilon) {
+    double d_x = VeffRFeVPotentialWellDistortionPrime(
+        x, U0, charge, nrf, harmon, voltages, L, N, sigs, pc);
+    x += (target - y) / d_x;
+    y = VeffRFeVPotentialWellDistortion(x, U0, charge, nrf, harmon, voltages, L,
+                                        N, sigs, pc);
+  }
+  return x;
+}
+
+double synchrotronTune(double omega0, double U0, double charge, int nrf,
+                       double harmon[], double voltages[], double phis,
+                       double eta, double pc) {
+  return sqrt(harmon[0] * eta *
+              fabs(VeffRFeVPrime(phis, charge, nrf, harmon, voltages)) /
+              (2 * pi * pc * 1e9));
+}
+
+double synchrotronTunePWD(double omega0, double U0, double charge, int nrf,
+                          double harmon[], double voltages[], double L,
+                          double N, double sigs, double phis, double eta,
+                          double pc) {
+  return sqrt(harmon[0] * eta *
+              fabs(VeffRFeVPotentialWellDistortionPrime(
+                  phis, U0, charge, nrf, harmon, voltages, L, N, sigs, pc)) /
+              (2 * pi * pc * 1e9));
+}
+
+double csige(double v0, double h0, double sigs, double twissh[], double U0,
+             bool printout) {
+  double gamma = twissh[0];
+  double gammatr = twissh[1];
+  double pc = twissh[2] * 1.0e9;
+  double circ = twissh[3];
+
+  double betar = sqrt(1 - 1 / (gamma * gamma));
+  double trev = circ / (betar * clight);
+  double frev = 1 / trev;
+  double eta = (1.0 / (gammatr * gammatr)) - (1.0 / (gamma * gamma));
+  double phis = -asin(U0 / v0);
+  double omega0 = 2 * pi / trev;
+
+  double nus =
+      sqrt(fabs(h0 * eta) / (2 * pi * betar * pc) * fabs(v0 * cos(phis)));
+  double sige = nus * omega0 * sigs / (clight * eta);
+  sige = 2 * pi * nus * sigs / (eta * clight);
+
+  if (printout) {
+    printf("Synchrotron Tune : %12.6e\n ", nus);
+    printf("Synchrotron freq : %12.6e\n ", nus * omega0);
+    printf("Sige             : %12.6e\n ", sige);
+  }
+  return sige;
+}
