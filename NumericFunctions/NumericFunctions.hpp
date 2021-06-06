@@ -15,6 +15,7 @@ const double mumass = 0.1056583755;          //     ! GeV CODATA 2018
 const double atomicmassunit = 0.93149410242; // GeV scipy constants
 const double pi = 3.141592653589793;
 const double ec = 1.602176634e-19;
+const double euler = 0.577215664901533;
 
 // Classical radius [m]
 const double erad = 2.8179403262e-15;

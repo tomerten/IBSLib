@@ -10,89 +10,161 @@
 
 using namespace std;
 /*
---------------------------------------------------------------------------------
-AUTHOR  : TOM MERTENS
---------------------------------------------------------------------------------
-VERSION 1.0 : FOR USING IN CFFI IBS PYTHON TEST EXAMPLE
-DATE        : 16/02/2021
-COPYRIGHT   : HELMHOLTZ ZENTRUM BERLIN
+================================================================================
+================================================================================
+METHOD TO CALCULATE dE/E FROM sigma_s.
 
-    DESCRIPTION:
-        CALCULATES SIMGA_E FROM SIGMA_S GIVEN OMEGA0, LONGITUNAL TUNE
-        AND ETA
+REMARK:
+-------
+  dE/E (do not confuse with dp/p, there is a factor beta**2) De/E = beta**2 dp/p
 
---------------------------------------------------------------------------------
-qs (double)     : longitunal tune
-sigs (double)   : bunch length [m]
-omega0 (double) : angular RF frequency
-eta (double)    : phase slip factor
---------------------------------------------------------------------------------
-RETURNS:
-sige (double)   : dE/E (do not confuse with dp/p, there is a factor beta**2
-difference)
---------------------------------------------------------------------------------
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 16/02/2021 : initial version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double : qs
+        longitunal tune
+    - double : sigs
+        bunch length [m]
+    - double : omega0
+        angular RF frequency
+    - double : eta
+        phase slip fact
+
+
+  Returns:
+  --------
+    double
+      dE/E
+
+================================================================================
+================================================================================
 */
 double sigefromsigs(double omega0, double sigs, double qs, double eta) {
   return qs * omega0 * (sigs / (fabs(eta) * clight));
 }
 
+/*
+================================================================================
+================================================================================
+METHOD TO CALCULATE sigma_s FROM dE/E.
+
+REMARK:
+-------
+  dE/E (do not confuse with dp/p, there is a factor beta**2) De/E = beta**2 dp/p
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double : sige
+        dE/E
+    - double : gamma
+        relativistic gamma
+    - double : gammatr
+        relativistic gamma for transition
+    - double : omegas
+        synchrotron angular frequency (omega0 * qs)
+
+
+  Returns:
+  --------
+    double
+      sigma_s
+
+================================================================================
+================================================================================
+*/
+
 double sigsfromsige(double sige, double gamma, double gammatr, double omegas) {
-  // oemgas = omega0 * qs
   return clight * fabs(eta(gamma, gammatr)) / omegas * sige;
 }
 /*
---------------------------------------------------------------------------------
-AUTHOR  : TOM MERTENS
---------------------------------------------------------------------------------
-VERSION 1.0 : FOR USING IN CFFI IBS PYTHON TEST EXAMPLE
-DATE        : 16/02/2021
-COPYRIGHT   : HELMHOLTZ ZENTRUM BERLIN
+================================================================================
+================================================================================
+METHOD TO CALCULATE PHASE SLIP FACTOR ETA.
 
-    DESCRIPTION:
-        CALCULATES ETA - PHASE SLIP FACTOR
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
---------------------------------------------------------------------------------
-gamma (double)   : relativistic gamma
-gammatr (double) : relativistic transition gamma of the lattice
---------------------------------------------------------------------------------
-RETURNS:
-eta (double)     : phase slip factor (1/ gammatr**2  - 1/ gamma**2)
---------------------------------------------------------------------------------
+  HISTORY:
+    - 08/06/2021 : initial version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double : gamma
+        relativistic gamma
+    - double : gammatr
+        relativistic gamma for transition
+
+  Returns:
+  --------
+    double
+      eta - phase slip factor (1/ gammatr**2  - 1/ gamma**2)
+
+================================================================================
+================================================================================
 */
+
 double eta(double gamma, double gammatr) {
-  return 1.0f / (gammatr * gammatr - 1.0f / (gamma * gamma));
+  return 1.0 / (gammatr * gammatr - 1.0 / (gamma * gamma));
 }
 
 /*
---------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
---------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 05/02/2021 COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+METHOD TO CALCULATE FMOHL.
 
-    DESCRIPTION :
-        CALCULATE CLASSICAL PARTICLE RADIUS
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    -  MICHAELA SCHAUMANN
 
-    REF:
-        HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS
+  HISTORY:
+    - 05/02/2021 COPYRIGHT : CERN / HZB
+    - 08/06/2021 : initial cpp version (Tom)
 
----------------------------------------------------------------------------------
-a (double)      : parameter of fmohl
-b (double)      : parameter of fmohl
-q (double)      : parameter of fmohl
-n (int)         : number of iterations (accuracy)
----------------------------------------------------------------------------------
-RETURNS:
-    fmohl (double)
----------------------------------------------------------------------------------
+  REFS:
+    - HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS
+    - BANE: A SIMPLIFIED MODEL OF INTRABEAM SCATTERING (EPAC 2002)
+    - PIWINSKI  Tech. Rep. HEAC 74, Stanford, 1974.
+
+================================================================================
+  Arguments:
+  ----------
+    - double : a
+        parameter 1
+    - double : b
+        parameter 2
+    - double : q
+        parameter 3
+    - int : n
+
+  Returns:
+  --------
+    double
+      Fmohl
+
+================================================================================
+================================================================================
 */
 double fmohl(double a, double b, double q, int n) {
-  // constants
-  double const euler = 0.577215664901533;
-  double const pi = 3.141592653589793;
 
   double u, cp, cq;
   double sum = 0.0;
@@ -401,15 +473,45 @@ double csige(double v0, double h0, double sigs, double U0, double gamma,
 }
 
 /*
- The code below is not optimized for speed but for readability.
- In principle this function is run once per simulation so the
- time gain of optimization would be minimal.
+================================================================================
+================================================================================
+METHOD TO UPDATE THE MADX TWISS TABLE WITH COLUMNS (KEYS IN THE MAP) WITH
+RECURRING VALUES IN THE IBS AND RADIATION DAMPING ROUTINES.
+
+REMARK:
+-------
+  The code below is not optimized for speed but for readability.
+  In principle this function is run once per simulation so the
+  time gain of optimization would be minimal.
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 06/08/2021 : initial version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - map<string, <double>>& : table
+      Twiss table
+
+  Returns:
+  --------
+    void
+      updates the Twiss table (as map) with new keys
+
+================================================================================
+================================================================================
  */
 void updateTwiss(map<string, vector<double>> &table) {
+  // get length of table to reserve the vector sizes
   int size = table["L"].size();
+
   vector<double> rho(size), k(size), I2(size), I3(size), I4x(size), I4y(size),
       I5x(size), I5y(size), gammax(size), gammay(size), hx(size), hy(size);
 
+  // calculate the new columns
   for (int i = 0; i < size; i++) {
     double angle = table["ANGLE"][i];
     double l = table["L"][i];
@@ -452,7 +554,7 @@ void updateTwiss(map<string, vector<double>> &table) {
     I5y[i] = (rho[i] == 0) ? 0.0 : hy[i] * l / rhoi3;
   }
 
-  // extend the map
+  // extend the map table
   table["rho"] = rho;
   table["k"] = k;
 
@@ -469,6 +571,32 @@ void updateTwiss(map<string, vector<double>> &table) {
   table["I5y"] = I5y;
 }
 
+/*
+================================================================================
+================================================================================
+METHOD TO PRINT A COLUMN FROM THE UPDATED TWISS TABLE (DEBUGGING)
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 06/08/2021 : initial version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - string : key
+      key in the map - column name  of the Twiss table
+    - map<string, <double>> : table
+      Twiss or extended Twiss table
+
+  Returns:
+  --------
+    void
+
+================================================================================
+================================================================================
+*/
 void printTwissMap(string key, map<string, vector<double>> &table) {
   vector<double> toprint = table[key];
 
