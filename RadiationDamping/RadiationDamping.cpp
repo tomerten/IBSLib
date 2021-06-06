@@ -10,8 +10,8 @@ void printradint(double out[6]) {
   printf("    I3  = %15.6f\n", out[1]);
   printf("    I4x = %15.6f\n", out[2]);
   printf("    I4y = %15.6f\n", out[3]);
-  printf("    I5x = %15.6f\n", out[5]);
-  printf("    I5y = %15.6f\n", out[6]);
+  printf("    I5x = %15.6f\n", out[4]);
+  printf("    I5y = %15.6f\n", out[5]);
 }
 /*
 ---------------------------------------------------------------------------------------------------------------

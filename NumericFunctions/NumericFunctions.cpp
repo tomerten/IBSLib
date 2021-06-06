@@ -1,7 +1,14 @@
 #include "NumericFunctions.hpp"
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <map>
 #include <math.h>
 #include <stdio.h>
+#include <string>
+#include <vector>
 
+using namespace std;
 /*
 --------------------------------------------------------------------------------
 AUTHOR  : TOM MERTENS
@@ -391,4 +398,81 @@ double csige(double v0, double h0, double sigs, double U0, double gamma,
     printf("Sige             : %12.6e\n ", sige);
   }
   return sige;
+}
+
+/*
+ The code below is not optimized for speed but for readability.
+ In principle this function is run once per simulation so the
+ time gain of optimization would be minimal.
+ */
+void updateTwiss(map<string, vector<double>> &table) {
+  int size = table["L"].size();
+  vector<double> rho(size), k(size), I2(size), I3(size), I4x(size), I4y(size),
+      I5x(size), I5y(size), gammax(size), gammay(size), hx(size), hy(size);
+
+  for (int i = 0; i < size; i++) {
+    double angle = table["ANGLE"][i];
+    double l = table["L"][i];
+    double bx = table["BETX"][i];
+    double by = table["BETY"][i];
+    double ax = table["ALFX"][i];
+    double ay = table["ALFY"][i];
+    double dx = table["DX"][i];
+    double dpx = table["DPX"][i];
+    double dy = table["DY"][i];
+    double dpy = table["DPY"][i];
+    double k1l = table["K1L"][i];
+    double k1sl = table["K1SL"][i];
+    double rhoi2, rhoi3;
+
+    // local bending radius
+    rho[i] = (angle == 0.0) ? 0.0 : l / angle;
+    rhoi2 = rho[i] * rho[i];
+    rhoi3 = rhoi2 * rho[i];
+
+    k[i] = (l == 0.0) ? 0.0 : k1l / l;
+
+    // first for integrals
+    I2[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi2;
+    I3[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi3;
+    I4x[i] = (rho[i] == 0.0) ? 0.0
+                             : (dx / rhoi3) * l +
+                                   (2.0 / rho[i]) * (k[i] * dx + k1sl * dy * l);
+    I4y[i] = 0.0;
+
+    // Courant-Snyder gamma
+    gammax[i] = (1.0 + ax * ax) / bx;
+    gammay[i] = (1.0 + ay * ay) / by;
+
+    // curly H
+    hx[i] = bx * dpx * dpx + 2.0 * ax * dx * dpx + gammax[i] * dx * dx;
+    hy[i] = by * dpy * dpy + 2.0 * ay * dy * dpy + gammay[i] * dy * dy;
+
+    I5x[i] = (rho[i] == 0) ? 0.0 : hx[i] * l / rhoi3;
+    I5y[i] = (rho[i] == 0) ? 0.0 : hy[i] * l / rhoi3;
+  }
+
+  // extend the map
+  table["rho"] = rho;
+  table["k"] = k;
+
+  table["gammax"] = gammax;
+  table["gammay"] = gammay;
+  table["hx"] = hx;
+  table["hy"] = hy;
+
+  table["I2"] = I2;
+  table["I3"] = I3;
+  table["I4x"] = I4x;
+  table["I4y"] = I4y;
+  table["I5x"] = I5x;
+  table["I5y"] = I5y;
+}
+
+void printTwissMap(string key, map<string, vector<double>> &table) {
+  vector<double> toprint = table[key];
+
+  for (auto elem : toprint) {
+    cout << elem << endl;
+  }
 }

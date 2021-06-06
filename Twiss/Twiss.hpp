@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <list>
+#include <map>
 #include <sstream>
 #include <stdio.h>
 #include <string>
@@ -12,4 +13,6 @@
 
 using namespace std;
 
+map<string, double> GetTwissHeader(string filename);
 vector<vector<double>> GetTable(string filename, vector<string> columns);
+map<string, vector<double>> GetTwissTableAsMap(string filename);

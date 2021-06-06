@@ -1,5 +1,10 @@
 #ifndef NUMERIC_FUNCTIONS_HPP
 #define NUMERIC_FUNCTIONS_HPP
+#include <map>
+#include <stdio.h>
+#include <string>
+#include <vector>
+using namespace std;
 
 const double clight = 299792458.0;
 const double hbar = 6.582119569e-25; // Reduced Planck Constant in GeV !!!!
@@ -70,4 +75,6 @@ double synchrotronTunePWD(double omega0, double U0, double charge, int nrf,
 double csige(double v0, double h0, double sigs, double U0, double gamma,
              double gammatr, double pc, double circ, double phis,
              bool printout);
+void updateTwiss(map<string, vector<double>> &table);
+void printTwissMap(string key, map<string, vector<double>> &table);
 #endif

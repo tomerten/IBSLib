@@ -5,15 +5,28 @@
 #include "OrdDiffEq.hpp"
 #include "RadiationDamping.hpp"
 #include "Twiss.hpp"
+#include <map>
 #include <stdio.h>
+#include <string>
+#include <vector>
+
+// using namespace std;
+
 void red() { printf("\033[1;31m"); }
 void yellow() { printf("\033[1;33m"); }
-void green() { printf("\033[0;32m"); }
+void green() { printf("\033[1;32m"); }
 void blue() { printf("\033[1;34m"); }
 void cyan() { printf("\033[1;36m"); }
 void reset() { printf("\033[0m"); }
 
 int main() {
+  // read twiss header as map and the table as map of vectors
+  string twissfilename = "b2_design_lattice_1996.twiss";
+  map<string, double> twissheadermap;
+  map<string, vector<double>> twisstablemap;
+
+  twissheadermap = GetTwissHeader(twissfilename);
+  twisstablemap = GetTwissTableAsMap(twissfilename);
 
   double twissheaderpiwismooth[6] = {
       3.32681701e03, // gamma
@@ -51,12 +64,8 @@ int main() {
   };
 
   vector<vector<double>> twisstable_piwilattice;
-  vector<string> cols;
-  cols.push_back("L");
-  cols.push_back("BETX");
-  cols.push_back("BETY");
-  cols.push_back("DX");
-  twisstable_piwilattice = GetTable("b2_design_lattice_1996.twiss", cols);
+  vector<string> cols /* */ {"L", "BETX", "BETY", "DX"};
+  twisstable_piwilattice = GetTable(twissfilename, cols);
 
   cols.clear();
   vector<vector<double>> twisstable_piwimodified;
@@ -172,33 +181,53 @@ int main() {
   BASIC NUMERIC FUNCTIONS
   ================================================================================
   */
+
   blue();
   printf("Basic Functions\n");
   printf("===============\n");
   reset();
 
+  // sigefromsigs
   printf("%-30s %20.6e (%s)\n",
          "SigEfromSigs :", sigefromsigs(2.0 * pi * 5e5, 0.001, 5e3, 10.0), "");
+
+  // eta
   printf("%-30s %20.6e (%s)\n", "Eta :", eta(3600.0, 37.0), "");
 
+  // fmohl
   double a = 5.709563671168914e-04;
   double b = 2.329156389696222e-01;
   double q = 2.272866910079534e00;
   int npp = 1000;
-  printf("%-30s %20.6e (%s)\n", "Fmohl :", fmohl(a, b, q, npp), "");
+  printf("%-30s %20.6e (%s)\n", "Fmohl          :", fmohl(a, b, q, npp), "");
+
+  // particle radius
   printf("%-30s %20.6e (%s)\n", "Paricle Radius :", particle_radius(1, 1), "m");
+
+  // beta relativistic from gamma
   printf("%-30s %20.6e (%s)\n",
          "Relativistic beta from gamma :", BetaRelativisticFromGamma(1), "m/s");
+
+  // rds from nagaitsev paper
   printf("%-30s %20.6e (%s)\n", "Rds (Nagaitsev) :", rds(1, 2, 3), "");
+
+  // VeffRFeV
   double harmon[1];
   double voltages[1];
   harmon[0] = 400.;
-  voltages[0] = 4. * 350e3;
+  voltages[0] = -4. * 350e3;
   printf("%-30s %20.6e (%s)\n",
          "VeffRFeV :", VeffRFeV(173, -1, 1, harmon, voltages), "eV");
+
+  // VeffRFeVprime
   printf("%-30s %20.6e (%s)\n",
          "VeffRFeVPrime:", VeffRFeVPrime(173, -1, 1, harmon, voltages), "eV");
 
+  // updateTwiss
+  updateTwiss(twisstablemap);
+  // printTwissMap("I2", twisstablemap);
+
+  // Energy loss per turn
   double *radint;
   radint = RadiationDampingLattice(nrows, twiss_rad);
   double U0 = RadiationLossesPerTurn(twissheaderrad, radint[0], emass / pmass);

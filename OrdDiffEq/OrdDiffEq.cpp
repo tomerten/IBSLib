@@ -58,7 +58,8 @@ void ODE(double twiss[], int nrows, double (*twissdata)[12], double harmon[],
 
   sige.push_back(csige(voltages[0], harmon[0], sigs[0], U0, gamma, gammatr, pc,
                        len, phis, false));
-
+  printf("Sige : %12.6e\n", sige[0]);
+  printf("Sigs : %12.6e\n", sigsfromsige(sige[0], gamma, gammatr, omegas));
   sige2.push_back(sige[0] * sige[0]);
 
   int steps = 0;
