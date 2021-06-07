@@ -34,9 +34,10 @@ REMARK:
         bunch length [m]
     - double : omega0
         angular RF frequency
-    - double : eta
-        phase slip fact
-
+    - double : gamma
+        relativistic gamma
+    - double : gammatr
+        relativistic gamma transition
 
   Returns:
   --------
@@ -46,8 +47,12 @@ REMARK:
 ================================================================================
 ================================================================================
 */
-double sigefromsigs(double omega0, double sigs, double qs, double eta) {
-  return qs * omega0 * (sigs / (fabs(eta) * clight));
+double sigefromsigs(double omega0, double sigs, double qs, double gamma,
+                    double gammatr) {
+  // dE/E = Beta**2 dp/p
+  double beta2 = BetaRelativisticFromGamma(gamma);
+  beta2 *= beta2;
+  return beta2 * qs * omega0 * (sigs / (fabs(eta(gamma, gammatr)) * clight));
 }
 
 /*
@@ -89,7 +94,10 @@ REMARK:
 */
 
 double sigsfromsige(double sige, double gamma, double gammatr, double omegas) {
-  return clight * fabs(eta(gamma, gammatr)) / omegas * sige;
+  // dE/E = Beta**2 dp/p
+  double beta2 = BetaRelativisticFromGamma(gamma);
+  beta2 *= beta2;
+  return clight * fabs(eta(gamma, gammatr)) / omegas * sige / beta2;
 }
 /*
 ================================================================================
@@ -134,7 +142,7 @@ METHOD TO CALCULATE FMOHL.
     - TOM MERTENS
     - MIKE BLASKIEWISC
     - RODERIK BRUCE
-    -  MICHAELA SCHAUMANN
+    - MICHAELA SCHAUMANN
 
   HISTORY:
     - 05/02/2021 COPYRIGHT : CERN / HZB
@@ -189,64 +197,96 @@ double fmohl(double a, double b, double q, int n) {
 }
 
 /*
--------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
---------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 05/02/2021
-COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+METHOD TO CALCULATE CLASSICAL PARTICLE RADIUS.
 
-    DESCRIPTION :
-        CALCULATE CLASSICAL PARTICLE RADIUS
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-    REF:
-        HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS (p. )
+  HISTORY:
+    - 05/02/2021 COPYRIGHT : CERN / HZB
+    - 08/06/2021 : initial cpp version (Tom)
 
----------------------------------------------------------------------------------
-charge (double)		: particle charge
-aatom				: atomic number - for electrons this is
-electron_mass_energy_MeV / proton_mass_energy_MeV
----------------------------------------------------------------------------------
+  REF:
+    HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS (p. )
+
+================================================================================
+  Arguments:
+  ----------
+    - double charge
+        particle charge
+    - double aatom
+        atomic number (A)
+
+  Returns:
+  --------
+    double
+      classical particle radius
+
+================================================================================
+================================================================================
 */
-double particle_radius(double charge, double aatom) {
+
+double ParticleRadius(double charge, double aatom) {
   return charge * charge / aatom * prad;
 }
 
 /*
----------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 05/02/2021
-COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+METHOD TO CALCULATE RELATIVISTIC BETA FROM RELATIVISTIC GAMMA
 
-    DESCRIPTION :
-        CALCULATE BETA RELATIVISTIC FROM GAMMA RELATIVISTC
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
----------------------------------------------------------------------------------
-gamma (double)  : relativistic gamma
----------------------------------------------------------------------------------
+  HISTORY:
+    - 05/02/2021 COPYRIGHT : CERN / HZB
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double gamma
+        relativistic gamma
+
+  Returns:
+  --------
+    double
+      relativistic beta
+
+================================================================================
+================================================================================
 */
 double BetaRelativisticFromGamma(double gamma) {
   return sqrt(1 - (1 / (gamma * gamma)));
 }
+
 /*
-REF : https://stackoverflow.com/questions/3437404/min-and-max-in-c
+================================================================================
+================================================================================
+MAX AND MIN METHODS
 
-#define GENERIC_MAX(x, y) ((x) > (y) ? (x) : (y))
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
-#define ENSURE_int(i)   _Generic((i), int:   (i))
-#define ENSURE_float(f) _Generic((f), float: (f))
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
+  REF :
+    https://stackoverflow.com/questions/3437404/min-and-max-in-c
 
-#define MAX(type, x, y) \
-  (type)GENERIC_MAX(ENSURE_##type(x), ENSURE_##type(y))
+================================================================================
+================================================================================
 */
 
 #define max(a, b)                                                              \
@@ -264,27 +304,39 @@ REF : https://stackoverflow.com/questions/3437404/min-and-max-in-c
   })
 
 /*
----------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 06/02/2021
-COPYRIGHT : CERN
+================================================================================
+================================================================================
+RDS FUNCTION NAGAITSEV IBS PAPER.
 
-    DESCRIPTION :
-        FUNCTIONS TO CALCULATE NAGAITSEV FUNCTION  RDS
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-    REF:
-        PRSTAB 8, 064403 (2005)
----------------------------------------------------------------------------------
-x (double)  : rds parameter
-y (double)  : rds parameter
-z (double)  : rds parameter
----------------------------------------------------------------------------------
+  HISTORY:
+    - 05/02/2021 COPYRIGHT : CERN / HZB
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+      PRSTAB 8, 064403 (2005)
+================================================================================
+  Arguments:
+  ----------
+    - double x
+    - double y
+    - double z
+
+  Returns:
+  --------
+    double
+      rds(x,y,z)
+
+================================================================================
+================================================================================
 */
+
 double rds(double x, double y, double z) {
   // init
   double errtol = 0.05;
@@ -339,59 +391,276 @@ double rds(double x, double y, double z) {
              (ave * sqrt(ave));
 }
 
-double VeffRFeV(double phi, double charge, int nrf, double harmon[],
-                double voltages[]) {
+/*
+================================================================================
+================================================================================
+METHOD RETURNS EFFECTIVE RF VOLTAGE TIMES CHARGE (eV)
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+      USPAS ACCELERATOR COURSE
+      LEE
+================================================================================
+  Arguments:
+  ----------
+    - double phi
+        RF phase
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+
+  Returns:
+  --------
+    double
+      Effective Voltage times particle charge - units (eV)
+
+================================================================================
+================================================================================
+*/
+
+double EffectiveRFVoltageInElectronVolt(double phi, double charge, int nrf,
+                                        double harmon[], double voltages[]) {
+  // init
   double vrf = voltages[0] * sin(phi);
+
+  // add the rest taking harmonic numbers into account
   for (int i = 1; i < nrf; i++) {
     vrf += voltages[i] * sin((harmon[i] / harmon[0]) * phi);
   }
+
+  // multiply with charge
   vrf *= charge;
 
-  return vrf;
-}
-
-double VeffRFeVPrime(double phi, double charge, int nrf, double harmon[],
-                     double voltages[]) {
-  double vrf = voltages[0] * cos(phi);
-  for (int i = 1; i < nrf; i++) {
-    vrf += voltages[i] * (harmon[i] / harmon[0]) *
-           cos((harmon[i] / harmon[0]) * phi);
-  }
-  vrf *= charge;
-
-  return vrf;
-}
-
-double VeffRFeVRadlosses(double phi, double U0, double charge, int nrf,
-                         double harmon[], double voltages[]) {
-  double vrf = VeffRFeV(phi, charge, nrf, harmon, voltages) - U0;
   return vrf;
 }
 
 /*
 ================================================================================
+================================================================================
+METHOD RETURNS DERIVATIVE WITH RESPECT TO PHASE OF EFFECTIVE RF VOLTAGE
+TIMES CHARGE (eV).
 
-REF :
-https://www.quantstart.com/articles/Implied-Volatility-in-C-using-Template-Functions-and-Newton-Raphson/
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+      USPAS ACCELERATOR COURSE
+      LEE
+================================================================================
+  Arguments:
+  ----------
+    - double phi
+        RF phase
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+
+  Returns:
+  --------
+    double
+      Effective Voltage times particle charge - units (eV)
+
+================================================================================
+================================================================================
+*/
+double EffectiveRFVoltageInElectronVoltPrime(double phi, double charge, int nrf,
+                                             double harmon[],
+                                             double voltages[]) {
+  // init
+  double vrf = voltages[0] * cos(phi);
+
+  // add other rfs
+  for (int i = 1; i < nrf; i++) {
+    vrf += voltages[i] * (harmon[i] / harmon[0]) *
+           cos((harmon[i] / harmon[0]) * phi);
+  }
+
+  // V -> eV
+  vrf *= charge;
+
+  return vrf;
+}
+
+/*
+================================================================================
+================================================================================
+METHOD RETURNS EFFECTIVE RF VOLTAGE TIMES CHARGE MINUS ENERGY LOSS PER TURN.
+ALL UNITS ARE IN eV.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+      USPAS ACCELERATOR COURSE
+      LEE
+================================================================================
+  Arguments:
+  ----------
+    - double phi
+        RF phase
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+
+  Returns:
+  --------
+    double
+      Effective Voltage times particle charge minus energy loss per turn
+      units (eV).
+
+================================================================================
+================================================================================
+*/
+double VeffRFeVRadlosses(double phi, double U0, double charge, int nrf,
+                         double harmon[], double voltages[]) {
+  double vrf =
+      EffectiveRFVoltageInElectronVolt(phi, charge, nrf, harmon, voltages) - U0;
+
+  return vrf;
+}
+
+/*
+================================================================================
+================================================================================
+METHOD TO GET THE SYNCHRONUOUS PHASE.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF :
+    https://www.quantstart.com/articles/Implied-Volatility-in-C-using-Template-Functions-and-Newton-Raphson/
+
+================================================================================
+  Arguments:
+  ----------
+    - double target
+        target value for the test function (zero)
+    - double init_phi
+        initial phase to start searching from
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+    - double epsilon
+        threshold accuracy for the return value
+
+  Returns:
+  --------
+    double
+      synchronuous phase
+
+================================================================================
 ================================================================================
 */
 
-double synchronuousphase(double target, double init_phi, double U0,
+double SynchronuousPhase(double target, double init_phi, double U0,
                          double charge, int nrf, double harmon[],
                          double voltages[], double epsilon) {
   // Set the initial option prices and volatility
   double y = VeffRFeVRadlosses(init_phi, U0, charge, nrf, harmon, voltages);
   double x = init_phi;
 
+  // Newton Raphson
   while (fabs(y - target) > epsilon) {
-    double d_x = VeffRFeVPrime(x, charge, nrf, harmon, voltages);
+    double d_x =
+        EffectiveRFVoltageInElectronVoltPrime(x, charge, nrf, harmon, voltages);
     x += (target - y) / d_x;
     y = VeffRFeVRadlosses(x, U0, charge, nrf, harmon, voltages);
   }
+
   return x;
 }
 
+/*
+================================================================================
+================================================================================
+METHOD TO GET THE EFFECTIVE RF VOLTAGE TIMES CHARGE WITH POTENTIAL WELL
+DISTORTION. (units eV).
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF :
+    Intrabeam Scattering Studies at the Cornell Electron-positron Storage Ring
+Test Accelerator
+
+================================================================================
+  Arguments:
+  ----------
+    - double phi
+        phase
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+    - double L
+    - double N
+    - double sigs
+        bunch length sigma s
+    - double pc
+        beam momentum
+    - double epsilon
+        threshold accuracy for the return value
+
+  Returns:
+  --------
+    double
+      Effective RF Voltage times charge in the presence of potential well
+      distortion.
+================================================================================
+================================================================================
+*/
 double VeffRFeVPotentialWellDistortion(double phi, double U0, double charge,
                                        int nrf, double harmon[],
                                        double voltages[], double L, double N,
@@ -402,17 +671,115 @@ double VeffRFeVPotentialWellDistortion(double phi, double U0, double charge,
              (sqrt(2 * pi) * sigs * sigs * sigs * pc * 1e9);
 }
 
+/*
+================================================================================
+================================================================================
+METHOD TO GET THE DERIVATIVE OF THE  EFFECTIVE RF VOLTAGE TIMES CHARGE WITH
+POTENTIAL WELL DISTORTION WITH RESPECT OT THE PHASE. (units eV).
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF :
+    Intrabeam Scattering Studies at the Cornell Electron-positron Storage Ring
+Test Accelerator
+
+================================================================================
+  Arguments:
+  ----------
+    - double phi
+        phase
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+    - double L
+    - double N
+    - double sigs
+        bunch length sigma s
+    - double pc
+        beam momentum
+
+  Returns:
+  --------
+    double
+      Effective RF Voltage times charge in the presence of potential well
+      distortion derivative with respect to the phase.
+================================================================================
+================================================================================
+*/
 double VeffRFeVPotentialWellDistortionPrime(double phi, double U0,
                                             double charge, int nrf,
                                             double harmon[], double voltages[],
                                             double L, double N, double sigs,
                                             double pc) {
-  return VeffRFeVPrime(phi, charge, nrf, harmon, voltages) +
+  return EffectiveRFVoltageInElectronVoltPrime(phi, charge, nrf, harmon,
+                                               voltages) +
          charge * ec * L * N * clight * clight /
              (sqrt(2.0 * pi) * sigs * sigs * sigs * pc * 1e9);
 }
 
-double synchronuousphasewithPWD(double target, double init_phi, double U0,
+/*
+================================================================================
+================================================================================
+METHOD TO GET THE SYNCHRONUOUS PHASE IN THE PRESENCE OF POTENTIAL WELL
+DISTORTION.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF :
+    https://www.quantstart.com/articles/Implied-Volatility-in-C-using-Template-Functions-and-Newton-Raphson/
+
+================================================================================
+  Arguments:
+  ----------
+    - double target
+        target value for the test function (zero)
+    - double init_phi
+        initial phase to start searching from
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+    - double epsilon
+        threshold accuracy for the return value
+    - double L
+    - double N
+    - double sigs
+        bunch length sigma s
+    - double pc
+        beam momentum
+
+  Returns:
+  --------
+    double
+      synchronuous phase with potential well distortion.
+
+================================================================================
+================================================================================
+*/
+double SynchronuousPhaseWithPWD(double target, double init_phi, double U0,
                                 double charge, int nrf, double harmon[],
                                 double voltages[], double L, double N,
                                 double sigs, double pc, double epsilon) {
@@ -430,16 +797,103 @@ double synchronuousphasewithPWD(double target, double init_phi, double U0,
   }
   return x;
 }
+/*
+================================================================================
+================================================================================
+METHOD TO GET THE SYNCHROTRON TUNE.
 
-double synchrotronTune(double omega0, double U0, double charge, int nrf,
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double omega0
+        accelerator angular frequency
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+    - double eta
+        phase slip factor
+    - double phis
+        synchronuous phase
+    - double pc
+        beam momentum in GeV
+
+  Returns:
+  --------
+    double
+      Synchrotron Tune
+
+================================================================================
+================================================================================
+*/
+double SynchrotronTune(double omega0, double U0, double charge, int nrf,
                        double harmon[], double voltages[], double phis,
                        double eta, double pc) {
   return sqrt(harmon[0] * eta *
-              fabs(VeffRFeVPrime(phis, charge, nrf, harmon, voltages)) /
+              fabs(EffectiveRFVoltageInElectronVoltPrime(phis, charge, nrf,
+                                                         harmon, voltages)) /
               (2 * pi * pc * 1e9));
 }
 
-double synchrotronTunePWD(double omega0, double U0, double charge, int nrf,
+/*
+================================================================================
+================================================================================
+METHOD TO GET THE SYNCHROTRON TUNE IN THE PRESENCE OF POTENTIAL WELL DISTORTION.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double omega0
+        accelerator angular frequency
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+    - double L
+    - double N
+    - double sigs
+    - double eta
+        phase slip factor
+    - double phis
+        synchronuous phase
+    - double pc
+        beam momentum in GeV
+
+  Returns:
+  --------
+    double
+      Synchrotron Tune
+
+================================================================================
+================================================================================
+*/
+double SynchrotronTunePWD(double omega0, double U0, double charge, int nrf,
                           double harmon[], double voltages[], double L,
                           double N, double sigs, double phis, double eta,
                           double pc) {
@@ -449,20 +903,67 @@ double synchrotronTunePWD(double omega0, double U0, double charge, int nrf,
               (2 * pi * pc * 1e9));
 }
 
-double csige(double v0, double h0, double sigs, double U0, double gamma,
-             double gammatr, double pc, double circ, double phis,
-             bool printout) {
+/*
+================================================================================
+================================================================================
+METHOD TO GET THE SYNCHROTRON TUNE IN THE PRESENCE OF POTENTIAL WELL DISTORTION.
 
-  double betar = sqrt(1 - 1 / (gamma * gamma));
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double omega0
+        accelerator angular frequency
+    - double U0
+        Energy loss per turn in eV
+    - double charge
+        particle charge
+    - double nrf
+        number of RF systems
+    - doube[] harmon
+        corresponding harmonic numbers
+    - double[] voltages
+        corresponding voltages
+    - double L
+    - double N
+    - double sigs
+    - double eta
+        phase slip factor
+    - double phis
+        synchronuous phase
+    - double pc
+        beam momentum in GeV
+
+  Returns:
+  --------
+    double
+      Synchrotron Tune
+
+================================================================================
+================================================================================
+*/
+double SigeFromRFAndSigs(double v0, double h0, double sigs, double U0,
+                         double gamma, double gammatr, double pc, double circ,
+                         double phis, bool printout) {
+
+  double betar = BetaRelativisticFromGamma(gamma);
+
   double trev = circ / (betar * clight);
-  double frev = 1 / trev;
+  double frev = 1.0 / trev;
   double eta = (1.0 / (gammatr * gammatr)) - (1.0 / (gamma * gamma));
-  double omega0 = 2 * pi / trev;
+  double omega0 = 2.0 * pi / trev;
 
   double nus =
-      sqrt(fabs(h0 * eta) / (2 * pi * betar * pc) * fabs(v0 * cos(phis)));
-  double sige = nus * omega0 * sigs / (clight * eta);
-  sige = 2 * pi * nus * sigs / (eta * clight);
+      sqrt(fabs(h0 * eta) / (2.0 * pi * betar * pc) * fabs(v0 * cos(phis)));
+  double sige; // = nus * omega0 * sigs / (clight * eta);
+
+  sige = 2.0 * pi * nus * sigs / (eta * clight);
 
   if (printout) {
     printf("Synchrotron Tune : %12.6e\n ", nus);

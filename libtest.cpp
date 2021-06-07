@@ -165,7 +165,7 @@ int main() {
   printf("CONSTANTS\n");
   printf("=========\n");
   reset();
-  printf("%-30s %20.6f (%s)\n", "Speed of light :", clight, "m/s");
+  printf("%-30s %20.6e (%s)\n", "Speed of light :", clight, "m/s");
   printf("%-30s %20.6e (%s)\n", "Reduced Planck constant :", hbar, "GeV");
   printf("%-30s %20.6e (%s)\n", "Electron mass :", emass, "GeV");
   printf("%-30s %20.6e (%s)\n", "Proton mass :", pmass, "GeV");
@@ -188,8 +188,10 @@ int main() {
   reset();
 
   // sigefromsigs
-  printf("%-30s %20.6e (%s)\n",
-         "SigEfromSigs :", sigefromsigs(2.0 * pi * 5e5, 0.001, 5e3, 10.0), "");
+  double gammar = twissheadermap["GAMMA"];
+  double gammatr = twissheadermap["GAMMATR"];
+  printf("%-30s %20.6e (%s)\n", "SigEfromSigs :",
+         sigefromsigs(2.0 * pi * 5e5, 0.001, 5e3, gammar, gammatr), "");
 
   // eta
   printf("%-30s %20.6e (%s)\n", "Eta :", eta(3600.0, 37.0), "");
@@ -202,7 +204,7 @@ int main() {
   printf("%-30s %20.6e (%s)\n", "Fmohl          :", fmohl(a, b, q, npp), "");
 
   // particle radius
-  printf("%-30s %20.6e (%s)\n", "Paricle Radius :", particle_radius(1, 1), "m");
+  printf("%-30s %20.6e (%s)\n", "Paricle Radius :", ParticleRadius(1, 1), "m");
 
   // beta relativistic from gamma
   printf("%-30s %20.6e (%s)\n",
@@ -216,12 +218,13 @@ int main() {
   double voltages[1];
   harmon[0] = 400.;
   voltages[0] = -4. * 350e3;
-  printf("%-30s %20.6e (%s)\n",
-         "VeffRFeV :", VeffRFeV(173, -1, 1, harmon, voltages), "eV");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeV :",
+         EffectiveRFVoltageInElectronVolt(173, -1, 1, harmon, voltages), "eV");
 
   // VeffRFeVprime
-  printf("%-30s %20.6e (%s)\n",
-         "VeffRFeVPrime:", VeffRFeVPrime(173, -1, 1, harmon, voltages), "eV");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVPrime:",
+         EffectiveRFVoltageInElectronVoltPrime(173, -1, 1, harmon, voltages),
+         "eV");
 
   // updateTwiss
   updateTwiss(twisstablemap);
@@ -234,41 +237,41 @@ int main() {
   printf("%-30s %20.6e (%s)\n", "VeffRFeVRadlosses :",
          VeffRFeVRadlosses(173, U0, -1, 1, harmon, voltages), "eV");
   printf("%-30s %20.6e (%s)\n", "synchronuousphase :",
-         synchronuousphase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3), "");
+         SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3), "");
 
-  double betar =
-      sqrt(1 - 1 / (twissheaderpiwismooth[0] * twissheaderpiwismooth[0]));
-  double trev = twissheaderpiwismooth[1] / (betar * clight);
-  double frev = 1 / trev;
-  double omega = 2 * pi * frev;
-  double etaa = eta(twissheaderpiwismooth[0], twissheaderpiwismooth[2]);
-  double Lpwd = 1e6;
+  double pc = twissheadermap["PC"];
+  double betar = BetaRelativisticFromGamma(gammar);
+  double len = twissheadermap["LENGTH"];
+  double trev = len / (betar * clight);
+  double frev = 1.0 / trev;
+  double omega = 2.0 * pi * frev;
+  double etaa = eta(gammar, gammatr);
+  double Lpwd = 1.0e6;
   printf("%-30s %20.6e (%s)\n", "synchrotronTune :",
-         synchrotronTune(
+         SynchrotronTune(
              omega, U0, -1, 1, harmon, voltages,
-             synchronuousphase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3),
+             SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3),
              etaa, twissheaderrad[1]),
          "");
 
   printf("%-30s %20.6e (%s)\n", "VeffRFeVPotentialWellDistortion :",
          VeffRFeVPotentialWellDistortion(173, U0, -1, 1, harmon, voltages, Lpwd,
-                                         1, 0.005, twissheaderrad[1]),
+                                         1, 0.005, pc),
          "eV");
   printf("%-30s %20.6e (%s)\n", "VeffRFeVPotentialWellDistortionPWD :",
          VeffRFeVPotentialWellDistortionPrime(173, U0, -1, 1, harmon, voltages,
-                                              Lpwd, 1, 0.005,
-                                              twissheaderrad[1]),
+                                              Lpwd, 1, 0.005, pc),
          "");
   printf("%-30s %20.6e (%s)\n", "synchronuousphasewithPWD :",
-         synchronuousphasewithPWD(0.0, 173, U0, -1, 1, harmon, voltages, Lpwd,
-                                  1, 0.005, twissheaderrad[1], 1e-3),
+         SynchronuousPhaseWithPWD(0.0, 173, U0, -1, 1, harmon, voltages, Lpwd,
+                                  1, 0.005, pc, 1e-6),
          "");
   printf("%-30s %20.6e (%s)\n", "synchrotronTunePWD :",
-         synchrotronTunePWD(
-             omega, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005,
-             synchronuousphasewithPWD(0.0, 173, U0, -1, 1, harmon, voltages,
-                                      Lpwd, 1, 0.005, twissheaderrad[1], 1e-3),
-             etaa, twissheaderrad[1]),
+         SynchrotronTunePWD(omega, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005,
+                            SynchronuousPhaseWithPWD(0.0, 173, U0, -1, 1,
+                                                     harmon, voltages, Lpwd, 1,
+                                                     0.005, pc, 1e-3),
+                            etaa, pc),
          "");
   /*
   ================================================================================

@@ -34,7 +34,7 @@ map<string, double> GetTwissHeader(string filename) {
   getline(file, line);
   // check if file is open
   if (file.is_open()) {
-    printf("File is open\n");
+    printf("File is open. Reading Twiss header.\n");
     // read lines until eof
     int counter = 0;
     string key;
@@ -54,6 +54,7 @@ map<string, double> GetTwissHeader(string filename) {
     }
   }
   file.close();
+  printf("File is closed. Done reading Twiss header.\n");
   return out;
 }
 
@@ -185,7 +186,7 @@ map<string, vector<double>> GetTwissTableAsMap(string filename) {
               find(TWISSCOLS.begin(), TWISSCOLS.end(), sub);
           if (it != TWISSCOLS.end()) {
             columnnames[colcounter - 1] = sub;
-            cout << colcounter - 1 << " " << sub << endl;
+            // cout << colcounter - 1 << " " << sub << endl;
           }
           ++colcounter;
         } while (iss);

@@ -43,21 +43,21 @@ void ODE(double twiss[], int nrows, double (*twissdata)[12], double harmon[],
   double U0 = RadiationLossesPerTurn(twiss_rad, radint[0], emass / pmass);
 
   // Longitudinal
-  double phis = synchronuousphase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-6);
+  double phis = SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-6);
   vector<double> sige2;
   double betar = sqrt(1 - 1 / (gamma * gamma));
   double trev = len / (betar * clight);
   double frev = 1 / trev;
   double omega = 2 * pi * frev;
-  double qs = synchrotronTune(omega, U0, -1, 1, harmon, voltages, phis,
+  double qs = SynchrotronTune(omega, U0, -1, 1, harmon, voltages, phis,
                               eta(gamma, gammatr), twiss_rad[1]);
   double omegas = omega * qs;
   printf("omega %12.6e\n", omega);
   printf("qs: %12.6e\n", qs);
   printf("omegas: %12.6e\n", omegas);
 
-  sige.push_back(csige(voltages[0], harmon[0], sigs[0], U0, gamma, gammatr, pc,
-                       len, phis, false));
+  sige.push_back(SigeFromRFAndSigs(voltages[0], harmon[0], sigs[0], U0, gamma,
+                                   gammatr, pc, len, phis, false));
   printf("Sige : %12.6e\n", sige[0]);
   printf("Sigs : %12.6e\n", sigsfromsige(sige[0], gamma, gammatr, omegas));
   sige2.push_back(sige[0] * sige[0]);
