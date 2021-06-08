@@ -20,8 +20,26 @@ void cyan() { printf("\033[1;36m"); }
 void reset() { printf("\033[0m"); }
 
 int main() {
-  // read twiss header as map and the table as map of vectors
+  /*
+  ================================================================================
+  INPUT
+  ================================================================================
+  */
   string twissfilename = "b2_design_lattice_1996.twiss";
+  double aatom = emass / pmass;
+  // VeffRFeV
+  int nrf = 1;
+  double harmon[1];
+  double voltages[1];
+  harmon[0] = 400.;
+  voltages[0] = -4. * 375e3;
+
+  /*
+  ================================================================================
+  READ FROM INPUT FILES
+  ================================================================================
+  */
+  // read twiss header as map and the table as map of vectors
   map<string, double> twissheadermap;
   map<string, vector<double>> twisstablemap;
 
@@ -181,145 +199,123 @@ int main() {
   BASIC NUMERIC FUNCTIONS
   ================================================================================
   */
+  // parameters needed in this section
+  double gammar = twissheadermap["GAMMA"];
+  double gammatr = twissheadermap["GAMMATR"];
+  double pc = twissheadermap["PC"];
+  double len = twissheadermap["LENGTH"];
+  // fmohl
+  double a = 5.709563671168914e-04;
+  double b = 2.329156389696222e-01;
+  double q = 2.272866910079534e00;
+  int npp = 1000;
+  // synchronuous phase eps
+  double epsilon = 1.0e-6;
+
+  // updateTwiss
+  updateTwiss(twisstablemap);
+  // printTwissMap("I2", twisstablemap);
+  double betar = BetaRelativisticFromGamma(gammar);
+  double r0 = ParticleRadius(1, aatom);
+  double trev = len / (betar * clight);
+  double frev = 1.0 / trev;
+  double omega = 2.0 * pi * frev;
+  double Lpwd = 1.0e6;
+  double neta = eta(gammar, gammatr);
+  double sige0 = sigefromsigs(2.0 * pi * 1.2e6, 0.001, 5e-3, gammar, gammatr);
+  double VrfEffeV =
+      EffectiveRFVoltageInElectronVolt(173, -1, 1, harmon, voltages);
+  double VrfEffeVp =
+      EffectiveRFVoltageInElectronVoltPrime(173, -1, 1, harmon, voltages);
+  double *radint;
+  radint = RadiationDampingLattice(twisstablemap);
+  double U0 = RadiationLossesPerTurn(twissheadermap, radint[1], emass / pmass);
+  double VrfEffeVU0 = VeffRFeVRadlosses(173, U0, -1, 1, harmon, voltages);
+  double phis =
+      SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, epsilon);
+  double qs =
+      SynchrotronTune(omega, U0, -1, 1, harmon, voltages, phis, neta, pc);
+  double omegas = qs * omega;
+  double VrfEffeVPWD = VeffRFeVPotentialWellDistortion(
+      173, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005, pc);
+  double VrfEffeVPWDp = VeffRFeVPotentialWellDistortionPrime(
+      173, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005, pc);
+  double phisPWD = SynchronuousPhaseWithPWD(
+      0.0, 173, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005, pc, epsilon);
+  double qsPWD = SynchrotronTunePWD(omega, U0, -1, 1, harmon, voltages, Lpwd, 1,
+                                    0.005, phisPWD, neta, pc);
 
   blue();
   printf("Basic Functions\n");
   printf("===============\n");
   reset();
 
-  // sigefromsigs
-  double gammar = twissheadermap["GAMMA"];
-  double gammatr = twissheadermap["GAMMATR"];
-  printf("%-30s %20.6e (%s)\n", "SigEfromSigs :",
-         sigefromsigs(2.0 * pi * 5e5, 0.001, 5e3, gammar, gammatr), "");
-
-  // eta
-  printf("%-30s %20.6e (%s)\n", "Eta :", eta(3600.0, 37.0), "");
-
-  // fmohl
-  double a = 5.709563671168914e-04;
-  double b = 2.329156389696222e-01;
-  double q = 2.272866910079534e00;
-  int npp = 1000;
+  printf("%-30s %20.6e (%s)\n", "SigEfromSigs :", sige0, "");
+  printf("%-30s %20.6e (%s)\n", "Eta :", neta, "");
   printf("%-30s %20.6e (%s)\n", "Fmohl          :", fmohl(a, b, q, npp), "");
-
-  // particle radius
-  printf("%-30s %20.6e (%s)\n", "Paricle Radius :", ParticleRadius(1, 1), "m");
-
-  // beta relativistic from gamma
-  printf("%-30s %20.6e (%s)\n",
-         "Relativistic beta from gamma :", BetaRelativisticFromGamma(1), "m/s");
-
-  // rds from nagaitsev paper
+  printf("%-30s %20.6e (%s)\n", "Particle Radius :", r0, "m");
+  printf("%-30s %20.6e (%s)\n", "Relativistic beta from gamma :", betar, "m/s");
   printf("%-30s %20.6e (%s)\n", "Rds (Nagaitsev) :", rds(1, 2, 3), "");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeV :", VrfEffeV, "eV");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVPrime:", VrfEffeVp, "eV");
+  printf("%-30s %20.6e (%s)\n", "U0:", U0, "eV");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVRadlosses :", VrfEffeVU0, "eV");
+  printf("%-30s %20.6e (%s)\n", "synchronuousphase :", phis, "rad");
+  printf("%-30s %20.6e (%s)\n", "synchrotronTune :", qs, "");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVPWD :", VrfEffeVPWD, "eV");
+  printf("%-30s %20.6e (%s)\n", "VeffRFeVPWDprime:", VrfEffeVPWDp, "");
+  printf("%-30s %20.6e (%s)\n", "synchronuousphasewithPWD :", phisPWD, "");
+  printf("%-30s %20.6e (%s)\n", "synchrotronTunePWD :", qsPWD, "");
 
-  // VeffRFeV
-  double harmon[1];
-  double voltages[1];
-  harmon[0] = 400.;
-  voltages[0] = -4. * 350e3;
-  printf("%-30s %20.6e (%s)\n", "VeffRFeV :",
-         EffectiveRFVoltageInElectronVolt(173, -1, 1, harmon, voltages), "eV");
-
-  // VeffRFeVprime
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVPrime:",
-         EffectiveRFVoltageInElectronVoltPrime(173, -1, 1, harmon, voltages),
-         "eV");
-
-  // updateTwiss
-  updateTwiss(twisstablemap);
-  // printTwissMap("I2", twisstablemap);
-
-  // Energy loss per turn
-  double *radint;
-  radint = RadiationDampingLattice(nrows, twiss_rad);
-  double U0 = RadiationLossesPerTurn(twissheaderrad, radint[0], emass / pmass);
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVRadlosses :",
-         VeffRFeVRadlosses(173, U0, -1, 1, harmon, voltages), "eV");
-  printf("%-30s %20.6e (%s)\n", "synchronuousphase :",
-         SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3), "");
-
-  double pc = twissheadermap["PC"];
-  double betar = BetaRelativisticFromGamma(gammar);
-  double len = twissheadermap["LENGTH"];
-  double trev = len / (betar * clight);
-  double frev = 1.0 / trev;
-  double omega = 2.0 * pi * frev;
-  double etaa = eta(gammar, gammatr);
-  double Lpwd = 1.0e6;
-  printf("%-30s %20.6e (%s)\n", "synchrotronTune :",
-         SynchrotronTune(
-             omega, U0, -1, 1, harmon, voltages,
-             SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, 1e-3),
-             etaa, twissheaderrad[1]),
-         "");
-
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVPotentialWellDistortion :",
-         VeffRFeVPotentialWellDistortion(173, U0, -1, 1, harmon, voltages, Lpwd,
-                                         1, 0.005, pc),
-         "eV");
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVPotentialWellDistortionPWD :",
-         VeffRFeVPotentialWellDistortionPrime(173, U0, -1, 1, harmon, voltages,
-                                              Lpwd, 1, 0.005, pc),
-         "");
-  printf("%-30s %20.6e (%s)\n", "synchronuousphasewithPWD :",
-         SynchronuousPhaseWithPWD(0.0, 173, U0, -1, 1, harmon, voltages, Lpwd,
-                                  1, 0.005, pc, 1e-6),
-         "");
-  printf("%-30s %20.6e (%s)\n", "synchrotronTunePWD :",
-         SynchrotronTunePWD(omega, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005,
-                            SynchronuousPhaseWithPWD(0.0, 173, U0, -1, 1,
-                                                     harmon, voltages, Lpwd, 1,
-                                                     0.005, pc, 1e-3),
-                            etaa, pc),
-         "");
   /*
   ================================================================================
   RADIATION DAMPING METHODS
   ================================================================================
   */
-  yellow();
-  printf("Radiation Damping\n");
+  double bxavg = len / (2.0 * pi * twissheadermap["Q1"]);
+  double byavg = len / (2.0 * pi * twissheadermap["Q2"]);
+
+  blue();
+  printf("\nRadiation Damping\n");
   printf("=================\n");
+
   green();
-  printf("Radiation Smooth Ring Approximation\n");
+  printf("\nRadiation Smooth Ring Approximation\n");
   reset();
-  radint = RadiationDampingApprox(twissheadernagaitsev[2],
-                                  twissheaderpiwismooth[2], 4.35, 2.13, 5.66);
+
+  radint = RadiationDampingApprox(len, gammar, gammatr, 4.35, bxavg, byavg);
   printradint(radint);
 
   green();
-  printf("Radiation Damping element by element\n");
+  printf("\nRadiation Damping element by element\n");
   reset();
-  radint = RadiationDampingLattice(nrows, twiss_rad);
+
+  radint = RadiationDampingLattice(twisstablemap);
   printradint(radint);
 
+  double *equi =
+      RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
+          twissheadermap, radint, aatom, omegas);
   green();
-  printf("Radiation Damping Equib \n");
+  printf("\nRadiation Damping Equib \n");
   reset();
-  double *equi = RadiationDampingGrowthRatesAndEquilibriumEmittances(
-      twissheaderrad, radint, emass / pmass);
+
   printf("%-30s %10.6e (%s)\n", "Taux :", equi[0], "s");
   printf("%-30s %10.6e (%s)\n", "Tauy :", equi[1], "s");
   printf("%-30s %10.6e (%s)\n", "Taus :", equi[2], "s");
   printf("%-30s %10.6e (%s)\n", "exinf :", equi[3], "");
   printf("%-30s %10.6e (%s)\n", "eyinf :", equi[4], "");
-  printf("%-30s %10.6e (%s)\n", "sgeoe2 :", equi[5], "");
-  printf("%-30s %10.6e (%s)\n", "jx :", equi[6], "");
-  printf("%-30s %10.6e (%s)\n", "jy :", equi[7], "");
+  printf("%-30s %10.6e (%s)\n", "sigeoe2 :", equi[5], "");
+  printf("%-30s %10.6e (%s)\n", "sigt :", equi[6], "");
+  printf("%-30s %10.6e (%s)\n", "jx :", equi[7], "");
+  printf("%-30s %10.6e (%s)\n", "jy :", equi[8], "");
 
   green();
-  printf("Radiation Losses per turn. \n");
-  reset();
-  printf("%-30s %10.6e (%s)\n", "U0 :",
-         RadiationLossesPerTurn(twissheaderrad, radint[0], emass / pmass),
-         "eV/Turn");
-
-  green();
-  printf("Critical Energy Calculations. \n");
+  printf("\nCritical Energy Calculations. \n");
   reset();
   double *critical;
-  critical = RadiationCriticalEnergy(4.35, twissheaderrad[0], 2 * pi * 1.25e6);
+  critical = RadiationCriticalEnergy(4.35, twissheaderrad[0], omega);
+
   printf("%-30s %10.6e (%s)\n", "omega_crit :", critical[0], "");
   printf("%-30s %10.6e (%s)\n", "Theta_crit :", critical[1], "");
   printf("%-30s %10.6e (%s)\n", "E_crit :", critical[2], "eV");
@@ -331,19 +327,35 @@ int main() {
    COULOMB LOG FUNCTIONS
    ================================================================================
    */
-  blue();
-  printf("CoulombLog Functions\n");
-  printf("====================\n");
-  reset();
-  double clog[2];
-  twclog(1e10, 7, 12, 1, 0, 5e-9, 1e-10, 1e-18, 3600, 1, 1700, 0.5, 0.005, 2e-9,
-         clog);
-  printf("%-30s %20.6e (%s)\n", "CoulombLog value :", clog[0], "");
-  printf("%-30s %20.6e (%s)\n\n", "CoulombLog constant :", clog[1], "");
-
   double pnumber = 1e10;
   double ex = 5e-9;
   double ey = 1e-10;
+  double dxavg = twissheadermap["DXRMS"];
+  double dyavg = twissheadermap["DYRMS"];
+  double charge = twissheadermap["CHARGE"];
+  double sige = 1e-4;
+  double sigt = 0.005;
+  double en0 = twissheadermap["ENERGY"];
+  double mass = twissheadermap["MASS"];
+
+  // r0 = erad;
+  bool printout = true;
+
+  blue();
+  printf("\nCoulombLog Functions\n");
+  printf("====================\n");
+  reset();
+
+  double clog[2];
+  twclog(pnumber, bxavg, byavg, dxavg, dyavg, ex, ey, r0, gammar, charge, en0,
+         mass, sige, sigt, clog);
+
+  green();
+  printf("\nCoulombLog using ring averages...\n");
+  reset();
+  printf("%-30s %20.6e (%s)\n", "CoulombLog value :", clog[0], "");
+  printf("%-30s %20.6e (%s)\n\n", "CoulombLog constant :", clog[1], "");
+
   double twissheader[9] = {
       3.32681701e03,  // gamma
       -1.00000000e00, // charge
@@ -355,10 +367,6 @@ int main() {
       2.24396462e-01, // dxrms
       0.00000000e00,  // dyrms
   };
-  double sige = 1e-4;
-  double sigt = 0.005;
-  double r0 = erad;
-  bool printout = true;
   CoulombLog(1e10, equi[3], equi[4], twissheader, sige, sigt, r0, printout,
              clog);
 

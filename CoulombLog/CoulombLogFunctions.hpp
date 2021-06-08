@@ -4,8 +4,8 @@
 #include <stdio.h>
 void twclog(double pnumber, double bx, double by, double dx, double dy,
             double ex, double ey, double r0, double gamma, double charge,
-
             double en0, double amass, double sige, double sigt, double *clog);
+
 void twclogtail(double pnumber, double l, double bx, double by, double dx,
                 double dpx, double dy, double dpy, double ax, double ay,
                 double angle, double k1l, double k1sl, double ex, double ey,

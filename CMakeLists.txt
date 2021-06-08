@@ -11,6 +11,7 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_OPENMP_COMPILE_FLAGS}")
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_OPENMP_LINK_FLAGS}")
 
 add_executable(${PROJECT_NAME} libtest.cpp)
+add_executable(DemoNumericFunctions  ${CMAKE_CURRENT_SOURCE_DIR}/Demos/DemoNumericFunctions.cpp)
 
 # numerics lib
 add_library(numfunc SHARED
@@ -64,3 +65,5 @@ target_link_libraries(${PROJECT_NAME} models)
 target_link_libraries(${PROJECT_NAME} twiss)
 target_link_libraries(${PROJECT_NAME} raddamp)
 target_link_libraries(${PROJECT_NAME} ode)
+
+target_link_libraries(DemoNumericFunctions numfunc twiss raddamp)

@@ -22,6 +22,7 @@ void ODE(double twiss[], int nrows, double (*twissdata)[12], double harmon[],
   double q1 = twiss[5];
   double len = twiss[6];
   double twiss_rad[6];
+  /*
   for (int i = 0; i < 6; i++) {
     twiss_rad[i] = twiss[i];
   }
@@ -63,6 +64,7 @@ void ODE(double twiss[], int nrows, double (*twissdata)[12], double harmon[],
   sige2.push_back(sige[0] * sige[0]);
 
   int steps = 0;
+  */
   /*
 
 do {

@@ -1009,8 +1009,9 @@ void updateTwiss(map<string, vector<double>> &table) {
   // get length of table to reserve the vector sizes
   int size = table["L"].size();
 
-  vector<double> rho(size), k(size), I2(size), I3(size), I4x(size), I4y(size),
-      I5x(size), I5y(size), gammax(size), gammay(size), hx(size), hy(size);
+  vector<double> rho(size), k(size), I1(size), I2(size), I3(size), I4x(size),
+      I4y(size), I5x(size), I5y(size), gammax(size), gammay(size), hx(size),
+      hy(size);
 
   // calculate the new columns
   for (int i = 0; i < size; i++) {
@@ -1036,6 +1037,7 @@ void updateTwiss(map<string, vector<double>> &table) {
     k[i] = (l == 0.0) ? 0.0 : k1l / l;
 
     // first for integrals
+    I1[i] = (rho[i] == 0.0) ? 0.0 : dx / rho[i] * l;
     I2[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi2;
     I3[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi3;
     I4x[i] = (rho[i] == 0.0) ? 0.0
@@ -1064,6 +1066,7 @@ void updateTwiss(map<string, vector<double>> &table) {
   table["hx"] = hx;
   table["hy"] = hy;
 
+  table["I1"] = I1;
   table["I2"] = I2;
   table["I3"] = I3;
   table["I4x"] = I4x;

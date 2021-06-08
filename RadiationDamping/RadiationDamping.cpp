@@ -1,127 +1,442 @@
 #include "NumericFunctions.hpp"
 #include <iostream>
+#include <map>
 #include <math.h>
+#include <numeric>
 #include <stdio.h>
+#include <string>
+#include <vector>
 
-void printradint(double out[6]) {
+using namespace std;
+
+/*
+================================================================================
+================================================================================
+METHOD TO PRINT RADIATION INTEGRALS FROM ARRAY.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double[] out
+        array with radiation integrals.
+
+  Returns:
+  --------
+    void
+
+================================================================================
+================================================================================
+*/
+void printradint(double out[7]) {
   printf("\n");
   printf("    Radiation Integrals \n");
-  printf("    I2  = %15.6f\n", out[0]);
-  printf("    I3  = %15.6f\n", out[1]);
-  printf("    I4x = %15.6f\n", out[2]);
-  printf("    I4y = %15.6f\n", out[3]);
-  printf("    I5x = %15.6f\n", out[4]);
-  printf("    I5y = %15.6f\n", out[5]);
+  printf("    I1  = %15.6f\n", out[0]);
+  printf("    I2  = %15.6f\n", out[1]);
+  printf("    I3  = %15.6f\n", out[2]);
+  printf("    I4x = %15.6f\n", out[3]);
+  printf("    I4y = %15.6f\n", out[4]);
+  printf("    I5x = %15.6f\n", out[5]);
+  printf("    I5y = %15.6f\n", out[6]);
 }
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE BUILD C LIBRARY FOR IBS
-  AUTHOR    : TOM MERTENS
-  DATE      : 04/02/2021
-  COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+METHOD TO CALCULATE RADIATION INTEGRALS USING SMOOTH LATTICE APPROXIMATION.
 
-DESCRIPTION :
-    CALCULATE APPROXIMATE RADIATION INTEGRALS USING LATTICE AVERAGES
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-DETAILS:
-    average betax = 2 * pi * Qx
-    average betay = 2 * pi * Qy
+  HISTORY:
+    - 04/02/2021 : UPDATE BUILD C LIBRARY FOR IBS
+    - 08/06/2021 : initial cpp version (Tom)
 
----------------------------------------------------------------------------------------------------------------
-latticeLength (double)          : length of the accelerator lattice
-gammaTransition (double)        : relativistic transition gamma of the lattice
-dipoleBendingRadius (double)    : bending radius of the dipoles (average)
-betax (double)                  : average betax
-betay (double)                  : average betay
----------------------------------------------------------------------------------------------------------------
-radiationIntegrals (double[6])  :
-    0 -> I2
-    1 -> I3
-    2 -> I4x
-    3 -> I4y
-    4 -> I5x
-    5 -> I5y
----------------------------------------------------------------------------------------------------------------
+================================================================================
+  Arguments:
+  ----------
+    - double latticelength
+        lattice length
+    - double gamma
+        relativistic gamma
+    - double gammaTransition
+        relativistic gamma transition
+    - double dipoleBendingRadius
+        dipole bending radius
+    - double betax
+        ring averaged beta x
+    - double betay
+        ring averaged beta y
 
+  Returns:
+  --------
+    double [7] radiationIntegrals
+      0 -> I1
+      1 -> I2
+      2 -> I3
+      3 -> I4x
+      4 -> I4y
+      5 -> I5x
+      6 -> I5y
+
+================================================================================
+================================================================================
 */
-double *RadiationDampingApprox(double latticeLength, double gammaTransition,
+
+double *RadiationDampingApprox(double latticeLength, double gamma,
+                               double gammaTransition,
                                double dipoleBendingRadius, double betax,
                                double betay) {
   static double radiationIntegrals[6];
 
   // Courant-Snyder optical functions
-  double alphax = 0.0f;
-  double alphay = 0.0f;
-  double gammax = (1.0f + alphax * alphax) / betax;
-  double gammay = (1.0f + alphay * alphay) / betay;
+  double alphax = 0.0;
+  double alphay = 0.0;
+  double gammax = (1.0 + alphax * alphax) / betax;
+  double gammay = (1.0 + alphay * alphay) / betay;
 
   // average dispersion
-  double dx = latticeLength / (2.0f * pi * gammaTransition * gammaTransition);
-  double dy = 0.0f;
-  double dpx = 0.1f;
-  double dpy = 0.0f;
+  double dx = latticeLength / (2.0 * pi * gammaTransition * gammaTransition);
+  double dy = 0.0;
+  double dpx = 0.1;
+  double dpy = 0.0;
 
   // curly H
-  double hx = betax * dpx + 2.0f * alphax * dx * dpx + gammax * dx;
-  double hy = betay * dpy + 2.0f * alphay * dy * dpy + gammay * dy;
+  double hx = betax * dpx + 2.0 * alphax * dx * dpx + gammax * dx;
+  double hy = betay * dpy + 2.0 * alphay * dy * dpy + gammay * dy;
 
   // calculate radiation integrals
-  radiationIntegrals[0] = 2.0f * pi / dipoleBendingRadius;
-  radiationIntegrals[1] =
-      2.0f * pi / (dipoleBendingRadius * dipoleBendingRadius);
-  radiationIntegrals[2] = 0.0f;
-  radiationIntegrals[3] = 0.0f;
-  radiationIntegrals[4] =
-      hx * 2.0f * pi / (dipoleBendingRadius * dipoleBendingRadius);
+  radiationIntegrals[0] = dx / dipoleBendingRadius * latticeLength;
+  radiationIntegrals[1] = 2.0 * pi / dipoleBendingRadius;
+  radiationIntegrals[2] =
+      2.0 * pi / (dipoleBendingRadius * dipoleBendingRadius);
+  radiationIntegrals[3] = 0.0;
+  radiationIntegrals[4] = 0.0;
   radiationIntegrals[5] =
-      hy * 2.0f * pi / (dipoleBendingRadius * dipoleBendingRadius);
+      hx * 2.0 * pi / (dipoleBendingRadius * dipoleBendingRadius);
+  radiationIntegrals[6] =
+      hy * 2.0 * pi / (dipoleBendingRadius * dipoleBendingRadius);
 
   return radiationIntegrals;
 }
+
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE BUILD C LIBRARY FOR IBS
-  AUTHOR    : TOM MERTENS
-  DATE      : 04/02/2021
-  COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+METHOD TO CALCULATE RADIATION INTEGRALS
 
-DESCRIPTION :
-    CALCULATE RADIATION INTEGRALS AT EACH LATTICE ELEMENT AND AVERAGE
-    OVER THE WHOLE LATTICE
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
-DETAILS:
-    TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-        0 -> l
-        1 -> betx
-        2 -> bety
-        3 -> dx
-        4 -> dpx
-        5 -> dy
-        6 -> dpy
-        7 -> alfx
-        8 -> alfy
-        9 -> angle
-        10-> k1l
-        11-> k1ls
----------------------------------------------------------------------------------------------------------------
-twissdata  (double[])       : twiss table data for the required columns (see
-DETAILS above) rows (int)                  : number of rows in twissdata cols
-(int)                  : number of columns in twissdata (6)
----------------------------------------------------------------------------------------------------------------
-radiationIntegrals (double[6])  :
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - map<string, vector<double>> table
+        Twiss table after applying updateTwiss (NumericFunctions.hpp)
+
+  Returns:
+  --------
+    double [7] radiationIntegrals
+      0 -> I1
+      1 -> I2
+      2 -> I3
+      3 -> I4x
+      4 -> I4y
+      5 -> I5x
+      6 -> I5y
+
+
+================================================================================
+================================================================================
+*/
+double *RadiationDampingLattice(map<string, vector<double>> &table) {
+  static double radiationIntegrals[7];
+  radiationIntegrals[0] =
+      accumulate(table["I1"].begin(), table["I1"].end(), 0.0);
+  radiationIntegrals[1] =
+      accumulate(table["I2"].begin(), table["I2"].end(), 0.0);
+  radiationIntegrals[2] =
+      accumulate(table["I3"].begin(), table["I3"].end(), 0.0);
+  radiationIntegrals[3] =
+      accumulate(table["I4x"].begin(), table["I4x"].end(), 0.0);
+  radiationIntegrals[4] =
+      accumulate(table["I4y"].begin(), table["I4y"].end(), 0.0);
+  radiationIntegrals[5] =
+      accumulate(table["I5x"].begin(), table["I5x"].end(), 0.0);
+  radiationIntegrals[6] =
+      accumulate(table["I5y"].begin(), table["I5y"].end(), 0.0);
+
+  return radiationIntegrals;
+}
+
+/*
+================================================================================
+================================================================================
+METHOD TO CALCULATE RADIATION LIFETIMES, RADIATION EQUILIBRIA AND PARTITION
+NUMBERS.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - map<string, double> twissheadermap
+        MADX twiss header map
+    - double[7] radiationIntegrals
+        radiation integrals array
+    - double aatom
+        atomic number of the particle
+    - double omegas
+        synchrotron angular frequency (qs * omega0)
+
+  Returns:
+  --------
+    double [8] output
+    0 -> alphax
+    1 -> alphay
+    2 -> alphas
+    3 -> exinf
+    4 -> eyinf
+    5 -> sigEoE2
+    6 -> sigt
+    7 -> jx
+    8 -> jy
+
+
+================================================================================
+================================================================================
+*/
+
+double *RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
+    map<string, double> &twissheadermap, double radiationIntegrals[7],
+    double aatom, double omegas) {
+
+  const double c = clight;
+  const double hbar = 1.0545718176461565e-34;
+  const double electron_volt_joule_relationship = 1.602176634e-19;
+
+  static double output[8];
+
+  double gamma = twissheadermap["GAMMA"];
+  double gammatr = twissheadermap["GAMMATR"];
+  double p0 = twissheadermap["PC"] * 1.0e9;
+  double len = twissheadermap["LENGTH"] * 1.0;
+  double restE = twissheadermap["MASS"] * 1.0e9;
+  double charge = twissheadermap["CHARGE"] * 1.0;
+  double q1 = twissheadermap["Q1"];
+  double i1 = radiationIntegrals[0];
+  double i2 = radiationIntegrals[1];
+  double i3 = radiationIntegrals[2];
+  double i4x = radiationIntegrals[3];
+  double i4y = radiationIntegrals[4];
+  double i5x = radiationIntegrals[5];
+  double i5y = radiationIntegrals[6];
+
+  double particle_radius = charge * charge / aatom * 1.54e-18;
+
+  double CalphaEC = particle_radius * c / (3.0 * restE * restE * restE) *
+                    (p0 * p0 * p0 / len);
+
+  // transverse partition numbers
+  double jx = 1.0 - i4x / i2;
+  double jy = 1.0 - i4y / i2;
+  double alphax = 2.0 * CalphaEC * i2 * jx;
+  double alphay = 2.0 * CalphaEC * i2 * jy;
+  double alphas = 2.0 * CalphaEC * i2 * (jx + jy);
+
+  // mc**2 expressed in Joule to match units of cq
+  double mass = restE * electron_volt_joule_relationship;
+  double cq = 55.0 / (32.0 * sqrt(3.0)) * (hbar * c) / mass;
+
+  double sigE0E2 = cq * gamma * gamma * i3 / (2.0 * i2 + i4x + i4y);
+  double alfap = i1 / len;
+  double sigt = alfap / sqrt(sigE0E2) / omegas;
+  double exinf = cq * gamma * gamma * i5x / (jx * i2);
+  double eyinf = cq * gamma * gamma * i5y / (jy * i2);
+
+  double betaAvg = len / (q1 * 2.0 * pi);
+
+  eyinf = (eyinf == 0.0) ? cq * betaAvg * i3 / (2.0 * jy * i2) : eyinf;
+
+  output[0] = 1.0 / alphax;
+  output[1] = 1.0 / alphay;
+  output[2] = 1.0 / alphas;
+  output[3] = exinf;
+  output[4] = eyinf;
+  output[5] = sigE0E2;
+  output[6] = sigt / gamma;
+  output[7] = jx;
+  output[8] = jy;
+
+  return output;
+}
+
+/*
+================================================================================
+================================================================================
+METHOD TO CALCULATE RADIATION LOSSES PER TURN.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - map<string, double> twiss
+        madx twiss header map
+    - double I2
+        second radiation integral
+    - double aatom
+        atomic mass number of the particle
+
+  Returns:
+  --------
+    double
+      Energy loss per turn in eV.
+================================================================================
+================================================================================
+*/
+
+double RadiationLossesPerTurn(map<string, double> &twiss, double I2,
+                              double aatom) {
+  double gamma = twiss["GAMMA"];
+  double p0 = twiss["PC"];
+  double len = twiss["LENGTH"];
+  double mass = twiss["MASS"];
+  double charge = twiss["CHARGE"];
+
+  double particle_radius = charge * charge / aatom * 1.54e-18;
+  double cgamma = (4.0 * pi / 3.0) * (particle_radius / (mass * mass * mass));
+  double betar = sqrt(1.0 - 1.0 / (gamma * gamma));
+  double vrev = clight * betar;
+  double trev = len / vrev;
+
+  return (clight * cgamma) / (2.0 * pi * len) * p0 * p0 * p0 * p0 * I2 * 1.0e9 *
+         trev;
+}
+
+/*
+================================================================================
+================================================================================
+CALCULATE THE CRITICAL FREQUENCY AND ANGLE OF EMITTED RADIATION IN
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double rho
+        dipole bending radius
+    - double gamma
+        relativistic gamma
+    - double omega
+        angular frequency
+
+  Retruns:
+  --------
+  double[5] output
+    0 -> omega critical
+    1 -> theta critical
+    2 -> critical photon energy for given omega
+    3 -> average energy per photon
+    4 -> average number of photons emitted per turn
+================================================================================
+================================================================================
+*/
+
+double *RadiationCriticalEnergy(double rho, double gamma, double omega) {
+  const double c = clight;
+  const double alphafine = 7.297352569300000e-03;
+  const double h = 6.626070150000000e-34;
+  const double twoOthree = 2.0f / 3.0f;
+  const double gamma3 = gamma * gamma * gamma;
+
+  static double output[5];
+
+  output[0] = twoOthree * c / rho * gamma3;
+  output[1] = 1.0f / gamma * pow(output[0] / omega, 1.0f / 3.0f);
+  output[2] = h * output[0];
+  output[3] = 1.0f / 3.0f * output[2];
+  output[4] = 2 * pi * alphafine * gamma;
+
+  return output;
+}
+
+/*
+================================================================================
+================================================================================
+METHOD TO CALCULATE RADIATION INTEGRALS FOR SINGLE ELEMENT
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double l
+    - double bx
+    - double by
+    - double dx
+    - double dpx
+    - double dy
+    - double dpy
+    - double ax
+    - double ay
+    - double angle
+    - double k1l
+    - double k1sl
+  Returns:
+  --------
+    double [6] radiationIntegrals
     0 -> I2
     1 -> I3
     2 -> I4x
     3 -> I4y
     4 -> I5x
     5 -> I5y
----------------------------------------------------------------------------------------------------------------
+
+================================================================================
+================================================================================
 */
 double *RadiationDampingElement(double l, double bx, double by, double dx,
                                 double dpx, double dy, double dpy, double ax,
@@ -172,246 +487,4 @@ double *RadiationDampingElement(double l, double bx, double by, double dx,
   radiationIntegrals[5] = I5y;
 
   return radiationIntegrals;
-}
-
-double *RadiationDampingLattice(int rows, double (*twissdata)[12]) {
-  static double radiationIntegrals[6];
-  double I2 = 0.0;
-  double I3 = 0.0;
-  double I4x = 0.0;
-  double I4y = 0.0;
-  double I5x = 0.0;
-  double I5y = 0.0;
-
-  double rhoi, ki, gammax, gammay, hx, hy;
-  double rhoi2, rhoi3;
-
-#pragma omp parallel for shared(twissdata) reduction(+ : I2, I3, I4x, I4y, I5x,I5y)
-  for (int i = 0; i < rows; i++) {
-    // local copies
-    double *l = &(twissdata[i][0]);
-    double *bx = &(twissdata[i][1]);
-    double *by = &(twissdata[i][2]);
-    double *dx = &(twissdata[i][3]);
-    double *dpx = &(twissdata[i][4]);
-    double *dy = &(twissdata[i][5]);
-    double *dpy = &(twissdata[i][6]);
-    double *ax = &(twissdata[i][7]);
-    double *ay = &(twissdata[i][8]);
-    double *angle = &(twissdata[i][9]);
-    double *k1l = &(twissdata[i][10]);
-    double *k1sl = &(twissdata[i][11]);
-
-    double *radintelement;
-    radintelement = RadiationDampingElement(*l, *bx, *by, *dx, *dpx, *dy, *dpy,
-                                            *ax, *ay, *angle, *k1l, *k1sl);
-    I2 += radintelement[0];
-    I3 += radintelement[1];
-    I4x += radintelement[2];
-    I4y += radintelement[3];
-    I5x += radintelement[4];
-    I5y += radintelement[5];
-  }
-
-  radiationIntegrals[0] = I2;
-  radiationIntegrals[1] = I3;
-  radiationIntegrals[2] = I4x;
-  radiationIntegrals[3] = I4y;
-  radiationIntegrals[4] = I5x;
-  radiationIntegrals[5] = I5y;
-
-  return radiationIntegrals;
-}
-
-/*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE BUILD C LIBRARY FOR IBS
-  AUTHOR    : TOM MERTENS
-  DATE      : 05/02/2021
-  COPYRIGHT : CERN / HZB
-
-DESCRIPTION :
-    CALCULATE RADIATION GROWTH RATES AND EQUILIBRIUM VALUES
-
-DETAILS:
-    TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-        0 -> gamma
-        1 -> pc
-        2 -> length
-        3 -> mass
-        4 -> charge
-        5 -> qx
-    USES RADIATION INTEGRALS
-        0 -> I2
-        1 -> I3
-        2 -> I4x
-        3 -> I4y
-        4 -> I5x
-        5 -> I5y
----------------------------------------------------------------------------------------------------------------
-twiss  (double[])               : twiss table data for the required columns (see
-DETAILS above) radiationIntegrals (double[6])  : radiation integrals aatom
-(double)                  : atomic A - for electrons this is
-electron_mass_energy_MeV / proton_mass_energy_MeV
----------------------------------------------------------------------------------------------------------------
-output (double[8])
-    0 -> alphax
-    1 -> alphay
-    2 -> alphas
-    3 -> exinf
-    4 -> eyinf
-    5 -> sigEoE2
-    6 -> jx
-    7 -> jy
----------------------------------------------------------------------------------------------------------------
-*/
-
-double *RadiationDampingGrowthRatesAndEquilibriumEmittances(
-    double twiss[5], double radiationIntegrals[6], double aatom) {
-  const double c = clight;
-  const double hbar = 1.0545718176461565e-34;
-  const double electron_volt_joule_relationship = 1.602176634e-19;
-
-  static double output[8];
-
-  double gamma = twiss[0];
-  double p0 = twiss[1] * 1.0e9;
-  double len = twiss[2] * 1.0;
-  double restE = twiss[3] * 1.0e9;
-  double charge = twiss[4] * 1.0;
-
-  double particle_radius = charge * charge / aatom * 1.54e-18;
-
-  double CalphaEC = particle_radius * c / (3.0 * restE * restE * restE) *
-                    (p0 * p0 * p0 / len);
-
-  // transverse partition numbers
-  double jx = 1.0 - radiationIntegrals[3] / radiationIntegrals[0];
-  double jy = 1.0 - radiationIntegrals[4] / radiationIntegrals[0];
-  double alphax = 2.0 * CalphaEC * radiationIntegrals[0] * jx;
-  double alphay = 2.0 * CalphaEC * radiationIntegrals[0] * jy;
-  double alphas = 2.0 * CalphaEC * radiationIntegrals[0] * (jx + jy);
-
-  // mc**2 expressed in Joule to match units of cq
-  double mass = restE * electron_volt_joule_relationship;
-  double cq = 55.0 / (32.0 * sqrt(3.0)) * (hbar * c) / mass;
-
-  double sigE0E2 = cq * gamma * gamma * radiationIntegrals[1] /
-                   (2.0 * radiationIntegrals[0] + radiationIntegrals[3] +
-                    radiationIntegrals[4]);
-  double exinf =
-      cq * gamma * gamma * radiationIntegrals[4] / (jx * radiationIntegrals[0]);
-  double eyinf =
-      cq * gamma * gamma * radiationIntegrals[5] / (jx * radiationIntegrals[0]);
-
-  double betaAvg = len / (twiss[5] * 2.0 * pi);
-
-  eyinf = (eyinf == 0.0) ? cq * betaAvg * radiationIntegrals[1] /
-                               (2.0 * jy * radiationIntegrals[0])
-                         : eyinf;
-
-  output[0] = 1.0 / alphax;
-  output[1] = 1.0 / alphay;
-  output[2] = 1.0 / alphas;
-  output[3] = exinf;
-  output[4] = eyinf;
-  output[5] = sigE0E2;
-  output[6] = jx;
-  output[7] = jy;
-
-  return output;
-}
-
-/*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE BUILD C LIBRARY FOR IBS
-  AUTHOR    : TOM MERTENS
-  DATE      : 05/02/2021
-  COPYRIGHT : CERN / HZB
-
-DESCRIPTION :
-    CALCULATE RADIATION LOSSES PER TURN
-
-DETAILS:
-    TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-        0 -> gamma
-        1 -> pc
-        2 -> length
-        3 -> mass
-        4 -> charge
-    USES RADIATION INTEGRALS I2
----------------------------------------------------------------------------------------------------------------
-twiss  (double[])               : twiss table data for the required columns (see
-DETAILS above) I2 (double)                     : radiation integrals aatom
-(double)                  : atomic A - for electrons this is
-electron_mass_energy_MeV / proton_mass_energy_MeV
----------------------------------------------------------------------------------------------------------------
-*/
-
-double RadiationLossesPerTurn(double twiss[5], double I2, double aatom) {
-  const double c = clight;
-
-  double gamma = twiss[0];
-  double p0 = twiss[1];
-  double len = twiss[2];
-  double mass = twiss[3];
-  double charge = twiss[4];
-  double particle_radius = charge * charge / aatom * 1.54e-18;
-  double cgamma = (4.0 * pi / 3.0) * (particle_radius / (mass * mass * mass));
-  double betar = sqrt(1.0 - 1.0 / (gamma * gamma));
-  double vrev = c * betar;
-  double trev = len / vrev;
-
-  return (c * cgamma) / (2.0 * pi * len) * p0 * p0 * p0 * p0 * I2 * 1.0e9 *
-         trev;
-}
-
-/*
-*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : TOM MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 1.0 : ADD RADIATION SPECTRUM CALCULATIONS
-    AUTHOR    : TOM MERTENS
-    DATE      : 08/02/2021
-    COPYRIGHT : HZB
-
-    DESCRIPTION :
-        CALCULATE THE CRITICAL FREQUENCY AND ANGLE OF EMITTED RADIATION IN
-DIPOLES
-
-    DETAILS:
-
----------------------------------------------------------------------------------------------------------------
-output:
-    0 -> omega critical
-    1 -> theta critical
-    2 -> critical photon energy for given omega
-    3 -> average energy per photon
-    4 -> average number of photons emitted per turn
----------------------------------------------------------------------------------------------------------------
-*/
-
-double *RadiationCriticalEnergy(double rho, double gamma, double omega) {
-  const double c = clight;
-  const double alphafine = 7.297352569300000e-03;
-  const double h = 6.626070150000000e-34;
-  const double twoOthree = 2.0f / 3.0f;
-  const double gamma3 = gamma * gamma * gamma;
-
-  static double output[5];
-
-  output[0] = twoOthree * c / rho * gamma3;
-  output[1] = 1.0f / gamma * pow(output[0] / omega, 1.0f / 3.0f);
-  output[2] = h * output[0];
-  output[3] = 1.0f / 3.0f * output[2];
-  output[4] = 2 * pi * alphafine * gamma;
-
-  return output;
 }

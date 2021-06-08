@@ -137,19 +137,6 @@ twiss/fast:
 .PHONY : twiss/fast
 
 #=============================================================================
-# Target rules for targets named raddamp
-
-# Build rule for target.
-raddamp: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 raddamp
-.PHONY : raddamp
-
-# fast build rule for target.
-raddamp/fast:
-	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/build
-.PHONY : raddamp/fast
-
-#=============================================================================
 # Target rules for targets named integrators
 
 # Build rule for target.
@@ -187,6 +174,32 @@ numfunc: cmake_check_build_system
 numfunc/fast:
 	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/build
 .PHONY : numfunc/fast
+
+#=============================================================================
+# Target rules for targets named raddamp
+
+# Build rule for target.
+raddamp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 raddamp
+.PHONY : raddamp
+
+# fast build rule for target.
+raddamp/fast:
+	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/build
+.PHONY : raddamp/fast
+
+#=============================================================================
+# Target rules for targets named DemoNumericFunctions
+
+# Build rule for target.
+DemoNumericFunctions: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoNumericFunctions
+.PHONY : DemoNumericFunctions
+
+# fast build rule for target.
+DemoNumericFunctions/fast:
+	$(MAKE) -f CMakeFiles/DemoNumericFunctions.dir/build.make CMakeFiles/DemoNumericFunctions.dir/build
+.PHONY : DemoNumericFunctions/fast
 
 #=============================================================================
 # Target rules for targets named models
@@ -240,6 +253,33 @@ CoulombLog/CoulombLogFunctions.s: CoulombLog/CoulombLogFunctions.cpp.s
 CoulombLog/CoulombLogFunctions.cpp.s:
 	$(MAKE) -f CMakeFiles/clog.dir/build.make CMakeFiles/clog.dir/CoulombLog/CoulombLogFunctions.cpp.s
 .PHONY : CoulombLog/CoulombLogFunctions.cpp.s
+
+Demos/DemoNumericFunctions.o: Demos/DemoNumericFunctions.cpp.o
+
+.PHONY : Demos/DemoNumericFunctions.o
+
+# target to build an object file
+Demos/DemoNumericFunctions.cpp.o:
+	$(MAKE) -f CMakeFiles/DemoNumericFunctions.dir/build.make CMakeFiles/DemoNumericFunctions.dir/Demos/DemoNumericFunctions.cpp.o
+.PHONY : Demos/DemoNumericFunctions.cpp.o
+
+Demos/DemoNumericFunctions.i: Demos/DemoNumericFunctions.cpp.i
+
+.PHONY : Demos/DemoNumericFunctions.i
+
+# target to preprocess a source file
+Demos/DemoNumericFunctions.cpp.i:
+	$(MAKE) -f CMakeFiles/DemoNumericFunctions.dir/build.make CMakeFiles/DemoNumericFunctions.dir/Demos/DemoNumericFunctions.cpp.i
+.PHONY : Demos/DemoNumericFunctions.cpp.i
+
+Demos/DemoNumericFunctions.s: Demos/DemoNumericFunctions.cpp.s
+
+.PHONY : Demos/DemoNumericFunctions.s
+
+# target to generate assembly for a file
+Demos/DemoNumericFunctions.cpp.s:
+	$(MAKE) -f CMakeFiles/DemoNumericFunctions.dir/build.make CMakeFiles/DemoNumericFunctions.dir/Demos/DemoNumericFunctions.cpp.s
+.PHONY : Demos/DemoNumericFunctions.cpp.s
 
 Integrators/Integrators.o: Integrators/Integrators.cpp.o
 
@@ -440,15 +480,19 @@ help:
 	@echo "... edit_cache"
 	@echo "... ode"
 	@echo "... twiss"
-	@echo "... raddamp"
 	@echo "... integrators"
 	@echo "... clog"
 	@echo "... numfunc"
+	@echo "... raddamp"
+	@echo "... DemoNumericFunctions"
 	@echo "... models"
 	@echo "... IBSLib"
 	@echo "... CoulombLog/CoulombLogFunctions.o"
 	@echo "... CoulombLog/CoulombLogFunctions.i"
 	@echo "... CoulombLog/CoulombLogFunctions.s"
+	@echo "... Demos/DemoNumericFunctions.o"
+	@echo "... Demos/DemoNumericFunctions.i"
+	@echo "... Demos/DemoNumericFunctions.s"
 	@echo "... Integrators/Integrators.o"
 	@echo "... Integrators/Integrators.i"
 	@echo "... Integrators/Integrators.s"

@@ -2,24 +2,6 @@
 #include "RadiationDamping.hpp"
 #include <math.h>
 #include <stdio.h>
-/*
-#define MAX(type, x, y) \
-  (type)GENERIC_MAX(ENSURE_##type(x), ENSURE_##type(y))
-*/
-
-#define max(a, b)                                                              \
-  ({                                                                           \
-    __typeof__(a) _a = (a);                                                    \
-    __typeof__(b) _b = (b);                                                    \
-    _a > _b ? _a : _b;                                                         \
-  })
-
-#define min(a, b)                                                              \
-  ({                                                                           \
-    __typeof__(a) _a = (a);                                                    \
-    __typeof__(b) _b = (b);                                                    \
-    _a < _b ? _a : _b;                                                         \
-  })
 
 void twclog(double pnumber, double bx, double by, double dx, double dy,
             double ex, double ey, double r0, double gamma, double charge,
