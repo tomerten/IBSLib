@@ -26,7 +26,7 @@ double prad = erad * emass / pmass;
 double sigefromsigs(double omega0, double sigs, double qs, double gamma,
                     double gammatr);
 
-double sigsfromsige(double sige, double gamma, double gammatr, double omega);
+double sigsfromsige(double sige, double gamma, double gammatr, double omegas);
 
 double eta(double gamma, double gammatr);
 
@@ -86,7 +86,8 @@ double SigeFromRFAndSigs(double v0, double h0, double sigs, double U0,
                          double gamma, double gammatr, double pc, double circ,
                          double phis, bool printout);
 
-void updateTwiss(map<string, vector<double>> &table);
+void updateTwiss(map<string, vector<double>> &table,
+                 double dipoleBendingRadius);
 
 void printTwissMap(string key, map<string, vector<double>> &table);
 #endif

@@ -33,6 +33,7 @@ int main() {
   double voltages[1];
   harmon[0] = 400.;
   voltages[0] = -4. * 375e3;
+  double rho = 4.35;
 
   /*
   ================================================================================
@@ -176,26 +177,6 @@ int main() {
 
   /*
   ================================================================================
-  CHECK CONSTANTS
-  ================================================================================
-  */
-  blue();
-  printf("CONSTANTS\n");
-  printf("=========\n");
-  reset();
-  printf("%-30s %20.6e (%s)\n", "Speed of light :", clight, "m/s");
-  printf("%-30s %20.6e (%s)\n", "Reduced Planck constant :", hbar, "GeV");
-  printf("%-30s %20.6e (%s)\n", "Electron mass :", emass, "GeV");
-  printf("%-30s %20.6e (%s)\n", "Proton mass :", pmass, "GeV");
-  printf("%-30s %20.6e (%s)\n", "Neutron mass :", nmass, "GeV");
-  printf("%-30s %20.6e (%s)\n", "Atomic Mass Unit :", mumass, "GeV");
-  printf("%-30s %20.6e (%s)\n", "Pi :", pi, "");
-  printf("%-30s %20.6e (%s)\n", "Electric Charge :", ec, "C");
-  printf("%-30s %20.6e (%s)\n", "Classical electron radius :", erad, "m");
-  printf("%-30s %20.6e (%s)\n\n", "Converted proton radius :", prad, "m");
-
-  /*
-  ================================================================================
   BASIC NUMERIC FUNCTIONS
   ================================================================================
   */
@@ -213,7 +194,7 @@ int main() {
   double epsilon = 1.0e-6;
 
   // updateTwiss
-  updateTwiss(twisstablemap);
+  updateTwiss(twisstablemap, rho);
   // printTwissMap("I2", twisstablemap);
   double betar = BetaRelativisticFromGamma(gammar);
   double r0 = ParticleRadius(1, aatom);
@@ -244,28 +225,6 @@ int main() {
       0.0, 173, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005, pc, epsilon);
   double qsPWD = SynchrotronTunePWD(omega, U0, -1, 1, harmon, voltages, Lpwd, 1,
                                     0.005, phisPWD, neta, pc);
-
-  blue();
-  printf("Basic Functions\n");
-  printf("===============\n");
-  reset();
-
-  printf("%-30s %20.6e (%s)\n", "SigEfromSigs :", sige0, "");
-  printf("%-30s %20.6e (%s)\n", "Eta :", neta, "");
-  printf("%-30s %20.6e (%s)\n", "Fmohl          :", fmohl(a, b, q, npp), "");
-  printf("%-30s %20.6e (%s)\n", "Particle Radius :", r0, "m");
-  printf("%-30s %20.6e (%s)\n", "Relativistic beta from gamma :", betar, "m/s");
-  printf("%-30s %20.6e (%s)\n", "Rds (Nagaitsev) :", rds(1, 2, 3), "");
-  printf("%-30s %20.6e (%s)\n", "VeffRFeV :", VrfEffeV, "eV");
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVPrime:", VrfEffeVp, "eV");
-  printf("%-30s %20.6e (%s)\n", "U0:", U0, "eV");
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVRadlosses :", VrfEffeVU0, "eV");
-  printf("%-30s %20.6e (%s)\n", "synchronuousphase :", phis, "rad");
-  printf("%-30s %20.6e (%s)\n", "synchrotronTune :", qs, "");
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVPWD :", VrfEffeVPWD, "eV");
-  printf("%-30s %20.6e (%s)\n", "VeffRFeVPWDprime:", VrfEffeVPWDp, "");
-  printf("%-30s %20.6e (%s)\n", "synchronuousphasewithPWD :", phisPWD, "");
-  printf("%-30s %20.6e (%s)\n", "synchrotronTunePWD :", qsPWD, "");
 
   /*
   ================================================================================
@@ -353,6 +312,7 @@ int main() {
   green();
   printf("\nCoulombLog using ring averages...\n");
   reset();
+
   printf("%-30s %20.6e (%s)\n", "CoulombLog value :", clog[0], "");
   printf("%-30s %20.6e (%s)\n\n", "CoulombLog constant :", clog[1], "");
 

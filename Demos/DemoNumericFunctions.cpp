@@ -2,10 +2,10 @@
 #include "RadiationDamping.hpp"
 #include "Twiss.hpp"
 #include <map>
+#include <math.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
-
 using namespace std;
 
 void red() { printf("\033[1;31m"); }
@@ -68,9 +68,10 @@ int main() {
   int npp = 1000;
   // synchronuous phase eps
   double epsilon = 1.0e-6;
+  double rho = 4.35;
 
   // updateTwiss
-  updateTwiss(twisstablemap);
+  updateTwiss(twisstablemap, rho);
   // printTwissMap("I2", twisstablemap);
   double betar = BetaRelativisticFromGamma(gammar);
   double r0 = ParticleRadius(1, aatom);
@@ -80,16 +81,16 @@ int main() {
   double Lpwd = 1.0e6;
   double neta = eta(gammar, gammatr);
   double sige0 = sigefromsigs(2.0 * pi * 1.2e6, 0.001, 5e-3, gammar, gammatr);
-  double VrfEffeV =
-      EffectiveRFVoltageInElectronVolt(173, -1, 1, harmon, voltages);
-  double VrfEffeVp =
-      EffectiveRFVoltageInElectronVoltPrime(173, -1, 1, harmon, voltages);
   double *radint;
   radint = RadiationDampingLattice(twisstablemap);
   double U0 = RadiationLossesPerTurn(twissheadermap, radint[1], emass / pmass);
-  double VrfEffeVU0 = VeffRFeVRadlosses(173, U0, -1, 1, harmon, voltages);
   double phis =
-      SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, epsilon);
+      SynchronuousPhase(0.0, 172, U0, -1, 1, harmon, voltages, epsilon);
+  double VrfEffeV =
+      EffectiveRFVoltageInElectronVolt(phis, -1, 1, harmon, voltages);
+  double VrfEffeVp =
+      EffectiveRFVoltageInElectronVoltPrime(phis, -1, 1, harmon, voltages);
+  double VrfEffeVU0 = VeffRFeVRadlosses(phis, U0, -1, 1, harmon, voltages);
   double qs =
       SynchrotronTune(omega, U0, -1, 1, harmon, voltages, phis, neta, pc);
   double omegas = qs * omega;
@@ -113,12 +114,17 @@ int main() {
   printf("%-30s %20.6e (%s)\n", "Particle Radius :", r0, "m");
   printf("%-30s %20.6e (%s)\n", "Relativistic beta from gamma :", betar, "");
   printf("%-30s %20.6e (%s)\n", "Rds (Nagaitsev) :", rds(1, 2, 3), "");
+  printf("%-30s %20.6e (%s)\n", "phis :", phis, "deg");
   printf("%-30s %20.6e (%s)\n", "VeffRFeV :", VrfEffeV, "eV");
   printf("%-30s %20.6e (%s)\n", "VeffRFeVPrime:", VrfEffeVp, "eV");
   printf("%-30s %20.6e (%s)\n", "U0:", U0, "eV");
   printf("%-30s %20.6e (%s)\n", "VeffRFeVRadlosses :", VrfEffeVU0, "eV");
   printf("%-30s %20.6e (%s)\n", "synchronuousphase :", phis, "rad");
   printf("%-30s %20.6e (%s)\n", "synchrotronTune :", qs, "");
+  printf("%-30s %20.6e (%s)\n", "synchrotron angularfrequency :", qs * omega,
+         "Hz");
+  printf("%-30s %20.6e (%s)\n", "synchrotron angularfrequency :",
+         sigsfromsige(sqrt(4.8e-7), gammar, gammatr, omegas), "Hz");
   printf("%-30s %20.6e (%s)\n", "VeffRFeVPWD :", VrfEffeVPWD, "eV");
   printf("%-30s %20.6e (%s)\n", "VeffRFeVPWDprime:", VrfEffeVPWDp, "");
   printf("%-30s %20.6e (%s)\n", "synchronuousphasewithPWD :", phisPWD, "");

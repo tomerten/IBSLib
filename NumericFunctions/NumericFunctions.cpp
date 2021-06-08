@@ -432,11 +432,11 @@ METHOD RETURNS EFFECTIVE RF VOLTAGE TIMES CHARGE (eV)
 double EffectiveRFVoltageInElectronVolt(double phi, double charge, int nrf,
                                         double harmon[], double voltages[]) {
   // init
-  double vrf = voltages[0] * sin(phi);
+  double vrf = voltages[0] * sin(phi / 180.0 * pi);
 
   // add the rest taking harmonic numbers into account
   for (int i = 1; i < nrf; i++) {
-    vrf += voltages[i] * sin((harmon[i] / harmon[0]) * phi);
+    vrf += voltages[i] * sin((harmon[i] / harmon[0]) * phi / 180.0 * pi);
   }
 
   // multiply with charge
@@ -487,12 +487,12 @@ double EffectiveRFVoltageInElectronVoltPrime(double phi, double charge, int nrf,
                                              double harmon[],
                                              double voltages[]) {
   // init
-  double vrf = voltages[0] * cos(phi);
+  double vrf = voltages[0] * cos(phi / 180.0 * pi);
 
   // add other rfs
   for (int i = 1; i < nrf; i++) {
     vrf += voltages[i] * (harmon[i] / harmon[0]) *
-           cos((harmon[i] / harmon[0]) * phi);
+           cos((harmon[i] / harmon[0]) * phi / 180.0 * pi);
   }
 
   // V -> eV
@@ -1005,7 +1005,8 @@ REMARK:
 ================================================================================
 ================================================================================
  */
-void updateTwiss(map<string, vector<double>> &table) {
+void updateTwiss(map<string, vector<double>> &table,
+                 const double dipoleBendingRadius) {
   // get length of table to reserve the vector sizes
   int size = table["L"].size();
 
@@ -1037,7 +1038,7 @@ void updateTwiss(map<string, vector<double>> &table) {
     k[i] = (l == 0.0) ? 0.0 : k1l / l;
 
     // first for integrals
-    I1[i] = (rho[i] == 0.0) ? 0.0 : dx / rho[i] * l;
+    I1[i] = (rho[i] == 0.0) ? 0.0 : (dx / rho[i]) * l;
     I2[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi2;
     I3[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi3;
     I4x[i] = (rho[i] == 0.0) ? 0.0

@@ -271,7 +271,7 @@ double *RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
 
   double sigE0E2 = cq * gamma * gamma * i3 / (2.0 * i2 + i4x + i4y);
   double alfap = i1 / len;
-  double sigt = alfap / sqrt(sigE0E2) / omegas;
+  double sigt = clight * alfap / sqrt(sigE0E2) / omegas;
   double exinf = cq * gamma * gamma * i5x / (jx * i2);
   double eyinf = cq * gamma * gamma * i5y / (jy * i2);
 
@@ -381,15 +381,15 @@ double *RadiationCriticalEnergy(double rho, double gamma, double omega) {
   const double c = clight;
   const double alphafine = 7.297352569300000e-03;
   const double h = 6.626070150000000e-34;
-  const double twoOthree = 2.0f / 3.0f;
+  const double twoOthree = 2.0 / 3.0;
   const double gamma3 = gamma * gamma * gamma;
 
   static double output[5];
 
   output[0] = twoOthree * c / rho * gamma3;
-  output[1] = 1.0f / gamma * pow(output[0] / omega, 1.0f / 3.0f);
+  output[1] = 1.0 / gamma * pow(output[0] / omega, 1.0 / 3.0);
   output[2] = h * output[0];
-  output[3] = 1.0f / 3.0f * output[2];
+  output[3] = 1.0 / 3.0 * output[2];
   output[4] = 2 * pi * alphafine * gamma;
 
   return output;

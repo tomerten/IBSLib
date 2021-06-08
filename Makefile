@@ -189,6 +189,19 @@ raddamp/fast:
 .PHONY : raddamp/fast
 
 #=============================================================================
+# Target rules for targets named DemoRadDamping
+
+# Build rule for target.
+DemoRadDamping: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoRadDamping
+.PHONY : DemoRadDamping
+
+# fast build rule for target.
+DemoRadDamping/fast:
+	$(MAKE) -f CMakeFiles/DemoRadDamping.dir/build.make CMakeFiles/DemoRadDamping.dir/build
+.PHONY : DemoRadDamping/fast
+
+#=============================================================================
 # Target rules for targets named DemoNumericFunctions
 
 # Build rule for target.
@@ -280,6 +293,33 @@ Demos/DemoNumericFunctions.s: Demos/DemoNumericFunctions.cpp.s
 Demos/DemoNumericFunctions.cpp.s:
 	$(MAKE) -f CMakeFiles/DemoNumericFunctions.dir/build.make CMakeFiles/DemoNumericFunctions.dir/Demos/DemoNumericFunctions.cpp.s
 .PHONY : Demos/DemoNumericFunctions.cpp.s
+
+Demos/DemoRadDamping.o: Demos/DemoRadDamping.cpp.o
+
+.PHONY : Demos/DemoRadDamping.o
+
+# target to build an object file
+Demos/DemoRadDamping.cpp.o:
+	$(MAKE) -f CMakeFiles/DemoRadDamping.dir/build.make CMakeFiles/DemoRadDamping.dir/Demos/DemoRadDamping.cpp.o
+.PHONY : Demos/DemoRadDamping.cpp.o
+
+Demos/DemoRadDamping.i: Demos/DemoRadDamping.cpp.i
+
+.PHONY : Demos/DemoRadDamping.i
+
+# target to preprocess a source file
+Demos/DemoRadDamping.cpp.i:
+	$(MAKE) -f CMakeFiles/DemoRadDamping.dir/build.make CMakeFiles/DemoRadDamping.dir/Demos/DemoRadDamping.cpp.i
+.PHONY : Demos/DemoRadDamping.cpp.i
+
+Demos/DemoRadDamping.s: Demos/DemoRadDamping.cpp.s
+
+.PHONY : Demos/DemoRadDamping.s
+
+# target to generate assembly for a file
+Demos/DemoRadDamping.cpp.s:
+	$(MAKE) -f CMakeFiles/DemoRadDamping.dir/build.make CMakeFiles/DemoRadDamping.dir/Demos/DemoRadDamping.cpp.s
+.PHONY : Demos/DemoRadDamping.cpp.s
 
 Integrators/Integrators.o: Integrators/Integrators.cpp.o
 
@@ -484,6 +524,7 @@ help:
 	@echo "... clog"
 	@echo "... numfunc"
 	@echo "... raddamp"
+	@echo "... DemoRadDamping"
 	@echo "... DemoNumericFunctions"
 	@echo "... models"
 	@echo "... IBSLib"
@@ -493,6 +534,9 @@ help:
 	@echo "... Demos/DemoNumericFunctions.o"
 	@echo "... Demos/DemoNumericFunctions.i"
 	@echo "... Demos/DemoNumericFunctions.s"
+	@echo "... Demos/DemoRadDamping.o"
+	@echo "... Demos/DemoRadDamping.i"
+	@echo "... Demos/DemoRadDamping.s"
 	@echo "... Integrators/Integrators.o"
 	@echo "... Integrators/Integrators.i"
 	@echo "... Integrators/Integrators.s"
