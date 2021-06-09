@@ -4,49 +4,66 @@
 #include <stdio.h>
 
 /*
-------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MADX AUTHORS COPYRIGHT CERN
-------------------------------------------------------------------------------
-VERSION 1.0 : SIMPSON INTEGRATOR WITH DECADE SPLITTING TO BE ABLE TO ADD
-              CONTE-MARTINI AND BJORKEN-MTINGWA - NORMAL SIMPSON GIVES TOO
-              LARGE DEVIATIONS COMPARED TO SIMPSON DECADE.
+================================================================================
+================================================================================
+SIMPSON INTEGRATOR WITH DECADE SPLITTING TO BE ABLE TO ADD
+CONTE-MARTINI AND BJORKEN-MTINGWA - NORMAL SIMPSON GIVES TOO
+LARGE DEVIATIONS COMPARED TO SIMPSON DECADE.
+================================================================================
+  AUTHORS:
+    - MADX AUTHORS COPYRIGHT CERN
+    - TOM MERTENS
 
-AUTHOR    : TOM MERTENS
-DATE      : 16/02/2021
-OPYRIGHT  : CERN / HZB
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
-    DESCRIPTION :
-        SIMPSON INTEGRATOR SPLITTING THE INTEGRAL IN
-        DECADES FOR FASTER CONVERGENCE
+  REF:
+    - MADX ORIGINAL SOURCE CODE IN TWSINT FUNCTION
+    - CERN NOTE CERN-AB-2006-002 EQ 8
 
-    DETAILS:
-        MAX DECADES = 30 (10**30)
-        INTERVAL SPLITS (NS) = 50
+================================================================================
+  Arguments:
+  ----------
+    - double a
+        lambda**2 coefficient integral denominator
+    - double b
+        lambda coefficient integral denominator
+    - double c
+        constant integral denominator
+    - double cl
+        longitudinal growth time factor
+    - double cx
+        horizontal growth time factor
+    - double cy
+        vertical growht time factor
+    - double cprime (double)
+        scaling factor
+    - double cyy
+        scaling factor adapted to sqrt denominator
+    - double tl1
+        lambda coefficient integral numerator
+    - double tl2
+        constant term integral numerator
+    - double tx1
+        lambda coefficient integral numerator
+    - double tx2
+        constant term integral numerator
+    - double ty1
+        lambda coefficient integral numerator
+    - double ty2
+        constant term integral numerator
 
-    REF:
-        MADX ORIGINAL SOURCE CODE IN TWSINT FUNCTION
-        CERN NOTE CERN-AB-2006-002 EQ 8
+  Returns:
+  --------
+    double [3] tau
+      IBS growth rates for AMPLITUDES (SIGMA NOT EMIT -> MULTIPLY WITH TWO FOR
+      EMIT)
+      0 -> al
+      1 -> ax
+      2 -> ay
 
--------------------------------------------------------------------------------
-a (double)      : lambda**2 coefficient integral denominator
-b (double)      : lambda coefficient integral denominator
-c (double)      : constant integral denominator
-cl (double)     : longitudinal growth time factor
-cx (double)     : horizontal growth time factor
-cy (double)     : vertical growht time factor
-cprime (double) : scaling factor
-cyy (double)    : scaling factor adapted to sqrt denominator
-tl1 (double)    : lambda coefficient integral numerator
-tl2 (double)    : constant term integral numerator
-tx1 (double)    : lambda coefficient integral numerator
-tx2 (double)    : constant term integral numerator
-ty1 (double)    : lambda coefficient integral numerator
-ty2 (double)    : constant term integral numerator
--------------------------------------------------------------------------------
-test (double)   : iteration convergence test value
-tau (double[3]) : {long growth factor, hor growth factor, ver growth factor}
-if no convergence all are set to 0.0
--------------------------------------------------------------------------------
+================================================================================
+================================================================================
 */
 void SimpsonDecade(double a, double b, double c, double cl, double cx,
                    double cy, double cprime, double cyy, double tl1, double tl2,
@@ -134,28 +151,45 @@ void SimpsonDecade(double a, double b, double c, double cl, double cx,
   }
 }
 /*
-------------------------------------------------------------------------------
-VERSION 1.0 : IBS INTEGRALS INTEGRAND AS FUNCTION TO BE ABLE TO ADD
-              CONTE-MARTINI AND BJORKEN-MTINGWA - NORMAL SIMPSON GIVES TOO
-              LARGE DEVIATIONS COMPARED TO SIMPSON DECADE.
+================================================================================
+================================================================================
+IBS INTEGRALS INTEGRAND AS FUNCTION TO BE ABLE TO ADD
+CONTE-MARTINI AND BJORKEN-MTINGWA.
 
-AUTHOR    : TOM MERTENS
-DATE      : 16/02/2021
-OPYRIGHT  : HZB
+NOTE:
+-----
+NORMAL SIMPSON GIVES TOO
+LARGE DEVIATIONS COMPARED TO SIMPSON DECADE.
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
-    DESCRIPTION :
-        IBS INTEGRALS INTEGRAND
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
--------------------------------------------------------------------------------
-a (double)       : lambda**2 coefficient integral denominator
-b (double)       : lambda coefficient integral denominator
-c (double)       : constant integral denominator
-ax (double)      : lambda coefficient integral numerator
-bx (double)      : constant term integral numerator
-lambda (double)  : integration variable
--------------------------------------------------------------------------------
+================================================================================
+  Arguments:
+  ----------
+    - double a
+        lambda**2 coefficient integral denominator
+    - double b
+        lambda coefficient integral denominator
+    - double c
+        constant integral denominator
+    - double ax
+        lambda coefficient integral numerator
+    - double bx
+        constant term integral numerator
+    - double lambda
+        integration variable
+
+  Returns:
+  --------
+    double integral
+        integrand for IBS integral
+================================================================================
+================================================================================
 */
-
 double IBSIntegralIntegrand(double lambda, double ax, double bx, double a,
                             double b, double c) {
   double num = sqrt(lambda) * (ax * lambda + bx);
@@ -164,6 +198,55 @@ double IBSIntegralIntegrand(double lambda, double ax, double bx, double a,
   return num / denom;
 }
 
+/*
+================================================================================
+================================================================================
+iSTANDARD SIMPSON INTEGRATION METHOD
+
+NOTE:
+-----
+NORMAL SIMPSON GIVES TOO
+LARGE DEVIATIONS COMPARED TO SIMPSON DECADE.
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double ibsintegrand(double, double, double, double, double,
+                                   double)
+    - double a
+        lambda**2 coefficient integral denominator
+    - double b
+        lambda coefficient integral denominator
+    - double c
+        constant integral denominator
+    - double ax
+        lambda coefficient integral numerator
+    - double bx
+        constant term integral numerator
+    - double ax
+        lambda coefficient integral numerator
+    - double bx
+        constant term integral numerator
+    - double al
+        lower integration boundary
+    - double bl
+        higher integration boundary
+    - int n
+        number of interval splits for the Simpson method
+
+  Returns:
+  --------
+    double integral
+        value for the integral
+================================================================================
+================================================================================
+*/
 double simpson(double ibsintegrand(double, double, double, double, double,
                                    double),
                double ax, double bx, double a, double b, double c, double al,
@@ -189,6 +272,58 @@ double simpson(double ibsintegrand(double, double, double, double, double,
   return integral;
 }
 
+/*
+================================================================================
+================================================================================
+STANDARD SIMPSON INTEGRAL FOR BJORKEN-MTINGWA INTEGRAND.
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+    - CERN NOTE CERN-AB-2006-002 EQ 8
+
+================================================================================
+  Arguments:
+  ----------
+    - double BjorkenMtingwaIntegrand(double, double, double, double, double,
+                                      double)
+    - double ax
+        lambda coefficient integral numerator x
+    - double bx
+        constant coefficient integral numerator x
+    - double ay
+        lambda coefficient integral numerator y
+    - double by
+        constant coefficient integral numerator y
+    - double as
+        lambda coefficient integral numerator s
+    - double bs
+        constant coefficient integral numerator s
+    - double a
+        lambda**2 coefficient integral denominator
+    - double b
+        lambda coefficient integral denominator
+    - double c
+        constant integral denominator
+    - double *integral
+        return variable
+
+  Returns:
+  --------
+    double [3] integral
+      IBS growth rates for AMPLITUDES (SIGMA NOT EMIT -> MULTIPLY WITH TWO FOR
+      EMIT)
+      0 -> al
+      1 -> ax
+      2 -> ay
+
+================================================================================
+================================================================================
+*/
 void intSimpson(double BjorkenMtingwaIntegrand(double, double, double, double,
                                                double, double),
                 double ax, double bx, double ay, double by, double as,
@@ -236,6 +371,8 @@ void intSimpson(double BjorkenMtingwaIntegrand(double, double, double, double,
 
 /*
 ================================================================================
+================================================================================
+================================================================================
 MODELS BELOW ARE MORE COMPLETE
 EQUATIONS ARE MORE COMPLICATED AND
 THE CODE MIGHT BE NOT COMPLETELY BUG FREE AT THIS POINT
@@ -243,35 +380,67 @@ THE CODE MIGHT BE NOT COMPLETELY BUG FREE AT THIS POINT
 FOR EQUATIONS CHECK CERN NOTE
 CERN-AB-2006-002
 ================================================================================
+================================================================================
+================================================================================
 */
 
 /*
---------------------------------------------------------------------------------
-AUTHOR  : TOM MERTENS
-DATE    : 17/02/2021
-VERSION : 1.0 - ADD BJORKEN MTINGWA MODEL USING SIMPSON DECADE INTEGRATOR
+================================================================================
+================================================================================
+SIMPSON DECADE INTEGRAL FOR BJORKEN-MTINGWA INTEGRAND.
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
---------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-sige (double)           : energy spread dE/E
-gammas (double)         : relativistic gamma
-betx (double)           : beta x
-bety (double)           : beta y
-alx (double)            : alfa x
-aly (double)            : alfa y
-dx (double)             : dispersion x
-dpx (double)            : dispersion derivative x
-dy (double)             : dispersion y
-dpy (double)            : dispersion derivative y
---------------------------------------------------------------------------------
-tau (double*):
-    tau[0] : longitudinal growth rate
-    tau[1] : horizontal growth rate
-    tau[2] : vertical growth rate
---------------------------------------------------------------------------------
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+    - CERN NOTE CERN-AB-2006-002 EQ 8
+
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of real particles in the bunch
+    - double ex
+        horizontal emittance
+    - double ey
+        vertical emittance
+    - double sigs
+        bunch length
+    - double sige
+        energy spread dE/E
+    - double gammas
+        relativistic gamma
+    - double betx
+        beta x
+    - double bety
+        beta y
+    - double alx
+        alfa x
+    - double aly
+        alfa y
+    - double dx
+        dispersion x
+    - double dpx
+        dispersion derivative x
+    - double dy
+        dispersion y
+    - double dpy
+        dispersion derivative y
+
+  Returns:
+  --------
+    double [3] tau
+      IBS growth rates for AMPLITUDES (SIGMA NOT EMIT -> MULTIPLY WITH TWO FOR
+      EMIT) FOR BJORKEN MTINGWA MODEL
+      0 -> al
+      1 -> ax
+      2 -> ay
+
+================================================================================
+================================================================================
 */
 void BjorkenMtingwaInt(double pnumber, double ex, double ey, double sigs,
                        double sige, double gammas, double betx, double bety,
@@ -341,33 +510,64 @@ void BjorkenMtingwaInt(double pnumber, double ex, double ey, double sigs,
   SimpsonDecade(a, b, c, cl, cx, cy, cprime, cyy, tl1, tl2, tx1, tx2, ty1, ty2,
                 tau);
 }
-/*
---------------------------------------------------------------------------------
-AUTHOR  : TOM MERTENS
-DATE    : 17/02/2021
-VERSION : 1.0 - ADD CONTE MARTINI MODEL USING SIMPSON DECADE INTEGRATOR
 
---------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-sige (double)           : energy spread dE/E
-gammas (double)         : relativistic gamma
-betx (double)           : beta x
-bety (double)           : beta y
-alx (double)            : alfa x
-aly (double)            : alfa y
-dx (double)             : dispersion x
-dpx (double)            : dispersion derivative x
-dy (double)             : dispersion y
-dpy (double)            : dispersion derivative y
---------------------------------------------------------------------------------
-tau (double*):
-    tau[0] : longitudinal growth rate
-    tau[1] : horizontal growth rate
-    tau[2] : vertical growth rate
---------------------------------------------------------------------------------
+/*
+================================================================================
+================================================================================
+SIMPSON DECADE INTEGRAL FOR CONTE-MARTINI INTEGRAND.
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+    - CERN NOTE CERN-AB-2006-002 EQ 8
+
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of real particles in the bunch
+    - double ex
+        horizontal emittance
+    - double ey
+        vertical emittance
+    - double sigs
+        bunch length
+    - double sige
+        energy spread dE/E
+    - double gammas
+        relativistic gamma
+    - double betx
+        beta x
+    - double bety
+        beta y
+    - double alx
+        alfa x
+    - double aly
+        alfa y
+    - double dx
+        dispersion x
+    - double dpx
+        dispersion derivative x
+    - double dy
+        dispersion y
+    - double dpy
+        dispersion derivative y
+
+  Returns:
+  --------
+    double [3] tau
+      IBS growth rates for AMPLITUDES (SIGMA NOT EMIT -> MULTIPLY WITH TWO FOR
+      EMIT) FOR CONTE-MARTINI MODEL
+      0 -> al
+      1 -> ax
+      2 -> ay
+
+================================================================================
+================================================================================
 */
 void ConteMartiniInt(double pnumber, double ex, double ey, double sigs,
                      double sige, double gammas, double betx, double bety,
@@ -462,33 +662,64 @@ void ConteMartiniInt(double pnumber, double ex, double ey, double sigs,
   SimpsonDecade(a, b, c, cl, cx, cy, cprime, cyy, tl1, tl2, tx1, tx2, ty1, ty2,
                 tau);
 }
-/*
---------------------------------------------------------------------------------
-AUTHOR  : TOM MERTENS
-DATE    : 17/02/2021
-VERSION : 1.0 - ADD MADX MODEL USING SIMPSON DECADE INTEGRATOR
 
---------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-sige (double)           : energy spread dE/E
-gammas (double)         : relativistic gamma
-betx (double)           : beta x
-bety (double)           : beta y
-alx (double)            : alfa x
-aly (double)            : alfa y
-dx (double)             : dispersion x
-dpx (double)            : dispersion derivative x
-dy (double)             : dispersion y
-dpy (double)            : dispersion derivative y
---------------------------------------------------------------------------------
-tau (double*):
-    tau[0] : longitudinal growth rate
-    tau[1] : horizontal growth rate
-    tau[2] : vertical growth rate
---------------------------------------------------------------------------------
+/*
+================================================================================
+================================================================================
+SIMPSON DECADE INTEGRAL FOR MADX ZIMMERMAN INTEGRAND.
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+    - CERN NOTE CERN-AB-2006-002 EQ 8
+
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of real particles in the bunch
+    - double ex
+        horizontal emittance
+    - double ey
+        vertical emittance
+    - double sigs
+        bunch length
+    - double sige
+        energy spread dE/E
+    - double gammas
+        relativistic gamma
+    - double betx
+        beta x
+    - double bety
+        beta y
+    - double alx
+        alfa x
+    - double aly
+        alfa y
+    - double dx
+        dispersion x
+    - double dpx
+        dispersion derivative x
+    - double dy
+        dispersion y
+    - double dpy
+        dispersion derivative y
+
+  Returns:
+  --------
+    double [3] tau
+      IBS growth rates for AMPLITUDES (SIGMA NOT EMIT -> MULTIPLY WITH TWO FOR
+      EMIT) FOR MADX ZIMMERMAN MODEL
+      0 -> al
+      1 -> ax
+      2 -> ay
+
+================================================================================
+================================================================================
 */
 void MadxInt(double pnumber, double ex, double ey, double sigs, double sige,
              double gammas, double betx, double bety, double alx, double aly,
@@ -634,6 +865,75 @@ tau (double[3]) : {long growth factor, hor growth factor, ver growth factor}
 if no convergence all are set to 0.0
 -------------------------------------------------------------------------------
 */
+/*
+================================================================================
+================================================================================
+SIMPSON INTEGRATOR SPLITTING THE INTEGRAL IN DECADES FOR FASTER CONVERGENCE
+WITH SCALING.
+
+DETAILS:
+        MAX DECADES = 30 (10**30)
+        INTERVAL SPLITS (NS) = 50
+
+REF:
+        MADX ORIGINAL SOURCE CODE IN TWSINT FUNCTION
+        CERN NOTE CERN-AB-2006-002 EQ 8
+================================================================================
+  AUTHORS:
+    - MADX ORIGINAL AUTHORS
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+    - CERN NOTE CERN-AB-2006-002 EQ 8
+
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of real particles in the bunch
+    - double ex
+        horizontal emittance
+    - double ey
+        vertical emittance
+    - double sigs
+        bunch length
+    - double sige
+        energy spread dE/E
+    - double gammas
+        relativistic gamma
+    - double betx
+        beta x
+    - double bety
+        beta y
+    - double alx
+        alfa x
+    - double aly
+        alfa y
+    - double dx
+        dispersion x
+    - double dpx
+        dispersion derivative x
+    - double dy
+        dispersion y
+    - double dpy
+        dispersion derivative y
+
+  Returns:
+  --------
+    double [3] tau
+      IBS growth rates for AMPLITUDES (SIGMA NOT EMIT -> MULTIPLY WITH TWO FOR
+      EMIT) FOR MADX ZIMMERMAN MODEL
+      0 -> al
+      1 -> ax
+      2 -> ay
+
+================================================================================
+================================================================================
+*/
+
 void twsint(double pnumber, double ex, double ey, double sigs, double sige,
             double gammas, double betax, double betay, double alx, double aly,
             double dx, double dpx, double dy, double dpy, double *tau) {

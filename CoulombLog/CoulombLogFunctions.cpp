@@ -3,6 +3,67 @@
 #include <math.h>
 #include <stdio.h>
 
+/*
+================================================================================
+================================================================================
+METHOD TO CALCULATE COULOMBLOG PER ELEMENT OR USING ELEMENT BY ELEMENT
+TWISS DATA.
+
+================================================================================
+  AUTHORS:
+    - MADX COPYRIGHT CERN
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+        Calculation of Coulomb logarithm (and print)
+        based on the formulae in AIP physics vade mecum p.264 (1981)
+
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double bx
+        beta x
+    - double by
+        beta y
+    - double dx
+        dispersion x
+    - double dy
+        dispersion y
+    - double ex
+        emittance x
+    - double ey
+        emittance y
+    - double r0
+        classical particle radius
+    - double gamma
+        relativistic gamma
+    - double charge
+        particle charge
+    - double en0
+        particle energy
+    - double amass
+        particle mass
+    - double sige
+        energy spread
+    - double sigt
+        bunch length (s)
+    - double* clog
+        output variable
+
+  Returns:
+  --------
+  double[2] clog
+    1 -> coulomblog
+    2 -> coulomblog constant
+
+================================================================================
+================================================================================
+*/
 void twclog(double pnumber, double bx, double by, double dx, double dy,
             double ex, double ey, double r0, double gamma, double charge,
             double en0, double amass, double sige, double sigt, double *clog) {
@@ -56,7 +117,85 @@ void twclog(double pnumber, double bx, double by, double dx, double dy,
   clog[0] = coulog;
   clog[1] = constt;
 }
+/*
+================================================================================
+================================================================================
+METHOD TO CALCULATE COULOMBLOG PER ELEMENT OR USING ELEMENT BY ELEMENT TWISS
+DATA WITH TAILCUT.
 
+================================================================================
+  AUTHORS:
+    - MADX COPYRIGHT CERN
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+        Calculation of Coulomb logarithm (and print)
+        based on the formulae in AIP physics vade mecum p.264 (1981)
+
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double bx
+        beta x
+    - double by
+        beta y
+    - double dx
+        dispersion x
+    - double dpx
+        dispersion derivative x
+    - double dy
+        dispersion y
+    - double dpy
+        dispersion derivative y
+    - double ax
+        alfa x
+    - double ay
+        alfa y
+    - double angle
+        bending angle
+    - double k1l
+        k1l from twiss madx
+    - double k1sl
+        k1sl from twiss madx
+    - double ex
+        emittance x
+    - double ey
+        emittance y
+    - double r0
+        classical particle radius
+    - double aatom
+        atomic number A
+    - double gamma
+        relativistic gamma
+    - double charge
+        particle charge
+    - double en0
+        particle energy
+    - double len
+        acceleratro length
+    - double amass
+        particle mass
+    - double sige
+        energy spread
+    - double sigt
+        bunch length (s)
+    - double* clog
+        output variable
+
+  Returns:
+  --------
+  double[2] clog
+    1 -> coulomblog
+    2 -> coulomblog constant
+
+================================================================================
+================================================================================
+*/
 void twclogtail(double pnumber, double l, double bx, double by, double dx,
                 double dpx, double dy, double dpy, double ax, double ay,
                 double angle, double k1l, double k1sl, double ex, double ey,
@@ -149,55 +288,57 @@ void twclogtail(double pnumber, double l, double bx, double by, double dx,
   clog[0] = coulog;
   clog[1] = constt;
 }
-
 /*
--------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MADX AUTHORS COPYRIGHT CERN
--------------------------------------------------------------------------------
-VERSION 1.0 : INTEGRATE COULOMB LOG CALCULATION IN IBS MODELS AT EACH STEP
-(BEFORE FIXED VALUE FOR ENTIRE SIM)
-AUTHOR    : TOM MERTENS
-DATE      : 19/12/2016
-COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+METHOD TO CALCULATE COULOMBLOG PER ELEMENT OR USING RING AVERAGED VALUES
 
-    DESCRIPTION :
-        FUNCTIONS TO CALCULATE COULOMB LOG
-        NOTE: DEPENDS ON CURRENT EMIT
+================================================================================
+  AUTHORS:
+    - MADX COPYRIGHT CERN
+    - TOM MERTENS
 
-    DETAILS:
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            3 -> length
-            4 -> energy
-            5 -> mass
-            6 -> q1
-            7 -> q2
-            8 -> dxrms
-            9 -> dyrms
-            10-> gammatr
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
-    REF:
+  REF:
         Calculation of Coulomb logarithm (and print)
         based on the formulae in AIP physics vade mecum p.264 (1981)
 
--------------------------------------------------------------------------------
-pnumber (double)        : number of particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-twissheader (double[])  : twiss header (madx)
-sige (double)           : dE / E
-sigt (double)           : simga_s [m]
-aatom (double)          : atomic mass
-printout (_Bool)        : flag to print out data to screen
--------------------------------------------------------------------------------
-clog (double*)          : output (0 -> coulomblog, 1 -> IBS constant factor)
-with coulomblog (double)    Constant in eq. (IV.9.1), ZAP user's manual.
--------------------------------------------------------------------------------
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        emittance x
+    - double ey
+        emittance y
+    - map<string, double>& twissheader
+        madx twiss header
+    - double sige
+        energy spread
+    - double sigt
+        bunch length (s)
+    - double r0
+        classical particle radius
+    - bool printout
+        printout summary
+    - double* clog
+        output variable
+
+  Returns:
+  --------
+  double[2] clog
+    1 -> coulomblog
+    2 -> coulomblog constant
+
+================================================================================
+================================================================================
 */
-void CoulombLog(double pnumber, double ex, double ey, double twissheader[10],
-                double sige, double sigt, double r0, bool printout,
-                double *clog) {
+void CoulombLog(double pnumber, double ex, double ey,
+                map<string, double> &twissheader, double sige, double sigt,
+                double r0, bool printout, double *clog) {
   // const double one   = 1.0f;
   const double two = 2.0;
   // const double four  = 4.0f;
@@ -216,17 +357,15 @@ void CoulombLog(double pnumber, double ex, double ey, double twissheader[10],
   //-----------------------------------------------------------------------------
   //-----------------------------------------------------------------------------
   // static double output[2];
-
-  double gamma = twissheader[0];
-  double charge = twissheader[1];
-  double len = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
-  double q1 = twissheader[5];
-  double q2 = twissheader[6];
-  double dxbar = twissheader[7];
-  double dybar = twissheader[8];
-  // double gammatr = twissheader[9];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double len = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
+  double q1 = twissheader["Q1"];
+  double q2 = twissheader["Q2"];
+  double dxbar = twissheader["DXRMS"];
+  double dybar = twissheader["DYRMS"];
 
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
@@ -283,56 +422,65 @@ void CoulombLog(double pnumber, double ex, double ey, double twissheader[10],
   clog[0] = coulog;
   clog[1] = constt;
 }
-
 /*
-------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MADX AUTHORS COPYRIGHT CERN
-------------------------------------------------------------------------------
-VERSION 1.0 : INTEGRATE COULOMB LOG CALCULATION IN IBS MODELS AT EACH STEP
-(BEFORE FIXED VALUE FOR ENTIRE SIM)
-AUTHOR    : TOM MERTENS
-DATE      : 19/12/2016
-OPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+METHOD TO CALCULATE COULOMBLOG PER ELEMENT OR USING RING AVERAGED VALUES
+WITH TAILCUT.
 
-    DESCRIPTION :
-        FUNCTIONS TO CALCULATE TAIL CUT COULOMB LOG
-        NOTE: DEPENDS ON CURRENT EMIT
+================================================================================
+  AUTHORS:
+    - MADX COPYRIGHT CERN
+    - TOM MERTENS
 
-    DETAILS:
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            3 -> length
-            4 -> energy
-            5 -> mass
-            6 -> q1
-            7 -> q2
-            8 -> dxrms
-            9 -> dyrms
-            10-> gammatr
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
-    REF:
-        Calculation of Tail cut Coulomb logarithm (and print)
+  REF:
+        Calculation of Coulomb logarithm (and print)
         based on the formulae in AIP physics vade mecum p.264 (1981)
 
--------------------------------------------------------------------------------
-pnumber (double)        : number of particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-twissheader (double[])  : twiss header (madx)
-sige (double)           : dE / E
-sigt (double)           : simga_s [m]
-aatom (double)          : atomic mass
-printout (_Bool)        : flag to print out data to screen
--------------------------------------------------------------------------------
-clog (double*)          : output (0 -> coulomblog, 1 -> IBS constant factor)
-with coulomblog (double)    Constant in eq. (IV.9.1), ZAP user's manual.
--------------------------------------------------------------------------------
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        emittance x
+    - double ey
+        emittance y
+    - map<string, double>& twissheader
+        madx twiss header
+    - double sige
+        energy spread
+    - double sigt
+        bunch length (s)
+    - double tauradx
+        radiation lifetime x
+    - double taurady
+        radiation lifetime y
+    - double taurads
+        radiation lifetime s
+    - double r0
+        classical particle radius
+    - bool printout
+        printout summary
+    - double* clog
+        output variable
+
+  Returns:
+  --------
+  double[2] clog
+    1 -> coulomblog
+    2 -> coulomblog constant
+
+================================================================================
+================================================================================
 */
 void TailCutCoulombLog(double pnumber, double ex, double ey,
-                       double twissheader[10], double sige, double sigt,
-                       double tauradx, double taurady, double taurads,
-                       double r0, bool printout, double *clog) {
+                       map<string, double> &twissheader, double sige,
+                       double sigt, double tauradx, double taurady,
+                       double taurads, double r0, bool printout, double *clog) {
   // const double one   = 1.0f;
   const double two = 2.0f;
   // const double four  = 4.0f;
@@ -352,19 +500,19 @@ void TailCutCoulombLog(double pnumber, double ex, double ey,
   // IMPORTANT: HBAR USED HERE IS REDUCED PLANCK CONSTANT IN GEV!!!!
   //-----------------------------------------------------------------------------
   //-----------------------------------------------------------------------------
-  const double hbar = 6.582119569e-25; // 1.0545718176461565e-34;
+  // const double hbar = 6.582119569e-25; // 1.0545718176461565e-34;
 
   // static double output[2];
 
-  double gamma = twissheader[0];
-  double charge = twissheader[1];
-  double len = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
-  double q1 = twissheader[5];
-  double q2 = twissheader[6];
-  double dxbar = twissheader[7];
-  double dybar = twissheader[8];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double len = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
+  double q1 = twissheader["Q1"];
+  double q2 = twissheader["Q2"];
+  double dxbar = twissheader["DXRMS"];
+  double dybar = twissheader["DYRMS"];
   // double gammatr = twissheader[9];
 
   // necessary parameters

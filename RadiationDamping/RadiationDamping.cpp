@@ -219,7 +219,7 @@ NUMBERS.
     3 -> exinf
     4 -> eyinf
     5 -> sigEoE2
-    6 -> sigt
+    6 -> sigs
     7 -> jx
     8 -> jy
 
@@ -271,7 +271,7 @@ double *RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
 
   double sigE0E2 = cq * gamma * gamma * i3 / (2.0 * i2 + i4x + i4y);
   double alfap = i1 / len;
-  double sigt = clight * alfap / sqrt(sigE0E2) / omegas;
+  double sigs = clight * alfap * sqrt(sigE0E2) / omegas;
   double exinf = cq * gamma * gamma * i5x / (jx * i2);
   double eyinf = cq * gamma * gamma * i5y / (jy * i2);
 
@@ -285,7 +285,7 @@ double *RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
   output[3] = exinf;
   output[4] = eyinf;
   output[5] = sigE0E2;
-  output[6] = sigt / gamma;
+  output[6] = sigs;
   output[7] = jx;
   output[8] = jy;
 
@@ -386,7 +386,7 @@ double *RadiationCriticalEnergy(double rho, double gamma, double omega) {
 
   static double output[5];
 
-  output[0] = twoOthree * c / rho * gamma3;
+  output[0] = (1.0 / twoOthree) * c / rho * gamma3;
   output[1] = 1.0 / gamma * pow(output[0] / omega, 1.0 / 3.0);
   output[2] = h * output[0];
   output[3] = 1.0 / 3.0 * output[2];

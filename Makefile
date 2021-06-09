@@ -111,108 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named ode
+# Target rules for targets named IBSLib
 
 # Build rule for target.
-ode: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ode
-.PHONY : ode
+IBSLib: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 IBSLib
+.PHONY : IBSLib
 
 # fast build rule for target.
-ode/fast:
-	$(MAKE) -f CMakeFiles/ode.dir/build.make CMakeFiles/ode.dir/build
-.PHONY : ode/fast
-
-#=============================================================================
-# Target rules for targets named twiss
-
-# Build rule for target.
-twiss: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 twiss
-.PHONY : twiss
-
-# fast build rule for target.
-twiss/fast:
-	$(MAKE) -f CMakeFiles/twiss.dir/build.make CMakeFiles/twiss.dir/build
-.PHONY : twiss/fast
-
-#=============================================================================
-# Target rules for targets named integrators
-
-# Build rule for target.
-integrators: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 integrators
-.PHONY : integrators
-
-# fast build rule for target.
-integrators/fast:
-	$(MAKE) -f CMakeFiles/integrators.dir/build.make CMakeFiles/integrators.dir/build
-.PHONY : integrators/fast
-
-#=============================================================================
-# Target rules for targets named clog
-
-# Build rule for target.
-clog: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 clog
-.PHONY : clog
-
-# fast build rule for target.
-clog/fast:
-	$(MAKE) -f CMakeFiles/clog.dir/build.make CMakeFiles/clog.dir/build
-.PHONY : clog/fast
-
-#=============================================================================
-# Target rules for targets named numfunc
-
-# Build rule for target.
-numfunc: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 numfunc
-.PHONY : numfunc
-
-# fast build rule for target.
-numfunc/fast:
-	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/build
-.PHONY : numfunc/fast
-
-#=============================================================================
-# Target rules for targets named raddamp
-
-# Build rule for target.
-raddamp: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 raddamp
-.PHONY : raddamp
-
-# fast build rule for target.
-raddamp/fast:
-	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/build
-.PHONY : raddamp/fast
-
-#=============================================================================
-# Target rules for targets named DemoRadDamping
-
-# Build rule for target.
-DemoRadDamping: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 DemoRadDamping
-.PHONY : DemoRadDamping
-
-# fast build rule for target.
-DemoRadDamping/fast:
-	$(MAKE) -f CMakeFiles/DemoRadDamping.dir/build.make CMakeFiles/DemoRadDamping.dir/build
-.PHONY : DemoRadDamping/fast
-
-#=============================================================================
-# Target rules for targets named DemoNumericFunctions
-
-# Build rule for target.
-DemoNumericFunctions: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 DemoNumericFunctions
-.PHONY : DemoNumericFunctions
-
-# fast build rule for target.
-DemoNumericFunctions/fast:
-	$(MAKE) -f CMakeFiles/DemoNumericFunctions.dir/build.make CMakeFiles/DemoNumericFunctions.dir/build
-.PHONY : DemoNumericFunctions/fast
+IBSLib/fast:
+	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/build
+.PHONY : IBSLib/fast
 
 #=============================================================================
 # Target rules for targets named models
@@ -228,17 +137,147 @@ models/fast:
 .PHONY : models/fast
 
 #=============================================================================
-# Target rules for targets named IBSLib
+# Target rules for targets named DemoRadDamping
 
 # Build rule for target.
-IBSLib: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 IBSLib
-.PHONY : IBSLib
+DemoRadDamping: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoRadDamping
+.PHONY : DemoRadDamping
 
 # fast build rule for target.
-IBSLib/fast:
-	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/build
-.PHONY : IBSLib/fast
+DemoRadDamping/fast:
+	$(MAKE) -f CMakeFiles/DemoRadDamping.dir/build.make CMakeFiles/DemoRadDamping.dir/build
+.PHONY : DemoRadDamping/fast
+
+#=============================================================================
+# Target rules for targets named raddamp
+
+# Build rule for target.
+raddamp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 raddamp
+.PHONY : raddamp
+
+# fast build rule for target.
+raddamp/fast:
+	$(MAKE) -f CMakeFiles/raddamp.dir/build.make CMakeFiles/raddamp.dir/build
+.PHONY : raddamp/fast
+
+#=============================================================================
+# Target rules for targets named DemoCoulombLog
+
+# Build rule for target.
+DemoCoulombLog: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoCoulombLog
+.PHONY : DemoCoulombLog
+
+# fast build rule for target.
+DemoCoulombLog/fast:
+	$(MAKE) -f CMakeFiles/DemoCoulombLog.dir/build.make CMakeFiles/DemoCoulombLog.dir/build
+.PHONY : DemoCoulombLog/fast
+
+#=============================================================================
+# Target rules for targets named DemoIntegrators
+
+# Build rule for target.
+DemoIntegrators: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoIntegrators
+.PHONY : DemoIntegrators
+
+# fast build rule for target.
+DemoIntegrators/fast:
+	$(MAKE) -f CMakeFiles/DemoIntegrators.dir/build.make CMakeFiles/DemoIntegrators.dir/build
+.PHONY : DemoIntegrators/fast
+
+#=============================================================================
+# Target rules for targets named DemoNumericFunctions
+
+# Build rule for target.
+DemoNumericFunctions: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoNumericFunctions
+.PHONY : DemoNumericFunctions
+
+# fast build rule for target.
+DemoNumericFunctions/fast:
+	$(MAKE) -f CMakeFiles/DemoNumericFunctions.dir/build.make CMakeFiles/DemoNumericFunctions.dir/build
+.PHONY : DemoNumericFunctions/fast
+
+#=============================================================================
+# Target rules for targets named numfunc
+
+# Build rule for target.
+numfunc: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 numfunc
+.PHONY : numfunc
+
+# fast build rule for target.
+numfunc/fast:
+	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/build
+.PHONY : numfunc/fast
+
+#=============================================================================
+# Target rules for targets named DemoIBS
+
+# Build rule for target.
+DemoIBS: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoIBS
+.PHONY : DemoIBS
+
+# fast build rule for target.
+DemoIBS/fast:
+	$(MAKE) -f CMakeFiles/DemoIBS.dir/build.make CMakeFiles/DemoIBS.dir/build
+.PHONY : DemoIBS/fast
+
+#=============================================================================
+# Target rules for targets named ode
+
+# Build rule for target.
+ode: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ode
+.PHONY : ode
+
+# fast build rule for target.
+ode/fast:
+	$(MAKE) -f CMakeFiles/ode.dir/build.make CMakeFiles/ode.dir/build
+.PHONY : ode/fast
+
+#=============================================================================
+# Target rules for targets named clog
+
+# Build rule for target.
+clog: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 clog
+.PHONY : clog
+
+# fast build rule for target.
+clog/fast:
+	$(MAKE) -f CMakeFiles/clog.dir/build.make CMakeFiles/clog.dir/build
+.PHONY : clog/fast
+
+#=============================================================================
+# Target rules for targets named integrators
+
+# Build rule for target.
+integrators: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 integrators
+.PHONY : integrators
+
+# fast build rule for target.
+integrators/fast:
+	$(MAKE) -f CMakeFiles/integrators.dir/build.make CMakeFiles/integrators.dir/build
+.PHONY : integrators/fast
+
+#=============================================================================
+# Target rules for targets named twiss
+
+# Build rule for target.
+twiss: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 twiss
+.PHONY : twiss
+
+# fast build rule for target.
+twiss/fast:
+	$(MAKE) -f CMakeFiles/twiss.dir/build.make CMakeFiles/twiss.dir/build
+.PHONY : twiss/fast
 
 CoulombLog/CoulombLogFunctions.o: CoulombLog/CoulombLogFunctions.cpp.o
 
@@ -266,6 +305,87 @@ CoulombLog/CoulombLogFunctions.s: CoulombLog/CoulombLogFunctions.cpp.s
 CoulombLog/CoulombLogFunctions.cpp.s:
 	$(MAKE) -f CMakeFiles/clog.dir/build.make CMakeFiles/clog.dir/CoulombLog/CoulombLogFunctions.cpp.s
 .PHONY : CoulombLog/CoulombLogFunctions.cpp.s
+
+Demos/DemoCoulombLog.o: Demos/DemoCoulombLog.cpp.o
+
+.PHONY : Demos/DemoCoulombLog.o
+
+# target to build an object file
+Demos/DemoCoulombLog.cpp.o:
+	$(MAKE) -f CMakeFiles/DemoCoulombLog.dir/build.make CMakeFiles/DemoCoulombLog.dir/Demos/DemoCoulombLog.cpp.o
+.PHONY : Demos/DemoCoulombLog.cpp.o
+
+Demos/DemoCoulombLog.i: Demos/DemoCoulombLog.cpp.i
+
+.PHONY : Demos/DemoCoulombLog.i
+
+# target to preprocess a source file
+Demos/DemoCoulombLog.cpp.i:
+	$(MAKE) -f CMakeFiles/DemoCoulombLog.dir/build.make CMakeFiles/DemoCoulombLog.dir/Demos/DemoCoulombLog.cpp.i
+.PHONY : Demos/DemoCoulombLog.cpp.i
+
+Demos/DemoCoulombLog.s: Demos/DemoCoulombLog.cpp.s
+
+.PHONY : Demos/DemoCoulombLog.s
+
+# target to generate assembly for a file
+Demos/DemoCoulombLog.cpp.s:
+	$(MAKE) -f CMakeFiles/DemoCoulombLog.dir/build.make CMakeFiles/DemoCoulombLog.dir/Demos/DemoCoulombLog.cpp.s
+.PHONY : Demos/DemoCoulombLog.cpp.s
+
+Demos/DemoIBS.o: Demos/DemoIBS.cpp.o
+
+.PHONY : Demos/DemoIBS.o
+
+# target to build an object file
+Demos/DemoIBS.cpp.o:
+	$(MAKE) -f CMakeFiles/DemoIBS.dir/build.make CMakeFiles/DemoIBS.dir/Demos/DemoIBS.cpp.o
+.PHONY : Demos/DemoIBS.cpp.o
+
+Demos/DemoIBS.i: Demos/DemoIBS.cpp.i
+
+.PHONY : Demos/DemoIBS.i
+
+# target to preprocess a source file
+Demos/DemoIBS.cpp.i:
+	$(MAKE) -f CMakeFiles/DemoIBS.dir/build.make CMakeFiles/DemoIBS.dir/Demos/DemoIBS.cpp.i
+.PHONY : Demos/DemoIBS.cpp.i
+
+Demos/DemoIBS.s: Demos/DemoIBS.cpp.s
+
+.PHONY : Demos/DemoIBS.s
+
+# target to generate assembly for a file
+Demos/DemoIBS.cpp.s:
+	$(MAKE) -f CMakeFiles/DemoIBS.dir/build.make CMakeFiles/DemoIBS.dir/Demos/DemoIBS.cpp.s
+.PHONY : Demos/DemoIBS.cpp.s
+
+Demos/DemoIntegrators.o: Demos/DemoIntegrators.cpp.o
+
+.PHONY : Demos/DemoIntegrators.o
+
+# target to build an object file
+Demos/DemoIntegrators.cpp.o:
+	$(MAKE) -f CMakeFiles/DemoIntegrators.dir/build.make CMakeFiles/DemoIntegrators.dir/Demos/DemoIntegrators.cpp.o
+.PHONY : Demos/DemoIntegrators.cpp.o
+
+Demos/DemoIntegrators.i: Demos/DemoIntegrators.cpp.i
+
+.PHONY : Demos/DemoIntegrators.i
+
+# target to preprocess a source file
+Demos/DemoIntegrators.cpp.i:
+	$(MAKE) -f CMakeFiles/DemoIntegrators.dir/build.make CMakeFiles/DemoIntegrators.dir/Demos/DemoIntegrators.cpp.i
+.PHONY : Demos/DemoIntegrators.cpp.i
+
+Demos/DemoIntegrators.s: Demos/DemoIntegrators.cpp.s
+
+.PHONY : Demos/DemoIntegrators.s
+
+# target to generate assembly for a file
+Demos/DemoIntegrators.cpp.s:
+	$(MAKE) -f CMakeFiles/DemoIntegrators.dir/build.make CMakeFiles/DemoIntegrators.dir/Demos/DemoIntegrators.cpp.s
+.PHONY : Demos/DemoIntegrators.cpp.s
 
 Demos/DemoNumericFunctions.o: Demos/DemoNumericFunctions.cpp.o
 
@@ -518,19 +638,31 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... ode"
-	@echo "... twiss"
-	@echo "... integrators"
-	@echo "... clog"
-	@echo "... numfunc"
-	@echo "... raddamp"
-	@echo "... DemoRadDamping"
-	@echo "... DemoNumericFunctions"
-	@echo "... models"
 	@echo "... IBSLib"
+	@echo "... models"
+	@echo "... DemoRadDamping"
+	@echo "... raddamp"
+	@echo "... DemoCoulombLog"
+	@echo "... DemoIntegrators"
+	@echo "... DemoNumericFunctions"
+	@echo "... numfunc"
+	@echo "... DemoIBS"
+	@echo "... ode"
+	@echo "... clog"
+	@echo "... integrators"
+	@echo "... twiss"
 	@echo "... CoulombLog/CoulombLogFunctions.o"
 	@echo "... CoulombLog/CoulombLogFunctions.i"
 	@echo "... CoulombLog/CoulombLogFunctions.s"
+	@echo "... Demos/DemoCoulombLog.o"
+	@echo "... Demos/DemoCoulombLog.i"
+	@echo "... Demos/DemoCoulombLog.s"
+	@echo "... Demos/DemoIBS.o"
+	@echo "... Demos/DemoIBS.i"
+	@echo "... Demos/DemoIBS.s"
+	@echo "... Demos/DemoIntegrators.o"
+	@echo "... Demos/DemoIntegrators.i"
+	@echo "... Demos/DemoIntegrators.s"
 	@echo "... Demos/DemoNumericFunctions.o"
 	@echo "... Demos/DemoNumericFunctions.i"
 	@echo "... Demos/DemoNumericFunctions.s"

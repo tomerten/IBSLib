@@ -1,3 +1,5 @@
+#include "CoulombLogFunctions.hpp"
+#include "Integrators.hpp"
 #include "NumericFunctions.hpp"
 #include "RadiationDamping.hpp"
 #include "Twiss.hpp"
@@ -59,8 +61,8 @@ int main() {
   double frev = 1.0 / trev;
   double omega = 2.0 * pi * frev;
   double Lpwd = 1.0e6;
+  double sigs = 0.005;
   double neta = eta(gammar, gammatr);
-  double sige0 = sigefromsigs(2.0 * pi * 1.2e6, 0.001, 5e-3, gammar, gammatr);
   double VrfEffeV =
       EffectiveRFVoltageInElectronVolt(173, -1, 1, harmon, voltages);
   double VrfEffeVp =
@@ -73,6 +75,7 @@ int main() {
       SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages, epsilon);
   double qs =
       SynchrotronTune(omega, U0, -1, 1, harmon, voltages, phis, neta, pc);
+  double sige0 = sigefromsigs(omega, sigs, qs, gammar, gammatr);
   double omegas = qs * omega;
   double VrfEffeVPWD = VeffRFeVPotentialWellDistortion(
       173, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005, pc);
@@ -85,56 +88,56 @@ int main() {
   double bxavg = len / (2.0 * pi * twissheadermap["Q1"]);
   double byavg = len / (2.0 * pi * twissheadermap["Q2"]);
 
-  blue();
-  printf("\nRadiation Damping\n");
-  printf("=================\n");
-
-  green();
-  printf("\nRadiation Smooth Ring Approximation\n");
-  reset();
-
-  radint = RadiationDampingApprox(len, gammar, gammatr, 4.35, bxavg, byavg);
-  printradint(radint);
-
-  green();
-  printf("\nRadiation Damping element by element\n");
-  reset();
-
+  // va
+  double pnumber = 1e10;
+  double ex = 5e-9;
+  double ey = 1e-10;
+  double dxavg = twissheadermap["DXRMS"];
+  double dyavg = twissheadermap["DYRMS"];
+  double charge = twissheadermap["CHARGE"];
+  double en0 = twissheadermap["ENERGY"];
+  double mass = twissheadermap["MASS"];
+  double sigt = sigs / clight;
+  bool printout = true;
   radint = RadiationDampingLattice(twisstablemap);
-  printradint(radint);
-
-  phis = 173.49249640825525;
-  qs = SynchrotronTune(omega, U0, -1, 1, harmon, voltages, phis, neta, pc);
-  omegas = qs * omega;
   double *equi =
       RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
           twissheadermap, radint, aatom, omegas);
-  green();
-  printf("\nRadiation Damping Equib \n");
+
+  blue();
+  printf("Integrator Functions\n");
+  printf("====================\n");
   reset();
 
-  printf("%-30s %10.6e (%s)\n", "Taux :", equi[0], "s");
-  printf("%-30s %10.6e (%s)\n", "Tauy :", equi[1], "s");
-  printf("%-30s %10.6e (%s)\n", "Taus :", equi[2], "s");
-  printf("%-30s %10.6e (%s)\n", "exinf :", equi[3], "");
-  printf("%-30s %10.6e (%s)\n", "eyinf :", equi[4], "");
-  printf("%-30s %10.6e (%s)\n", "sigeoe2 :", equi[5], "");
-  printf("%-30s %10.6e (%s)\n", "sigt :", equi[6], "");
-  printf("%-30s %10.6e (%s)\n", "jx :", equi[7], "");
-  printf("%-30s %10.6e (%s)\n", "jy :", equi[8], "");
-
+  double tau[3];
+  a = 1, b = 2;
+  double c = 3;
+  double c1 = 4, cx = 5, cy = 6, cprime = 7;
+  double cyy = 8, tl1 = 9, tl2 = 10, tx1 = 11, tx2 = 12, ty1 = 13, ty2 = 14;
+  SimpsonDecade(a, b, c, c1, cx, cy, cprime, cyy, tl1, tl2, tx1, tx2, ty1, ty2,
+                tau);
   green();
-  printf("\nCritical Energy Calculations. \n");
+  printf("SimpsonDecade madx...\n");
   reset();
-  double *critical;
-  critical = RadiationCriticalEnergy(rho, gammar, omega);
+  printf("%-30s %20.6e (%s)\n", "al :", tau[0], "");
+  printf("%-30s %20.6e (%s)\n", "ax :", tau[1], "");
+  printf("%-30s %20.6e (%s)\n", "ay :", tau[2], "");
+  printf("\n\n");
 
-  printf("%-30s %10.6e (%s)\n", "omega_crit :", critical[0], "");
-  printf("%-30s %10.6e (%s)\n", "Theta_crit :", critical[1], "");
-  printf("%-30s %10.6e (%s)\n", "E_crit :", critical[2], "eV");
-  printf("%-30s %10.6e (%s)\n", "E_per_photon_avg :", critical[3], "eV/photon");
-  printf("%-30s %10.6e (%s)\n", "N_photons_avg_per_turn :", critical[4],
-         "1/turn");
+  printf("%-30s %20.6e (%s)\n",
+         "Variable integrand :", IBSIntegralIntegrand(1, 2, 3, 4, 5, 6), "");
+  printf("%-30s %20.6e (%s)\n", "Standard Simpson integral :",
+         simpson(IBSIntegralIntegrand, 1, 2, 3, 4, 5, 6, 7, 1000), "");
+
+  printf("\n\n");
+  green();
+  printf("Standard SimpsonDecade ...\n");
+  reset();
+  intSimpson(IBSIntegralIntegrand, 1, 2, 3, 4, 6, 7, 8, 9, 10, tau);
+  printf("%-30s %20.6e (%s)\n", "al :", tau[0], "");
+  printf("%-30s %20.6e (%s)\n", "ax :", tau[1], "");
+  printf("%-30s %20.6e (%s)\n", "ay :", tau[2], "");
+  printf("\n\n");
 
   return 0;
 }

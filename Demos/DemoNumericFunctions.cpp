@@ -80,7 +80,6 @@ int main() {
   double omega = 2.0 * pi * frev;
   double Lpwd = 1.0e6;
   double neta = eta(gammar, gammatr);
-  double sige0 = sigefromsigs(2.0 * pi * 1.2e6, 0.001, 5e-3, gammar, gammatr);
   double *radint;
   radint = RadiationDampingLattice(twisstablemap);
   double U0 = RadiationLossesPerTurn(twissheadermap, radint[1], emass / pmass);
@@ -93,6 +92,7 @@ int main() {
   double VrfEffeVU0 = VeffRFeVRadlosses(phis, U0, -1, 1, harmon, voltages);
   double qs =
       SynchrotronTune(omega, U0, -1, 1, harmon, voltages, phis, neta, pc);
+  double sige0 = sigefromsigs(omega, 0.005, qs, gammar, gammatr);
   double omegas = qs * omega;
   double VrfEffeVPWD = VeffRFeVPotentialWellDistortion(
       173, U0, -1, 1, harmon, voltages, Lpwd, 1, 0.005, pc);
@@ -123,8 +123,6 @@ int main() {
   printf("%-30s %20.6e (%s)\n", "synchrotronTune :", qs, "");
   printf("%-30s %20.6e (%s)\n", "synchrotron angularfrequency :", qs * omega,
          "Hz");
-  printf("%-30s %20.6e (%s)\n", "synchrotron angularfrequency :",
-         sigsfromsige(sqrt(4.8e-7), gammar, gammatr, omegas), "Hz");
   printf("%-30s %20.6e (%s)\n", "VeffRFeVPWD :", VrfEffeVPWD, "eV");
   printf("%-30s %20.6e (%s)\n", "VeffRFeVPWDprime:", VrfEffeVPWDp, "");
   printf("%-30s %20.6e (%s)\n", "synchronuousphasewithPWD :", phisPWD, "");

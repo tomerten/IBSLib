@@ -30,11 +30,20 @@ Current Supported Models
 - Conte-Martini
 - Madx (CERN note AB-2006-002) using `TWINT` and `SIMPSONDECADE` methods to perform the integration.
 
+Coublomb Log methods
+====================
+
+- twclog - uses element by element twiss data
+- twclogtail - uses element by element twiss data
+- CoublombLog - uses ring averages 
+- TailCutCoulombLog - uses ring averages
+
+
 Integration methods
 ===================
 
-- Simpson (standard) implementation)
-- Simspon per decade for covering large spread in integration ranges (ususally 50 orders of magnitude difference between low and high)
+- Simpson (standard implementation)
+- SimpsonDecade - Simspon per decade for covering large spread in integration ranges (ususally 50 orders of magnitude difference between low and high)
 - TWINT, based on GSL QUAD method
 
 Radiation Damping

@@ -2,20 +2,31 @@
 #include "Integrators.hpp"
 #include "NumericFunctions.hpp"
 #include <iostream>
+#include <map>
 #include <math.h>
 #include <stdio.h>
+#include <string>
+#include <vector>
+/*
+================================================================================
+================================================================================
+METHOD TO QUICKLY PRINT OUT THE IBS GROWTH TIMES AND IBS GROWTH RATES.
 
-/* reminder on how to pass arrays
-double *arraytest(int array[][4]) {
-  static double output[4];
-  for (int i = 0; i < 2; ++i) {
-    output[i] = 0;
-    for (int j = 0; j < 4; ++j) {
-      output[i] += array[i][j];
-    }
-  }
-  return output;
-}
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+================================================================================
+  Arguments:
+  ----------
+    - double[3] output
+        array with growth rates
+
+================================================================================
+================================================================================
 */
 void printouts(double output[3]) {
   // factor 2 and 0.5 are for converting to emittance values from sigma values
@@ -26,78 +37,71 @@ void printouts(double output[3]) {
   printf("    Vertical     = %15.6f\n", 2.0 * output[2]);
 
   printf("\n");
-  printf("    (Weighted) average lifetimes - emittances (sec)\n");
+  printf("    (Weighted) average growth - emittances (sec)\n");
   printf("    Longitudinal = %15.6f\n", 0.5 / output[0]);
   printf("    Horizontal   = %15.6f\n", 0.5 / output[1]);
   printf("    Vertical     = %15.6f\n", 0.5 / output[2]);
 }
 
 /*
--------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
--------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 05/02/2021
-COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+IBS MODEL PIWINSKI SMOOTH LATTICE APPROXIMATION USING RING AVERAGES
 
-    DESCRIPTION :
-        IBS ROUTINE PIWINSKI USING SMOOTH PARAMETERS
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-    REF:
-        HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS P.126
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
-    DETAILS:
-    TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING MADX TWISS HEADER
-        0 -> gamma
-        1 -> length
-        3 -> gammatr
-        4 -> qx
-        6 -> qy
--------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-dponp (double)          : momentum spread
-twiss (double[6])       : twiss header (see DETAILS above)
-aatom (double)          : atomic number - for electrons this is
-electron_mass_energy_MeV / proton_mass_energy_MeV
--------------------------------------------------------------------------------
-output (double[3])      : growth rates for emittances
-    0 -> ap
-    1 -> ax
-    2 -> ay
--------------------------------------------------------------------------------
-USED VARIABLES:
-pi       : constant
-c        : speed of light
-betar    : relativistic beta
-betxAvg  : average betax derived from horizontal tune
-betyAvg  : average betay derived from vertical tune
-xdisp    : average horizontal dispersion derived from relativistic transition
-gamma    : relativistic gamma
-q1       : horizontal tune
-q2       : vertical tune
-rmsx     : RMS x
-rmsy     : RMX y
-r0       : classical radius
--------------------------------------------------------------------------------
+  REF:
+    - HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS P.126
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - double r0
+        classical particle radius
+
+
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
 */
 double *PiwinskiSmooth(double pnumber, double ex, double ey, double sigs,
-                       double dponp, double twiss[5], double r0) {
+                       double dponp, map<string, double> &twiss, double r0) {
   const double c = 299792458.0;
   const double pi = 3.141592653589793;
 
   static double output[3];
 
-  double gamma = twiss[0];
-  double len = twiss[1];
-  double gammatr = twiss[2];
-  double q1 = twiss[3];
-  double q2 = twiss[4];
+  double gamma = twiss["GAMMA"];
+  double len = twiss["LENGTH"];
+  double gammatr = twiss["GAMMATR"];
+  double q1 = twiss["Q1"];
+  double q2 = twiss["Q2"];
 
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
@@ -142,75 +146,62 @@ double *PiwinskiSmooth(double pnumber, double ex, double ey, double sigs,
 }
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 05/02/2021
-COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+IBS MODEL PIWINSKI LATTICE ELEMENT BY ELEMENT
 
-    DESCRIPTION :
-        IBS ROUTINE PIWINSKI FOR INDIVIDUAL ELEMENTS
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-    REF:
-        HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> length
+  REF:
+    - HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS P.126
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> dx
----------------------------------------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-dponp (double)          : momentum spread
-twissheader (double[4]) : twiss header containing (see details above)
-n (int)                 : number of columns in the twiss data table
-twiss (double[])        : twiss table data for the required columns (see DETAILS
-above) aatom (double)          : atomic number - for electrons this is
-electron_mass_energy_MeV / proton_mass_energy_MeV
----------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates fro emittances
-    0 -> ap
-    1 -> ax
-    2 -> ay
----------------------------------------------------------------------------------------------------------------
-USED VARIABLES:
-pi       : constant
-c        : speed of light
-betar    : relativistic beta
-betxAvg  : average betax derived from horizontal tune
-betyAvg  : average betay derived from vertical tune
-xdisp    : average horizontal dispersion derived from relativistic transition
-gamma    : relativistic gamma
-q1       : horizontal tune
-q2       : vertical tune
-rmsx     : RMS x
-rmsy     : RMX y
-r0       : classical radius
----------------------------------------------------------------------------------------------------------------
+
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
 */
 double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
-                        double dponp, double twissheader[2], int n,
-                        double (*twissdata)[4], // shape [4,n]
-                        double r0) {
+                        double dponp, map<string, double> &twissheader,
+                        map<string, vector<double>> &twissdata, double r0) {
   const double c = clight;
 
   static double output[3];
-  double gamma = twissheader[0];
-  double len = twissheader[1];
+  double gamma = twissheader["GAMMA"];
+  double len = twissheader["LENGTH"];
 
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
@@ -226,6 +217,7 @@ double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
   double alfay0 = 0.0;
   double alfap0 = 0.0;
 
+  int n = twissdata["L"].size();
 #pragma omp parallel for shared(twissdata) reduction(+ : alfax0, alfay0, alfap0)
   for (int i = 0; i < n; i++) {
     // fmohl accuracy
@@ -233,10 +225,10 @@ double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
 
     // local naming of twiss data
     // making code more readable (?efficiency)
-    double *L = &twissdata[i][0];
-    double *bx = &twissdata[i][1];
-    double *by = &twissdata[i][2];
-    double *dx = &twissdata[i][3];
+    double *L = &twissdata["L"][i];
+    double *bx = &twissdata["BETX"][i];
+    double *by = &twissdata["BETY"][i];
+    double *dx = &twissdata["DX"][i];
 
     double rmsx = sqrt(*bx * ex);
     double rmsy = sqrt(*by * ey);
@@ -269,78 +261,64 @@ double *PiwinskiLattice(double pnumber, double ex, double ey, double sigs,
 }
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : MIKE BLASKIEWISC, RODERIK BRUCE, MICHAELA SCHAUMANN, TOM
-MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE TYPES
-(P-PB)
-AUTHOR    : TOM MERTENS
-DATE      : 05/02/2021
-COPYRIGHT : CERN / HZB
+================================================================================
+================================================================================
+IBS MODEL PIWINSKI LATTICE MODIFIED TAKING DPX INTO ACCOUNT IN CURLY H
 
-    DESCRIPTION :
-        IBS ROUTINE PIWINSKI FOR INDIVIDUAL ELEMENTS
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-    REF:
-        HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> length
+  REF:
+    - HANDBOOK FOR ACCELERATOR PHYSICISTS AND ENGINEERS P.126
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> dx
-            4 -> dpx
-            5 -> alfx
----------------------------------------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-dponp (double)          : momentum spread
-twissheader (double[4]) : twiss header containing (see details above)
-n (int)                 : number of columns in the twiss data table
-twiss (double[])        : twiss table data for the required columns (see DETAILS
-above) aatom (double)          : atomic number - for electrons this is
-electron_mass_energy_MeV / proton_mass_energy_MeV
----------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates for emittances
-    0 -> ap
-    1 -> ax
-    2 -> ay
----------------------------------------------------------------------------------------------------------------
-USED VARIABLES:
-pi       : constant
-c        : speed of light
-betar    : relativistic beta
-betxAvg  : average betax derived from horizontal tune
-betyAvg  : average betay derived from vertical tune
-xdisp    : average horizontal dispersion derived from relativistic transition
-gamma    : relativistic gamma
-q1       : horizontal tune
-q2       : vertical tune
-rmsx     : RMS x
-rmsy     : RMX y
-r0       : classical radius
----------------------------------------------------------------------------------------------------------------
+
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
 */
 double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
                                 double sigs, double dponp,
-                                double twissheader[5], int n,
-                                double (*twissdata)[6], // shape [6,n]
+                                map<string, double> &twissheader,
+                                map<string, vector<double>> &twissdata,
                                 double r0) {
   const double c = clight;
 
   static double output[3];
-  double gamma = twissheader[0];
-  double len = twissheader[1];
+  double gamma = twissheader["GAMMA"];
+  double len = twissheader["LENGTH"];
 
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
@@ -355,16 +333,17 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
   double alfax0 = 0.0;
   double alfay0 = 0.0;
   double alfap0 = 0.0;
+  int n = twissdata["L"].size();
 
 #pragma omp parallel for shared(twissdata) reduction(+ : alfax0, alfay0, alfap0)
   for (int i = 0; i < n; i++) {
     // local naming
-    double *L = &twissdata[i][0];
-    double *bx = &twissdata[i][1];
-    double *by = &twissdata[i][2];
-    double *dx = &twissdata[i][3];
-    double *dpx = &twissdata[i][4];
-    double *alfx = &twissdata[i][5];
+    double *L = &twissdata["L"][i];
+    double *bx = &twissdata["BETX"][i];
+    double *by = &twissdata["BETY"][i];
+    double *dx = &twissdata["DX"][i];
+    double *dpx = &twissdata["DPX"][i];
+    double *alfx = &twissdata["ALFX"][i];
 
     // fmohl accuracy
     int npp = 1000;
@@ -404,91 +383,65 @@ double *PiwinskiLatticeModified(double pnumber, double ex, double ey,
 }
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : RODERIK BRUCE, TOM MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE
-TYPES (P-PB) AUTHOR    : TOM MERTENS DATE      : 06/02/2021 COPYRIGHT : CERN
-/ HZB
+================================================================================
+================================================================================
+IBS MODEL NAGAITSEV
 
-    DESCRIPTION :
-      IBS ROUTINE NAGAITSEV
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            2 -> length
-            3 -> energy
-            4 -> mass
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> dx
-            4 -> dpx
-            5 -> alfx
-
-    REF:
+  REF:
         PRSTAB 8, 064403 (2005)
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
----------------------------------------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-dponp (double)          : momentum spread
-twissheader (double[4]) : twiss header containing (see details above)
-n (int)                 : number of columns in the twiss data table
-twiss (double[])        : twiss table data for the required columns (see
-DETAILS above) aatom (double)          : atomic number - for electrons this
-is electron_mass_energy_MeV / proton_mass_energy_MeV
----------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates for emittances
-    0 -> ap
-    1 -> ax
-    2 -> ay
 
----------------------------------------------------------------------------------------------------------------
-pnumber  : number of real particles in the bunch
-epsx     : hor emit
-epsy     : ver emit
-sigs     : bunch len
-dponp    : momentum spread
-pi       : constant
-circ     : accelerator circumference
-clight   : speed of light
-qatom    : charge
-aatom    : atomic number
-betar    : relativistic beta
-betx     : BETX madx
-bety     : BETY madx
-dx       : DX madx
-dxp      : DPX madx
-l        : L madx
-alfx     : ALFX madx
-nelem    : number of elements
-gamma0   : relativistic gamma
-alfap0   : longitudinal growth rate
-alfax0   : hor growth rate
-alfay0   : ver growth rate
----------------------------------------------------------------------------------------------------------------
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
 */
 double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
-                  double dponp, double twissheader[5], int n,
-                  double (*twissdata)[6], // shape [6,n]
-                  double r0) {
+                  double dponp, map<string, double> &twissheader,
+                  map<string, vector<double>> &twissdata, double r0) {
   const double c = clight;
 
   static double output[3];
-  double gamma = twissheader[0];
-  double charge = twissheader[1];
-  double len = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double len = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
@@ -501,15 +454,16 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
   double betar3 = betar * betar * betar;
   double gamma5 = gamma * gamma * gamma * gamma * gamma;
 
+  int n = twissdata["L"].size();
 #pragma omp parallel for shared(twissdata,len) reduction(+: alfap0, alfax0,alfay0)
   for (int i = 0; i < n; i++) {
     // local naming
-    double *L = &twissdata[i][0];
-    double *bx = &twissdata[i][1];
-    double *by = &twissdata[i][2];
-    double *dx = &twissdata[i][3];
-    double *dpx = &twissdata[i][4];
-    double *alfx = &twissdata[i][5];
+    double *L = &twissdata["L"][i];
+    double *bx = &twissdata["BETX"][i];
+    double *by = &twissdata["BETY"][i];
+    double *dx = &twissdata["DX"][i];
+    double *dpx = &twissdata["DPX"][i];
+    double *alfx = &twissdata["ALFX"][i];
 
     double phi = *dpx + (*alfx * (*dx / *bx));
     double axx = *bx / ex;
@@ -566,21 +520,69 @@ double *Nagaitsev(double pnumber, double ex, double ey, double sigs,
   return output;
 }
 
+/*
+================================================================================
+================================================================================
+IBS MODEL NAGAITSEV WITH TAILCUT
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+        PRSTAB 8, 064403 (2005)
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
+
+
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
+*/
 // doubling of code to avoid large amount of if evaluations when
 // runnig long simulations
 double *Nagaitsevtailcut(double pnumber, double ex, double ey, double sigs,
-                         double dponp, double twissheader[5], int n,
-                         double (*twissdata)[12], // shape [6,n]
-                         double r0, double aatom) {
+                         double dponp, map<string, double> &twissheader,
+                         map<string, vector<double>> &twissdata, double r0,
+                         double aatom) {
   const double c = clight;
 
   static double output[3];
-  double gamma = twissheader[0];
-  double charge = twissheader[1];
-  double len = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
-
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double len = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
   // necessary parameters
   // double r0 = charge * charge / aatom * 1.54e-18;
 
@@ -592,21 +594,23 @@ double *Nagaitsevtailcut(double pnumber, double ex, double ey, double sigs,
   double betar3 = betar * betar * betar;
   double gamma5 = gamma * gamma * gamma * gamma * gamma;
 
+  int n = twissdata["L"].size();
+
 #pragma omp parallel for shared(twissdata,len) reduction(+: alfap0, alfax0,alfay0)
   for (int i = 0; i < n; i++) {
     // local naming
-    double *L = &(twissdata[i][0]);
-    double *bx = &(twissdata[i][1]);
-    double *by = &(twissdata[i][2]);
-    double *dx = &(twissdata[i][3]);
-    double *dpx = &(twissdata[i][4]);
-    double *dy = &(twissdata[i][5]);
-    double *dpy = &(twissdata[i][6]);
-    double *ax = &(twissdata[i][7]);
-    double *ay = &(twissdata[i][8]);
-    double *angle = &(twissdata[i][9]);
-    double *k1l = &(twissdata[i][10]);
-    double *k1sl = &(twissdata[i][11]);
+    double *L = &(twissdata["L"][i]);
+    double *bx = &(twissdata["BETX"][i]);
+    double *by = &(twissdata["BETY"][i]);
+    double *dx = &(twissdata["DX"][i]);
+    double *dpx = &(twissdata["DPX"][i]);
+    double *dy = &(twissdata["DY"][i]);
+    double *dpy = &(twissdata["DPY"][i]);
+    double *ax = &(twissdata["ALFX"][i]);
+    double *ay = &(twissdata["ALFY"][i]);
+    double *angle = &(twissdata["ANGLE"][i]);
+    double *k1l = &(twissdata["K1L"][i]);
+    double *k1sl = &(twissdata["K1SL"][i]);
 
     double phi = *dpx + (*ax * (*dx / *bx));
     double axx = *bx / ex;
@@ -668,6 +672,8 @@ double *Nagaitsevtailcut(double pnumber, double ex, double ey, double sigs,
 }
 
 /*
+********************************************************************************
+================================================================================
 ================================================================================
 
 IBS MODELS USING DEDICATED INTEGRATORS
@@ -677,89 +683,63 @@ NOTE:
     USES MADX TWISS TABLE WITH TWISS AT CENTER OF ELEMENTS!!!!!!
 
 ================================================================================
+================================================================================
+********************************************************************************
 */
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : CERN MADX COPYRIGHT
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE
-TYPES (P-PB)
+================================================================================
+================================================================================
+IBS MODEL ZIMMERMAN MADX
 
-    AUTHOR    :
-        TOM MERTENS DATE      : 01/06/2021 COPYRIGHT : CERN/ HZB
+================================================================================
+  AUTHORS:
+    - FRANK ZIMMERMAN
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
 
-    REF:
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
         CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
-    DESCRIPTION :
-      IBS ROUTINE MADX
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            2 -> length
-            3 -> energy
-            4 -> mass
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> alfax
-            4 -> alfay
-            5 -> dx
-            6 -> dpx
-            7 -> dy
-            8 -> dpy
-
----------------------------------------------------------------------------------------------------------------
-pnumber (double)        : number of real particles in the bunch
-ex (double)             : horizontal emittance
-ey (double)             : vertical emittance
-sigs (double)           : bunch length
-dponp (double)          : momentum spread
-twissheader (double[4]) : twiss header containing (see details above)
-n (int)                 : number of rows in the twiss data table
-twiss (double[])        : twiss table data for the required columns (see
-DETAILS above) aatom (double)          : atomic number - for electrons this
-is electron_mass_energy_MeV / proton_mass_energy_MeV
----------------------------------------------------------------------------------------------------------------
-output (double[3])      : growth rates for emittances
-    0 -> ap
-    1 -> ax
-    2 -> ay
-
----------------------------------------------------------------------------------------------------------------
-pnumber  : number of real particles in the bunch
-epsx     : hor emit
-epsy     : ver emit
-sigs     : bunch len
-dponp    : momentum spread
-pi       : constant
-circ     : accelerator circumference
-clight   : speed of light
-qatom    : charge
-aatom    : atomic number
-betar    : relativistic beta
-betx     : BETX madx
-bety     : BETY madx
-dx       : DX madx
-dxp      : DPX madx
-l        : L madx
-alfx     : ALFX madx
-nelem    : number of elements
-gamma0   : relativistic gamma
-alfap0   : longitudinal growth rate
-alfax0   : hor growth rate
-alfay0   : ver growth rate
----------------------------------------------------------------------------------------------------------------
+================================================================================
+================================================================================
 */
 double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
-                double twissheader[5], int n, double (*twissdata)[9], double r0,
+                map<string, double> &twissheader,
+                map<string, vector<double>> &twissdata, double r0,
                 bool printout) {
   const double zero = 0.0;
   const double one = 1.0;
@@ -767,11 +747,11 @@ double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
 
   static double output[3];
 
-  double gamma = twissheader[0];
-  double charge = twissheader[1];
-  double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // relativistic beta
   double betar = sqrt(1 - 1 / (gamma * gamma));
@@ -815,18 +795,19 @@ double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
   double hscwtdy = zero;
 
   // CoulombLog(pnumber, ex, ey, twissheader, sige, sigs, aatom, 0, clog);
+  int n = twissdata["L"].size();
 
 #pragma omp parallel for shared(twissdata,circ, alfas) reduction(+: alfap0, alfax0, alfay0, sbxb, sbyb, salxb, salyb,sdxb, sdyb )
   for (int i = 0; i < n; i++) {
-    double dels = twissdata[i][0]; // l
-    double betax = twissdata[i][1];
-    double betay = twissdata[i][2];
-    double alx = twissdata[i][3]; // alfx
-    double aly = twissdata[i][4]; // alfy
-    double dx = betar * twissdata[i][5];
-    double dpx = betar * twissdata[i][6];
-    double dy = betar * twissdata[i][7];
-    double dpy = betar * twissdata[i][8];
+    double dels = twissdata["L"][i]; // l
+    double betax = twissdata["BETX"][i];
+    double betay = twissdata["BETY"][i];
+    double alx = twissdata["ALFX"][i]; // alfx
+    double aly = twissdata["ALFY"][i]; // alfy
+    double dx = betar * twissdata["DX"][i];
+    double dpx = betar * twissdata["DPX"][i];
+    double dy = betar * twissdata["DY"][i];
+    double dpy = betar * twissdata["DPY"][i];
 
     sbxb = sbxb + betax * dels;
     sbxinv = sbxinv + dels / betax;
@@ -957,20 +938,71 @@ double *ibsmadx(double pnumber, double ex, double ey, double sigs, double sige,
   return output;
 }
 
+/*
+================================================================================
+================================================================================
+IBS MODEL ZIMMERMAN MADX WITH TAILCUT
+
+================================================================================
+  AUTHORS:
+    - FRANK ZIMMERMAN
+    - TOM MERTENS
+    - MIKE BLASKIEWISC
+    - RODERIK BRUCE
+    - MICHAELA SCHAUMANN
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+        CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
+
+
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
+*/
 double *ibsmadxtailcut(double pnumber, double ex, double ey, double sigs,
-                       double sige, double twissheader[5], int n,
-                       double (*twissdata)[12], double r0, double aatom) {
+                       double sige, map<string, double> &twissheader,
+                       map<string, vector<double>> &twissdata, double r0,
+                       double aatom) {
   const double zero = 0.0;
   const double one = 1.0;
   const double two = 2.0;
 
   static double output[3];
 
-  double gamma = twissheader[0];
-  double charge = twissheader[1];
-  double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // relativistic beta
   double betar = sqrt(1 - 1 / (gamma * gamma));
@@ -1011,23 +1043,25 @@ double *ibsmadxtailcut(double pnumber, double ex, double ey, double sigs,
   double hscwtd = zero;
   double hscwtdy = zero;
 
+  int n = twissdata["L"].size();
+
   // CoulombLog(pnumber, ex, ey, twissheader, sige, sigs, aatom, 0, clog);
 
 #pragma omp parallel for shared(twissdata,circ, alfas) reduction(+: alfap0, alfax0, alfay0, sbxb, sbyb, salxb, salyb,sdxb, sdyb )
   for (int i = 0; i < n; i++) {
     // local naming
-    double *L = &(twissdata[i][0]);
-    double *bx = &(twissdata[i][1]);
-    double *by = &(twissdata[i][2]);
-    double *dx = &(twissdata[i][3]);
-    double *dpx = &(twissdata[i][4]);
-    double *dy = &(twissdata[i][5]);
-    double *dpy = &(twissdata[i][6]);
-    double *ax = &(twissdata[i][7]);
-    double *ay = &(twissdata[i][8]);
-    double *angle = &(twissdata[i][9]);
-    double *k1l = &(twissdata[i][10]);
-    double *k1sl = &(twissdata[i][11]);
+    double *L = &(twissdata["L"][i]);
+    double *bx = &(twissdata["BETX"][i]);
+    double *by = &(twissdata["BETY"][i]);
+    double *dx = &(twissdata["DX"][i]);
+    double *dpx = &(twissdata["DPX"][i]);
+    double *dy = &(twissdata["DY"][i]);
+    double *dpy = &(twissdata["DPY"][i]);
+    double *ax = &(twissdata["ALFX"][i]);
+    double *ay = &(twissdata["ALFY"][i]);
+    double *angle = &(twissdata["ANGLE"][i]);
+    double *k1l = &(twissdata["K1L"][i]);
+    double *k1sl = &(twissdata["K1SL"][i]);
 
     sbxb = sbxb + *bx * *L;
     sbxinv = sbxinv + *L / *bx;
@@ -1081,50 +1115,59 @@ double *ibsmadxtailcut(double pnumber, double ex, double ey, double sigs,
 }
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : TOM MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE
-TYPES (P-PB)
+================================================================================
+================================================================================
+IBS MODEL  BJORKEN-MTINGWA USING STANDARD SIMPSON => FAILNG!!!!!!!!!!!!!
 
-    AUTHOR    :
-        TOM MERTENS DATE      : 01/06/2021 COPYRIGHT : HZB
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
-    REF:
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
         CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
-    DESCRIPTION :
-      IBS ROUTINE MADX
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            2 -> length
-            3 -> energy
-            4 -> mass
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> dx
-            4 -> dpx
-            5 -> alfax
----------------------------------------------------------------------------------------------------------------
-
+================================================================================
+================================================================================
 */
 double *BjorkenMtingwa2(double pnumber, double ex, double ey, double sigs,
-                        double dponp, double twissheader[5], int n,
-                        double (*twissdata)[6], double r0) {
-  const double gamma = twissheader[0];
-  const double charge = twissheader[1];
-  const double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
-
+                        double dponp, map<string, double> &twissheader,
+                        map<string, vector<double>> &twissdata, double r0) {
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
   // initialize
   double alfax0 = 0.0f;
   double alfay0 = 0.0f;
@@ -1134,14 +1177,16 @@ double *BjorkenMtingwa2(double pnumber, double ex, double ey, double sigs,
 
   static double output[3];
 
+  int n = twissdata["L"].size();
+
 #pragma omp parallel for shared(twissdata) reduction(+ : alfap0, alfax0, alfay0)
   for (int i = 0; i < n; i++) {
-    double l = twissdata[i][0];
-    double bx = twissdata[i][1];
-    double by = twissdata[i][2];
-    double dx = twissdata[i][3];
-    double dpx = twissdata[i][4];
-    double ax = twissdata[i][5];
+    double l = twissdata["L"][i];
+    double bx = twissdata["BETX"][i];
+    double by = twissdata["BETY"][i];
+    double dx = twissdata["DX"][i];
+    double dpx = twissdata["DPX"][i];
+    double ax = twissdata["ALFX"][i];
 
     double dx2 = dx * dx;
     // double dy2 = dy * dy;
@@ -1202,52 +1247,60 @@ double *BjorkenMtingwa2(double pnumber, double ex, double ey, double sigs,
 }
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : TOM MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE
-TYPES (P-PB)
+================================================================================
+================================================================================
+IBS MODEL  BJORKEN-MTINGWA USING STANDARD SIMPSON DECADE
 
-    AUTHOR    :
-        TOM MERTENS DATE      : 01/06/2021 COPYRIGHT : HZB
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
-    REF:
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
         CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
-    DESCRIPTION :
-      IBS ROUTINE MADX
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            2 -> length
-            3 -> energy
-            4 -> mass
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> alfx
-            4 -> alfy
-            5 -> dx
-            6 -> dpx
-            7 -> dy
-            8 -> dpy
----------------------------------------------------------------------------------------------------------------
+================================================================================
+================================================================================
 */
 double *BjorkenMtingwa(double pnumber, double ex, double ey, double sigs,
-                       double dponp, double twissheader[], int n,
-                       double (*twissdata)[9], double r0) {
+                       double dponp, map<string, double> &twissheader,
+                       map<string, vector<double>> &twissdata, double r0) {
   // constants
-  const double gamma = twissheader[0];
-  const double charge = twissheader[1];
-  const double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // initialize
   double alfax0 = 0.0;
@@ -1257,17 +1310,19 @@ double *BjorkenMtingwa(double pnumber, double ex, double ey, double sigs,
 
   static double output[3];
 
+  int n = twissdata["L"].size();
+
 #pragma omp parallel for shared(twissdata) reduction(+ : alfap0, alfax0, alfay0)
   for (int i = 0; i < n; i++) {
-    double l = twissdata[i][0];
-    double bx = twissdata[i][1];
-    double by = twissdata[i][2];
-    double ax = twissdata[i][3];
-    double ay = twissdata[i][4];
-    double dx = betar * twissdata[i][5];
-    double dpx = betar * twissdata[i][6];
-    double dy = betar * twissdata[i][7];
-    double dpy = betar * twissdata[i][8];
+    double l = twissdata["L"][i];
+    double bx = twissdata["BETX"][i];
+    double by = twissdata["BETY"][i];
+    double dx = betar * twissdata["DX"][i];
+    double dpx = betar * twissdata["DPX"][i];
+    double ax = twissdata["ALFX"][i];
+    double ay = twissdata["ALFY"][i];
+    double dy = betar * twissdata["DY"][i];
+    double dpy = betar * twissdata["DPY"][i];
 
     double integrals[3];
 
@@ -1293,16 +1348,63 @@ double *BjorkenMtingwa(double pnumber, double ex, double ey, double sigs,
 
   return output;
 }
+
+/*
+================================================================================
+================================================================================
+IBS MODEL  BJORKEN-MTINGWA USING STANDARD SIMPSON DECADE WITH TAILCUT.
+
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+        CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
+
+
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
+*/
 double *BjorkenMtingwatailcut(double pnumber, double ex, double ey, double sigs,
-                              double dponp, double twissheader[], int n,
-                              double (*twissdata)[12], double r0,
+                              double dponp, map<string, double> &twissheader,
+                              map<string, vector<double>> &twissdata, double r0,
                               double aatom) {
   // constants
-  const double gamma = twissheader[0];
-  const double charge = twissheader[1];
-  const double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // initialize
   double alfax0 = 0.0;
@@ -1312,20 +1414,22 @@ double *BjorkenMtingwatailcut(double pnumber, double ex, double ey, double sigs,
 
   static double output[3];
 
+  int n = twissdata["L"].size();
+
 #pragma omp parallel for shared(twissdata) reduction(+ : alfap0, alfax0, alfay0)
   for (int i = 0; i < n; i++) {
-    double *L = &(twissdata[i][0]);
-    double *bx = &(twissdata[i][1]);
-    double *by = &(twissdata[i][2]);
-    double *dx = &(twissdata[i][3]);
-    double *dpx = &(twissdata[i][4]);
-    double *dy = &(twissdata[i][5]);
-    double *dpy = &(twissdata[i][6]);
-    double *ax = &(twissdata[i][7]);
-    double *ay = &(twissdata[i][8]);
-    double *angle = &(twissdata[i][9]);
-    double *k1l = &(twissdata[i][10]);
-    double *k1sl = &(twissdata[i][11]);
+    double *L = &(twissdata["L"][i]);
+    double *bx = &(twissdata["BETX"][i]);
+    double *by = &(twissdata["BETY"][i]);
+    double *dx = &(twissdata["DX"][i]);
+    double *dpx = &(twissdata["DPX"][i]);
+    double *dy = &(twissdata["DY"][i]);
+    double *dpy = &(twissdata["DPY"][i]);
+    double *ax = &(twissdata["ALFX"][i]);
+    double *ay = &(twissdata["ALFY"][i]);
+    double *angle = &(twissdata["ANGLE"][i]);
+    double *k1l = &(twissdata["K1L"][i]);
+    double *k1sl = &(twissdata["K1SL"][i]);
 
     double integrals[3];
 
@@ -1355,53 +1459,60 @@ double *BjorkenMtingwatailcut(double pnumber, double ex, double ey, double sigs,
 }
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : TOM MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE
-TYPES (P-PB)
+================================================================================
+================================================================================
+IBS MODEL CONTE-MARTINI USING STANDARD SIMPSON DECADE
 
-    AUTHOR    :
-        TOM MERTENS DATE      : 01/06/2021 COPYRIGHT : HZB
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
 
-    REF:
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
         CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
-    DESCRIPTION :
-      IBS ROUTINE MADX
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            2 -> length
-            3 -> energy
-            4 -> mass
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> alfx
-            4 -> alfy
-            5 -> dx
-            6 -> dpx
-            7 -> dy
-            8 -> dpy
-
----------------------------------------------------------------------------------------------------------------
+================================================================================
+================================================================================
 */
 double *ConteMartini(double pnumber, double ex, double ey, double sigs,
-                     double dponp, double twissheader[], int n,
-                     double (*twissdata)[9], double r0) {
+                     double dponp, map<string, double> &twissheader,
+                     map<string, vector<double>> &twissdata, double r0) {
   // constants
-  const double gamma = twissheader[0];
-  const double charge = twissheader[1];
-  const double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // initialize
   double alfax0 = 0.0;
@@ -1410,17 +1521,19 @@ double *ConteMartini(double pnumber, double ex, double ey, double sigs,
   double betar = sqrt(1 - 1 / (gamma * gamma));
   static double output[3];
 
+  int n = twissdata["L"].size();
+
 #pragma omp parallel for shared(twissdata) reduction(+ : alfap0, alfax0, alfay0)
   for (int i = 0; i < n; i++) {
-    double l = twissdata[i][0]; // l
-    double bx = twissdata[i][1];
-    double by = twissdata[i][2];
-    double ax = twissdata[i][3]; // alfx
-    double ay = twissdata[i][4]; // alfy
-    double dx = betar * twissdata[i][5];
-    double dpx = betar * twissdata[i][6];
-    double dy = betar * twissdata[i][7];
-    double dpy = betar * twissdata[i][8];
+    double l = twissdata["L"][i];
+    double bx = twissdata["BETX"][i];
+    double by = twissdata["BETY"][i];
+    double dx = twissdata["DX"][i];
+    double dpx = twissdata["DPX"][i];
+    double ax = twissdata["ALFX"][i];
+    double ay = twissdata["ALFY"][i];
+    double dy = betar * twissdata["DY"][i];
+    double dpy = betar * twissdata["DPY"][i];
 
     double integrals[3];
 
@@ -1446,16 +1559,62 @@ double *ConteMartini(double pnumber, double ex, double ey, double sigs,
 
   return output;
 }
+/*
+================================================================================
+================================================================================
+IBS MODEL CONTE-MARTINI USING STANDARD SIMPSON DECADE WITH TAILCUT
 
+================================================================================
+  AUTHORS:
+    - TOM MERTENS
+
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
+        CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
+
+
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
+
+================================================================================
+================================================================================
+*/
 double *ConteMartinitailcut(double pnumber, double ex, double ey, double sigs,
-                            double dponp, double twissheader[], int n,
-                            double (*twissdata)[12], double r0, double aatom) {
+                            double dponp, map<string, double> &twissheader,
+                            map<string, vector<double>> &twissdata, double r0,
+                            double aatom) {
   // constants
-  const double gamma = twissheader[0];
-  const double charge = twissheader[1];
-  const double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // initialize
   double alfax0 = 0.0;
@@ -1464,20 +1623,22 @@ double *ConteMartinitailcut(double pnumber, double ex, double ey, double sigs,
   double betar = sqrt(1 - 1 / (gamma * gamma));
   static double output[3];
 
+  int n = twissdata["L"].size();
+
 #pragma omp parallel for shared(twissdata) reduction(+ : alfap0, alfax0, alfay0)
   for (int i = 0; i < n; i++) {
-    double *l = &(twissdata[i][0]);
-    double *bx = &(twissdata[i][1]);
-    double *by = &(twissdata[i][2]);
-    double *dx = &(twissdata[i][3]);
-    double *dpx = &(twissdata[i][4]);
-    double *dy = &(twissdata[i][5]);
-    double *dpy = &(twissdata[i][6]);
-    double *ax = &(twissdata[i][7]);
-    double *ay = &(twissdata[i][8]);
-    double *angle = &(twissdata[i][9]);
-    double *k1l = &(twissdata[i][10]);
-    double *k1sl = &(twissdata[i][11]);
+    double *l = &(twissdata["L"][i]);
+    double *bx = &(twissdata["BETX"][i]);
+    double *by = &(twissdata["BETY"][i]);
+    double *dx = &(twissdata["DX"][i]);
+    double *dpx = &(twissdata["DPX"][i]);
+    double *dy = &(twissdata["DY"][i]);
+    double *dpy = &(twissdata["DPY"][i]);
+    double *ax = &(twissdata["ALFX"][i]);
+    double *ay = &(twissdata["ALFY"][i]);
+    double *angle = &(twissdata["ANGLE"][i]);
+    double *k1l = &(twissdata["K1L"][i]);
+    double *k1sl = &(twissdata["K1SL"][i]);
 
     double integrals[3];
 
@@ -1506,53 +1667,61 @@ double *ConteMartinitailcut(double pnumber, double ex, double ey, double sigs,
 }
 
 /*
----------------------------------------------------------------------------------------------------------------
-ORIGINAL AUTHORS : TOM MERTENS
----------------------------------------------------------------------------------------------------------------
-VERSION 2.0 : UPDATE TO TRACK MULTIPLE BUNCHES AND HAVE DIFFERENT PARTICLE
-TYPES (P-PB)
+================================================================================
+================================================================================
+IBS MODEL ZIMMERMAN USING STANDARD SIMPSON DECADE
 
-    AUTHOR    :
-        TOM MERTENS DATE      : 01/06/2021 COPYRIGHT : HZB
+================================================================================
+  AUTHORS:
+    - FRANK ZIMMERMAN
+    - TOM MERTENS
 
-    REF:
+  HISTORY:
+    - 08/06/2021 : initial cpp version (Tom)
+
+  REF:
         CERN NOTE AB-2006--002
+================================================================================
+  Arguments:
+  ----------
+    - double pnumber
+        number of particles
+    - double ex
+        hor emittance
+    - double ey
+        ver emittance
+    - double sigs
+        bunch length
+    - double dponp
+        energy spread dp/p (CAREFULL factor beta**2 when using dE/E)
+    - map<string, double> &twiss
+        twiss header madx
+    - map<string, vector<double>> twissdata
+        twiss table madx
+    - double r0
+        classical particle radius
 
-    DESCRIPTION :
-      IBS ROUTINE MADX
 
-    DETAILS:
-        TWISS HEADER
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> gamma
-            1 -> charge
-            2 -> length
-            3 -> energy
-            4 -> mass
+  Returns:
+  --------
+    double[3] output
+        IBS GROWTH RATES
+        0 -> al
+        1 -> ax
+        2 -> ay
 
-        TWISS TABLE
-        TAKES AN ARRAY AS INPUT USING THE FOLLOWING INDEX MAPPING
-            0 -> length
-            1 -> betax
-            2 -> betay
-            3 -> alfx
-            4 -> alfy
-            5 -> dx
-            6 -> dpx
-            7 -> dy
-            8 -> dpy
-
----------------------------------------------------------------------------------------------------------------
+================================================================================
+================================================================================
 */
 double *MadxIBS(double pnumber, double ex, double ey, double sigs, double dponp,
-                double twissheader[5], int n, double (*twissdata)[9],
-                double r0) {
+                map<string, double> &twissheader,
+                map<string, vector<double>> &twissdata, double r0) {
   // constants
-  const double gamma = twissheader[0];
-  const double charge = twissheader[1];
-  const double circ = twissheader[2];
-  double en0 = twissheader[3];
-  double amass = twissheader[4];
+  double gamma = twissheader["GAMMA"];
+  double charge = twissheader["CHARGE"];
+  double circ = twissheader["LENGTH"];
+  double en0 = twissheader["ENERGY"];
+  double amass = twissheader["MASS"];
 
   // initialize
   double alfax0 = 0.0;
@@ -1562,17 +1731,19 @@ double *MadxIBS(double pnumber, double ex, double ey, double sigs, double dponp,
 
   static double output[3];
 
+  int n = twissdata["L"].size();
+
 #pragma omp parallel for shared(twissdata) reduction(+ : alfap0, alfax0, alfay0)
   for (int i = 0; i < n; i++) {
-    double l = twissdata[i][0];
-    double bx = twissdata[i][1];
-    double by = twissdata[i][2];
-    double ax = twissdata[i][3];
-    double ay = twissdata[i][4];
-    double dx = twissdata[i][5];
-    double dpx = twissdata[i][6];
-    double dy = twissdata[i][7];
-    double dpy = twissdata[i][8];
+    double l = twissdata["L"][i];
+    double bx = twissdata["BETX"][i];
+    double by = twissdata["BETY"][i];
+    double dx = twissdata["DX"][i];
+    double dpx = twissdata["DPX"][i];
+    double ax = twissdata["ALFX"][i];
+    double ay = twissdata["ALFY"][i];
+    double dy = betar * twissdata["DY"][i];
+    double dpy = betar * twissdata["DPY"][i];
 
     double integrals[3];
 
