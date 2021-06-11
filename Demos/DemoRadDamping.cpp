@@ -108,7 +108,7 @@ int main() {
   omegas = qs * omega;
   double *equi =
       RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
-          twissheadermap, radint, aatom, omegas);
+          twissheadermap, radint, aatom, qs);
   green();
   printf("\nRadiation Damping Equib \n");
   reset();
