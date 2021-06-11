@@ -19,9 +19,9 @@ void cyan() { printf("\033[1;36m"); }
 void reset() { printf("\033[0m"); }
 
 void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
-         int nrf, double harmon[], double voltages[], double stepsize,
-         int maxsteps, vector<double> &ex, vector<double> &ey,
-         vector<double> &sigs, vector<double> sige) {
+         int nrf, double harmon[], double voltages[], double dt, int maxsteps,
+         vector<double> &ex, vector<double> &ey, vector<double> &sigs,
+         vector<double> sige) {
   // Radiation integrals
   double gamma = twiss["GAMMA"];
   double pc = twiss["PC"];
@@ -78,42 +78,47 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
   double sige0 = sigefromsigs(omega, equi[6], qs, gamma, gammatr);
   printf("%-30s %20.6e (%s)\n", "Sige0  :", sige0, "");
   sige0 = SigeFromRFAndSigs(equi[6], U0, charge, nrf, harmon, voltages, gamma,
-                            gammatr, pc, len, phis, true);
+                            gammatr, pc, len, phis, false);
   printf("%-30s %20.6e (%s)\n", "Sige0  :", sige0, "");
 
   reset();
+  sige0 = SigeFromRFAndSigs(sigs[0], U0, charge, nrf, harmon, voltages, gamma,
+                            gammatr, pc, len, phis, false);
+  sige.push_back(sige0);
 
-  /*
+  vector<double> sige2;
+  sige2.push_back(sige[0] * sige[0]);
 
-    double U0 = RadiationLossesPerTurn(twiss_rad, radint[0], emass / pmass);
+  int i = 0;
 
-    // Longitudinal
-    double phis = SynchronuousPhase(0.0, 173, U0, -1, 1, harmon, voltages,
-    1e-6); vector<double> sige2; double betar = sqrt(1 - 1 / (gamma * gamma));
-    double trev = len / (betar * clight);
-    double frev = 1 / trev;
-    double omega = 2 * pi * frev;
-    double qs = SynchrotronTune(omega, U0, -1, 1, harmon, voltages, phis,
-                                eta(gamma, gammatr), twiss_rad[1]);
-    double omegas = omega * qs;
-    printf("omega %12.6e\n", omega);
-    printf("qs: %12.6e\n", qs);
-    printf("omegas: %12.6e\n", omegas);
+  vector<double> exx(maxsteps);
+  exx[0] = ex[0];
+  do {
+    i++;
+    printf("step : %10i\n", i);
+    ex.push_back(ex[0] * exp(-2 * i * dt * (1 / tauradx)) +
+                 equi[3] * (1 - exp(-2 * i * dt / tauradx)));
+    ey.push_back(ey[0] * exp(-2 * i * dt * (1 / taurady)) +
+                 equi[4] * (1 - exp(-2 * i * dt / taurady)));
 
-    sige.push_back(SigeFromRFAndSigs(voltages[0], harmon[0], sigs[0], U0, gamma,
-                                     gammatr, pc, len, phis, false));
-    printf("Sige : %12.6e\n", sige[0]);
-    printf("Sigs : %12.6e\n", sigsfromsige(sige[0], gamma, gammatr, omegas));
-    sige2.push_back(sige[0] * sige[0]);
+    sige2.push_back(sige2[0] * exp(-2 * i * dt * (1 / taurads)) +
+                    equi[5] * (1 - exp(-2 * i * dt / taurads)));
+    sige.push_back(sqrt(sige2[i]));
+    sigs.push_back(sigsfromsige(sige[i], gamma, gammatr, omegas));
 
-    int steps = 0;
-    */
-  /*
-
-do {
-steps++;
-printf("step : %10i", steps);
-} while (steps < maxsteps ||
-  fabs(ex[steps] - ex[steps - 1] + ey[steps] - ey[steps - 1]) < 1e-3);
-  */
+    printf("--------------------\n");
+    printf("step : %10i\n", i);
+    cyan();
+    printf("ex   : %12.6e\n", ex[i]);
+    printf("ey   : %12.6e\n", ey[i]);
+    printf("sigs : %12.6e\n", sigs[i]);
+    yellow();
+    printf("exdiff   %12.6e\n", fabs((ex[i] - ex[i - 1]) / ex[i - 1]));
+    printf("eydiff   %12.6e\n", fabs((ey[i] - ey[i - 1]) / ey[i - 1]));
+    printf("sigsdiff %12.6e\n", fabs((sigs[i] - sigs[i - 1]) / sigs[i - 1]));
+    reset();
+  } while (i < maxsteps &&
+           (fabs((ex[i] - ex[i - 1]) / ex[i - 1]) > 1e-3 ||
+            fabs((ey[i] - ey[i - 1]) / ey[i - 1]) > 1e-3 ||
+            fabs((sigs[i] - sigs[i - 1]) / sigs[i - 1]) > 1e-3));
 }

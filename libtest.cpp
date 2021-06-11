@@ -280,12 +280,12 @@ int main() {
   vector<double> eya;
   vector<double> sigsa;
   vector<double> sigea;
-  int maxsteps = 10;
-  double timestep = 1.0;
+  int maxsteps = 20;
+  double timestep = 5.0e-3;
 
-  exa.push_back(equi[3]);
-  eya.push_back(equi[4]);
-  sigsa.push_back(sigt);
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
 
   ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
       exa, eya, sigsa, sigea);
