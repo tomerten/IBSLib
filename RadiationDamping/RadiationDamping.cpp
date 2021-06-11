@@ -197,6 +197,7 @@ NUMBERS.
 
   HISTORY:
     - 08/06/2021 : initial cpp version (Tom)
+    - 11/06/2021 : removed I1 dependency and changed it for Synch Tune dep.
 
 ================================================================================
   Arguments:
@@ -207,8 +208,8 @@ NUMBERS.
         radiation integrals array
     - double aatom
         atomic number of the particle
-    - double omegas
-        synchrotron angular frequency (qs * omega0)
+    - double qs
+        synchrotron tune
 
   Returns:
   --------
@@ -230,7 +231,7 @@ NUMBERS.
 
 double *RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
     map<string, double> &twissheadermap, double radiationIntegrals[7],
-    double aatom, double omegas) {
+    double aatom, double qs) {
 
   const double c = clight;
   const double hbar = 1.0545718176461565e-34;
@@ -270,8 +271,11 @@ double *RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
   double cq = 55.0 / (32.0 * sqrt(3.0)) * (hbar * c) / mass;
 
   double sigE0E2 = cq * gamma * gamma * i3 / (2.0 * i2 + i4x + i4y);
-  double alfap = i1 / len;
-  double sigs = clight * alfap * sqrt(sigE0E2) / omegas;
+  // I1 calculated from twiss madx is to inaccurate
+  // TODO: add option to get it from twiss header
+  // double alfap = i1 / len;
+  // double sigs = clight * alfap * sqrt(sigE0E2) / omegas;
+  double sigs = sqrt(sigE0E2) * len * eta(gamma, gammatr) / (2 * pi * qs);
   double exinf = cq * gamma * gamma * i5x / (jx * i2);
   double eyinf = cq * gamma * gamma * i5y / (jy * i2);
 

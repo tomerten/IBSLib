@@ -19,7 +19,7 @@ double *RadiationDampingLattice(map<string, vector<double>> &table);
 
 double *RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
     map<string, double> &twissheadermap, double radiationIntegrals[7],
-    double aatom, double omegas);
+    double aatom, double qs);
 
 double RadiationLossesPerTurn(map<string, double> &twiss, double I2,
                               double aatom);

@@ -54,7 +54,7 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
 
   double *equi =
       RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
-          twiss, radint, aatom, omegas);
+          twiss, radint, aatom, qs);
 
   double tauradx, taurady, taurads;
   tauradx = equi[0];
