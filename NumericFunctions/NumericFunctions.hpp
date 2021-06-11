@@ -87,8 +87,7 @@ double SigeFromRFAndSigs(double sigs, double U0, double charge, int nrf,
                          double gammatr, double pc, double circ, double phis,
                          bool printout);
 
-void updateTwiss(map<string, vector<double>> &table,
-                 double dipoleBendingRadius);
+void updateTwiss(map<string, vector<double>> &table);
 
 void printTwissMap(string key, map<string, vector<double>> &table);
 #endif

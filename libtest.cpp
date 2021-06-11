@@ -194,7 +194,7 @@ int main() {
   double epsilon = 1.0e-6;
 
   // updateTwiss
-  updateTwiss(twisstablemap, rho);
+  updateTwiss(twisstablemap);
   // printTwissMap("I2", twisstablemap);
   double betar = BetaRelativisticFromGamma(gammar);
   double r0 = ParticleRadius(1, aatom);

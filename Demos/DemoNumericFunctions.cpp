@@ -71,7 +71,7 @@ int main() {
   double rho = 4.35;
 
   // updateTwiss
-  updateTwiss(twisstablemap, rho);
+  updateTwiss(twisstablemap);
   // printTwissMap("I2", twisstablemap);
   double betar = BetaRelativisticFromGamma(gammar);
   double r0 = ParticleRadius(1, aatom);

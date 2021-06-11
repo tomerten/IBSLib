@@ -1008,8 +1008,7 @@ REMARK:
 ================================================================================
 ================================================================================
  */
-void updateTwiss(map<string, vector<double>> &table,
-                 const double dipoleBendingRadius) {
+void updateTwiss(map<string, vector<double>> &table) {
   // get length of table to reserve the vector sizes
   int size = table["L"].size();
 
