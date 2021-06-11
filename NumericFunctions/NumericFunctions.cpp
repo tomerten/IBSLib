@@ -1,13 +1,14 @@
 #include "NumericFunctions.hpp"
 #include <algorithm>
+#include <cmath>
+#include <complex>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <map>
-#include <math.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
-
 using namespace std;
 /*
 ================================================================================
@@ -948,22 +949,24 @@ METHOD TO GET THE SYNCHROTRON TUNE IN THE PRESENCE OF POTENTIAL WELL DISTORTION.
 ================================================================================
 ================================================================================
 */
-double SigeFromRFAndSigs(double v0, double h0, double sigs, double U0,
-                         double gamma, double gammatr, double pc, double circ,
-                         double phis, bool printout) {
+double SigeFromRFAndSigs(double sigs, double U0, double charge, int nrf,
+                         double harmon[], double voltages[], double gamma,
+                         double gammatr, double pc, double circ, double phis,
+                         bool printout) {
 
   double betar = BetaRelativisticFromGamma(gamma);
 
   double trev = circ / (betar * clight);
   double frev = 1.0 / trev;
-  double eta = (1.0 / (gammatr * gammatr)) - (1.0 / (gamma * gamma));
-  double omega0 = 2.0 * pi / trev;
+  double neta = eta(gamma, gammatr);
+  double omega0 = 2.0 * pi * frev;
 
-  double nus =
-      sqrt(fabs(h0 * eta) / (2.0 * pi * betar * pc) * fabs(v0 * cos(phis)));
+  double nus = SynchrotronTune(omega0, U0, charge, nrf, harmon, voltages, phis,
+                               neta, pc);
   double sige; // = nus * omega0 * sigs / (clight * eta);
 
-  sige = 2.0 * pi * nus * sigs / (eta * clight);
+  sige = 2.0 * pi * nus * sigs / (neta * circ);
+  sige = omega0 * nus * sigs / (neta * clight);
 
   if (printout) {
     printf("Synchrotron Tune : %12.6e\n ", nus);
@@ -1014,6 +1017,8 @@ void updateTwiss(map<string, vector<double>> &table,
       I4y(size), I5x(size), I5y(size), gammax(size), gammay(size), hx(size),
       hy(size);
 
+  complex<double> kc, k2c, klc;
+
   // calculate the new columns
   for (int i = 0; i < size; i++) {
     double angle = table["ANGLE"][i];
@@ -1028,6 +1033,8 @@ void updateTwiss(map<string, vector<double>> &table,
     double dpy = table["DPY"][i];
     double k1l = table["K1L"][i];
     double k1sl = table["K1SL"][i];
+    double e1 = angle / 2.0;
+    double e2 = angle / 2.0;
     double rhoi2, rhoi3;
 
     // local bending radius
@@ -1035,26 +1042,72 @@ void updateTwiss(map<string, vector<double>> &table,
     rhoi2 = rho[i] * rho[i];
     rhoi3 = rhoi2 * rho[i];
 
-    k[i] = (l == 0.0) ? 0.0 : k1l / l;
+    if (rho[i] != 0.0) {
+      double rhoinv = 1.0 / rho[i];
 
-    // first for integrals
-    I1[i] = (rho[i] == 0.0) ? 0.0 : (dx / rho[i]) * l;
-    I2[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi2;
-    I3[i] = (rho[i] == 0.0) ? 0.0 : l / rhoi3;
-    I4x[i] = (rho[i] == 0.0) ? 0.0
-                             : (dx / rhoi3) * l +
-                                   (2.0 / rho[i]) * (k[i] * dx + k1sl * dy * l);
+      // effect of poleface rotation
+      double alfx = ax - bx * tan(e1) * rhoinv;
+      double dpxx = dpx + dx * tan(e1) * rhoinv;
+      double gamx = (1.0 + alfx * alfx) / bx;
+
+      // global gradient combining weak focusing and dipole gradient
+      // k2 can be positive or negative and k can be real or imaginary
+      k2c = rhoinv * rhoinv + 2.0 * k1l / l;
+      kc = sqrt(k2c);
+      klc = kc * l;
+
+      // propagation of dispersion at exit
+      double dx2 = real(dx * cos(klc) + dpxx * sin(klc) / kc +
+                        rhoinv * (1.0 - cos(klc)) / (kc * kc));
+
+      double dispaverage =
+          real(dx * sin(klc) / klc + dpxx * (1.0 - cos(klc)) / (kc * klc) +
+               rhoinv * (klc - sin(klc)) / (k2c * klc));
+
+      /*
+      double curlyhaverage = real(
+          gamx * dx * dx + 2 * alfx * dx * dpxx + bx * dpxx * dpxx +
+          2 * rhoinv * l *
+              (-(gamx * dx + alfx * dpxx) * (klc - sin(klc)) /
+                   (klc * klc * kc) +
+               (alfx * dx + bx * dpxx) * (1.0 - cos(klc)) / (klc * klc)) +
+          l * l * rhoinv * rhoinv *
+              (gamx * (3.0 * klc - 4.0 * sin(klc) + sin(klc) * cos(klc)) /
+                   (2.0 * k2c * klc * klc * klc) -
+               alfx * (1.0 - cos(klc)) * (1.0 - cos(klc)) /
+                   (kc * klc * klc * klc) +
+               bx * (klc - cos(klc) * sin(klc)) / (2.0 * klc * klc * klc)));
+               */
+
+      k[i] = k1l / l;
+
+      // 11/06/2021 - updated to match madx integrals
+      I1[i] = (dx * rhoinv) * l;
+      I2[i] = l / rhoi2;
+      I3[i] = l / fabs(rhoi3);
+      I4x[i] = dispaverage * rhoinv * (rhoinv * rhoinv + 2 * k[i]) * l -
+               rhoinv * rhoinv * (dx * tan(e1) + dx2 * tan(e2)) +
+               2.0 * rhoinv * k1sl * dy;
+
+      hx[i] = bx * dpxx * dpxx + 2.0 * alfx * dx * dpxx + gamx * dx * dx;
+      // hx[i] = curlyhaverage;
+      I5x[i] = hx[i] * l / rhoi3;
+      // I5x[i] = curlyhaverage * l / rhoi3;
+    } else {
+      I1[i] = 0.0;
+      I2[i] = 0.0;
+      I3[i] = 0.0;
+      I4x[i] = 0.0;
+    }
+
     I4y[i] = 0.0;
 
     // Courant-Snyder gamma
-    gammax[i] = (1.0 + ax * ax) / bx;
     gammay[i] = (1.0 + ay * ay) / by;
 
     // curly H
-    hx[i] = bx * dpx * dpx + 2.0 * ax * dx * dpx + gammax[i] * dx * dx;
     hy[i] = by * dpy * dpy + 2.0 * ay * dy * dpy + gammay[i] * dy * dy;
 
-    I5x[i] = (rho[i] == 0) ? 0.0 : hx[i] * l / rhoi3;
     I5y[i] = (rho[i] == 0) ? 0.0 : hy[i] * l / rhoi3;
   }
 

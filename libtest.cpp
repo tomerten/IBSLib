@@ -33,7 +33,7 @@ int main() {
   double voltages[1];
   harmon[0] = 400.;
   voltages[0] = -4. * 375e3;
-  double rho = 4.35;
+  double rho = 4.354479242994256;
 
   /*
   ================================================================================
@@ -257,11 +257,10 @@ int main() {
   ==============================================================================
   */
   printf("\n\n");
-  green();
-  printf("IBS Models\n");
+  blue();
+  printf("ODE Model\n");
   printf("==========\n");
-  cyan();
-  double *res;
+  reset();
 
   /*
 
@@ -282,13 +281,13 @@ int main() {
   vector<double> sigsa;
   vector<double> sigea;
   int maxsteps = 10;
-  double stepsize = 1.0;
+  double timestep = 1.0;
 
   exa.push_back(equi[3]);
   eya.push_back(equi[4]);
   sigsa.push_back(sigt);
 
-  ODE(twissode, nrows, twiss_rad, harmon, voltages, stepsize, maxsteps, exa,
-      eya, sigsa, sigea);
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea);
   return 0;
 }

@@ -82,9 +82,10 @@ double SynchrotronTunePWD(double omega0, double U0, double charge, int nrf,
                           double N, double sigs, double phis, double eta,
                           double pc);
 
-double SigeFromRFAndSigs(double v0, double h0, double sigs, double U0,
-                         double gamma, double gammatr, double pc, double circ,
-                         double phis, bool printout);
+double SigeFromRFAndSigs(double sigs, double U0, double charge, int nrf,
+                         double harmon[], double voltages[], double gamma,
+                         double gammatr, double pc, double circ, double phis,
+                         bool printout);
 
 void updateTwiss(map<string, vector<double>> &table,
                  double dipoleBendingRadius);
