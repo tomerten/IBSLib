@@ -314,5 +314,16 @@ int main() {
       exa, eya, sigsa, sigea, 4, pnumber);
   WriteToFile("ODE_test_output_nagaitsev.csv", exa, eya, sigsa);
 
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 5, pnumber);
+  WriteToFile("ODE_test_output_nagaitsevtailcut.csv", exa, eya, sigsa);
+
   return 0;
 }

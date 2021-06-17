@@ -130,10 +130,13 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     ibs = PiwinskiLatticeModified(pnumber, ex[0], ey[0], sigs[0], sige[0],
                                   twiss, twissdata, r0);
     break;
-
   case 4:
     ibs = Nagaitsev(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, twissdata,
                     r0);
+    break;
+  case 5:
+    ibs = Nagaitsevtailcut(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                           twissdata, r0, aatom);
     break;
   }
 
@@ -163,6 +166,13 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     case 4:
       ibs = Nagaitsev(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, twissdata,
                       r0);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    case 5:
+      ibs = Nagaitsevtailcut(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                             twissdata, r0, aatom);
       aes = ibs[0];
       aex = ibs[1];
       aey = ibs[2];

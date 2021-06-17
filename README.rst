@@ -101,3 +101,9 @@ written to a csv file.
 .. csv-table::  ODE Model using Nagaitsev   
     :file: ODE_test_output_nagaitsev.csv 
     :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Nagaitsev Tailcut
+    :file: ODE_test_output_nagaitsevtailcut.csv 
+    :header-rows: 1
