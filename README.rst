@@ -77,7 +77,8 @@ Numeric Functions
 ODE 
 ===
 
-The tables below show examples of the output of the ODE method with `maxsteps` set to two
+The tables below show examples of the output of the ODE method, with `maxsteps` 
+set to two in order to limit the output,
 written to a csv file.
 
 .. csv-table:: ODE Model using Piwinski Smooth
@@ -106,4 +107,10 @@ written to a csv file.
     
 .. csv-table::  ODE Model using Nagaitsev Tailcut
     :file: ODE_test_output_nagaitsevtailcut.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using MADX (Zimmerman)
+    :file: ODE_test_output_madx.csv 
     :header-rows: 1

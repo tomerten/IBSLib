@@ -138,6 +138,10 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     ibs = Nagaitsevtailcut(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
                            twissdata, r0, aatom);
     break;
+  case 6:
+    ibs = ibsmadx(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, twissdata, r0,
+                  false);
+    break;
   }
 
   printouts(ibs);
@@ -173,6 +177,13 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     case 5:
       ibs = Nagaitsevtailcut(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
                              twissdata, r0, aatom);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    case 6:
+      ibs = ibsmadx(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, twissdata,
+                    r0, false);
       aes = ibs[0];
       aex = ibs[1];
       aey = ibs[2];
