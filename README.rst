@@ -114,3 +114,15 @@ written to a csv file.
 .. csv-table::  ODE Model using MADX (Zimmerman)
     :file: ODE_test_output_madx.csv 
     :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using MADX (Zimmerman) with Tailcut
+    :file: ODE_test_output_madxtailcut.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Bjorken-Mtingwa with standard Simpson integration (Fails for ey)
+    :file: ODE_test_output_bjorken_mtingwa2.csv 
+    :header-rows: 1
