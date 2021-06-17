@@ -262,15 +262,6 @@ int main() {
   reset();
 
   /*
-
-  ================================================================================
-
-  IBS METHODS WITH DEDICATED INTEGRATORS
-
-  ================================================================================
-  */
-
-  /*
   ================================================================================
   ODE
   ================================================================================
@@ -279,7 +270,7 @@ int main() {
   vector<double> eya;
   vector<double> sigsa;
   vector<double> sigea;
-  int maxsteps = 10;
+  int maxsteps = 2;
   double timestep = 1.0e-3;
 
   exa.push_back(7.5e-9);
@@ -288,7 +279,40 @@ int main() {
 
   ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
       exa, eya, sigsa, sigea, 1, pnumber);
+  WriteToFile("ODE_test_output_piwinski_smooth.csv", exa, eya, sigsa);
 
-  WriteToFile("ODE_Output_test.csv", exa, eya, sigsa);
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 2, pnumber);
+  WriteToFile("ODE_test_output_piwinski_lattice.csv", exa, eya, sigsa);
+
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 3, pnumber);
+  WriteToFile("ODE_test_output_piwinski_latticemodified.csv", exa, eya, sigsa);
+
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 4, pnumber);
+  WriteToFile("ODE_test_output_nagaitsev.csv", exa, eya, sigsa);
+
   return 0;
 }

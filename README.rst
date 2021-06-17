@@ -77,6 +77,27 @@ Numeric Functions
 ODE 
 ===
 
-.. csv-table:: ODE Model using Piwinski Smooth 
-    :file: ODE_Output_test.csv 
+The tables below show examples of the output of the ODE method with `maxsteps` set to two
+written to a csv file.
+
+.. csv-table:: ODE Model using Piwinski Smooth
+    :file: ODE_test_output_piwinski_smooth.csv 
+    :header-rows: 1
+
+|
+
+.. csv-table:: ODE Model using Piwinski Lattice
+    :file: ODE_test_output_piwinski_lattice.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Piwinski Lattice Modified   
+    :file: ODE_test_output_piwinski_latticemodified.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Nagaitsev   
+    :file: ODE_test_output_nagaitsev.csv 
     :header-rows: 1
