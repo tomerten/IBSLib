@@ -73,3 +73,10 @@ Numeric Functions
 - synchrotronTune
 - synchrotronTunewithPWD
 - csige (calculates sige from RF settings, radiation losses and sigs)
+
+ODE 
+===
+
+.. csv-table:: ODE Model using Piwinski Smooth 
+    :file: ODE_Output_test.csv 
+    :header-rows: 1

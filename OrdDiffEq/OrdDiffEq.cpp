@@ -5,6 +5,8 @@
 #include "RadiationDamping.hpp"
 #include "Twiss.hpp"
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include <math.h>
 #include <stdio.h>
@@ -18,10 +20,24 @@ void blue() { printf("\033[1;34m"); }
 void cyan() { printf("\033[1;36m"); }
 void reset() { printf("\033[0m"); }
 
+void WriteToFile(string filename, vector<double> &ex, vector<double> &ey,
+                 vector<double> &sigs) {
+  ofstream csvfile(filename);
+  if (csvfile.is_open()) {
+    int num_of_rows = min({ex.size(), ey.size(), sigs.size()});
+    csvfile << "ex,ey,sigs" << endl;
+    for (int i = 0; i < num_of_rows; i++) {
+      csvfile << ex[i] << "," << ey[i] << "," << sigs[i] << endl;
+    }
+  } else {
+    cout << "File could not be opened";
+  }
+}
+
 void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
          int nrf, double harmon[], double voltages[], double dt, int maxsteps,
          vector<double> &ex, vector<double> &ey, vector<double> &sigs,
-         vector<double> sige) {
+         vector<double> sige, int model, double pnumber) {
   // Radiation integrals
   double gamma = twiss["GAMMA"];
   double pc = twiss["PC"];
@@ -93,9 +109,67 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
 
   vector<double> exx(maxsteps);
   exx[0] = ex[0];
+
+  double *ibs;
+  double aes, aex, aey;
+  vector<double> extemp, eytemp, sige2temp;
+  extemp.push_back(ex[0]);
+  eytemp.push_back(ey[0]);
+  sige2temp.push_back(sige2[0]);
+
+  switch (model) {
+  case 1:
+    ibs = PiwinskiSmooth(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, r0);
+    break;
+  }
+
+  printouts(ibs);
   do {
+    switch (model) {
+    case 1:
+      ibs = PiwinskiSmooth(pnumber, ex[i], ey[i], sigs[i], sige[i], twiss, r0);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    }
+
+    // double dex, dey, dsige2;
+    cyan();
+    printf("ex   : %12.6e\n", ex[i]);
+    printf("ey   : %12.6e\n", ey[i]);
+    printf("sigs : %12.6e\n", sigs[i]);
+
     i++;
     printf("step : %10i\n", i);
+    printf("aes : %10.6f\n", aes);
+    printf("aex : %10.6f\n", aex);
+    printf("aey : %10.6f\n", aey);
+    /*
+    dex = ex[i - 1] * (2 * dt * (-1 / tauradx + aex)) +
+          equi[3] * (-2 * dt / tauradx);
+    dey = ey[i - 1] * (2 * dt * (-1 / taurady + aey)) +
+          equi[4] * (-2 * dt / taurady);
+    dsige2 = sige2[i - 1] * (2 * dt * (-1 / taurads + aes)) +
+             equi[5] * (-2 * dt / taurads);
+             */
+
+    ex.push_back(extemp[i - 1] * exp(2 * dt * (-1 / tauradx + aex)) +
+                 equi[3] * (1 - exp(-2 * dt * i / tauradx)));
+    extemp.push_back(extemp[i - 1] * exp(2 * dt * (-1 / tauradx + aex)));
+
+    ey.push_back(eytemp[i - 1] * exp(2 * dt * (-1 / taurady + aey)) +
+                 equi[4] * (1 - exp(-2 * dt * i / taurady)));
+    eytemp.push_back(eytemp[i - 1] * exp(2 * dt * (-1 / taurady + aey)));
+
+    sige2.push_back(sige2temp[i - 1] * exp(2 * dt * (-1 / taurads + aes)) +
+                    equi[5] * (1 - exp(-2 * i * dt / taurads)));
+    sige2temp.push_back(sige2temp[i - 1] * exp(2 * dt * (-1 / taurads + aes)));
+    /*
+    printf("dsige2 : %10.6e\n", dsige2);
+    ex.push_back(ex[i - 1] + dex);
+    ey.push_back(ey[i - 1] + dey);
+    sige2.push_back(sige2[i - 1] + dsige2);
     ex.push_back(ex[0] * exp(-2 * i * dt * (1 / tauradx)) +
                  equi[3] * (1 - exp(-2 * i * dt / tauradx)));
     ey.push_back(ey[0] * exp(-2 * i * dt * (1 / taurady)) +
@@ -103,6 +177,7 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
 
     sige2.push_back(sige2[0] * exp(-2 * i * dt * (1 / taurads)) +
                     equi[5] * (1 - exp(-2 * i * dt / taurads)));
+                    */
     sige.push_back(sqrt(sige2[i]));
     sigs.push_back(sigsfromsige(sige[i], gamma, gammatr, omegas));
 
@@ -112,6 +187,10 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     printf("ex   : %12.6e\n", ex[i]);
     printf("ey   : %12.6e\n", ey[i]);
     printf("sigs : %12.6e\n", sigs[i]);
+    green();
+    printf("exdiff   %12.6e\n", (ex[i] - ex[i - 1]));
+    printf("eydiff   %12.6e\n", (ey[i] - ey[i - 1]));
+    printf("sigsdiff %12.6e\n", (sigs[i] - sigs[i - 1]));
     yellow();
     printf("exdiff   %12.6e\n", fabs((ex[i] - ex[i - 1]) / ex[i - 1]));
     printf("eydiff   %12.6e\n", fabs((ey[i] - ey[i - 1]) / ey[i - 1]));

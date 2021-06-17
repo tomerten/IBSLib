@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-
 // using namespace std;
 
 void red() { printf("\033[1;31m"); }
@@ -280,14 +279,16 @@ int main() {
   vector<double> eya;
   vector<double> sigsa;
   vector<double> sigea;
-  int maxsteps = 20;
-  double timestep = 5.0e-3;
+  int maxsteps = 10;
+  double timestep = 1.0e-3;
 
   exa.push_back(7.5e-9);
   eya.push_back(1e-9);
   sigsa.push_back(5e-3);
 
   ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
-      exa, eya, sigsa, sigea);
+      exa, eya, sigsa, sigea, 1, pnumber);
+
+  WriteToFile("ODE_Output_test.csv", exa, eya, sigsa);
   return 0;
 }
