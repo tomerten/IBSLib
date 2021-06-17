@@ -150,6 +150,26 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     ibs = BjorkenMtingwa2(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
                           twissdata, r0);
     break;
+  case 9:
+    ibs = BjorkenMtingwa(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                         twissdata, r0);
+    break;
+  case 10:
+    ibs = BjorkenMtingwatailcut(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                                twissdata, r0, aatom);
+    break;
+  case 11:
+    ibs = ConteMartini(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                       twissdata, r0);
+    break;
+  case 12:
+    ibs = ConteMartinitailcut(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                              twissdata, r0, aatom);
+    break;
+  case 13:
+    ibs =
+        MadxIBS(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, twissdata, r0);
+    break;
   }
 
   printouts(ibs);
@@ -206,6 +226,41 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     case 8:
       ibs = BjorkenMtingwa2(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
                             twissdata, r0);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    case 9:
+      ibs = BjorkenMtingwa(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                           twissdata, r0);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    case 10:
+      ibs = BjorkenMtingwatailcut(pnumber, ex[0], ey[0], sigs[0], sige[0],
+                                  twiss, twissdata, r0, aatom);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    case 11:
+      ibs = ConteMartini(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                         twissdata, r0);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    case 12:
+      ibs = ConteMartinitailcut(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss,
+                                twissdata, r0, aatom);
+      aes = ibs[0];
+      aex = ibs[1];
+      aey = ibs[2];
+      break;
+    case 13:
+      ibs = MadxIBS(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, twissdata,
+                    r0);
       aes = ibs[0];
       aex = ibs[1];
       aey = ibs[2];

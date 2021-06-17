@@ -126,3 +126,33 @@ written to a csv file.
 .. csv-table::  ODE Model using Bjorken-Mtingwa with standard Simpson integration (Fails for ey)
     :file: ODE_test_output_bjorken_mtingwa2.csv 
     :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Bjorken-Mtingwa with Simpson Decade Integration 
+    :file: ODE_test_output_bjorken_mtingwa.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Bjorken-Mtingwa with Simpson Decade Integration and Tailcut
+    :file: ODE_test_output_bjorken_mtingwatailcut.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Conte-Martini using Simspon Decade Integration
+    :file: ODE_test_output_conte_martini.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using Conte-Martini using Simspon Decade Integration and Tailcut
+    :file: ODE_test_output_conte_martini_tailcut.csv 
+    :header-rows: 1
+
+|
+    
+.. csv-table::  ODE Model using MADX (Zimmerman) using Simpson Decade Integration 
+    :file: ODE_test_output_madxibs.csv 
+    :header-rows: 1

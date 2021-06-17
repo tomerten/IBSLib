@@ -358,5 +358,58 @@ int main() {
       exa, eya, sigsa, sigea, 8, pnumber);
   WriteToFile("ODE_test_output_bjorken_mtingwa2.csv", exa, eya, sigsa);
 
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 9, pnumber);
+  WriteToFile("ODE_test_output_bjorken_mtingwa.csv", exa, eya, sigsa);
+
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 10, pnumber);
+  WriteToFile("ODE_test_output_bjorken_mtingwatailcut.csv", exa, eya, sigsa);
+
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 11, pnumber);
+  WriteToFile("ODE_test_output_conte_martini.csv", exa, eya, sigsa);
+
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 12, pnumber);
+  WriteToFile("ODE_test_output_conte_martini_tailcut.csv", exa, eya, sigsa);
+  exa.clear();
+  eya.clear();
+  sigsa.clear();
+  exa.push_back(7.5e-9);
+  eya.push_back(1e-9);
+  sigsa.push_back(5e-3);
+
+  ODE(twissheadermap, twisstablemap, 1, harmon, voltages, timestep, maxsteps,
+      exa, eya, sigsa, sigea, 13, pnumber);
+  WriteToFile("ODE_test_output_madxibs.csv", exa, eya, sigsa);
   return 0;
 }
