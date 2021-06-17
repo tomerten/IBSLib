@@ -39,6 +39,7 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
          int nrf, double harmon[], double voltages[], double dt, int maxsteps,
          vector<double> &ex, vector<double> &ey, vector<double> &sigs,
          vector<double> sige, int model, double pnumber) {
+
   // Radiation integrals
   double gamma = twiss["GAMMA"];
   double pc = twiss["PC"];
@@ -60,8 +61,9 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
 
   double *radint;
   radint = RadiationDampingLattice(twissdata);
-  printradint(radint);
+  // printradint(radint);
 
+  // Longitudinal Parameters
   double U0 = RadiationLossesPerTurn(twiss, radint[1], aatom);
   double phis =
       SynchronuousPhase(0.0, 173, U0, charge, nrf, harmon, voltages, epsilon);
@@ -69,6 +71,7 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
       SynchrotronTune(omega, U0, charge, nrf, harmon, voltages, phis, neta, pc);
   double omegas = qs * omega;
 
+  // equilibria
   double *equi =
       RadiationDampingLifeTimesAndEquilibriumEmittancesWithPartitionNumbers(
           twiss, radint, aatom, qs);
@@ -80,44 +83,50 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
   double sigeoe2 = equi[5];
 
   cyan();
+  printf("Radiation Damping Times\n");
+  printf("=======================\n");
   printf("%-30s %20.6e (%s)\n", "Tx :", tauradx, "");
   printf("%-30s %20.6e (%s)\n", "Ty :", taurady, "");
   printf("%-30s %20.6e (%s)\n", "Ts :", taurads, "");
-  blue();
-  printf("%-30s %20.6e (%s)\n", "qs      :", qs, "");
-  printf("%-30s %20.6e (%s)\n", "synch freq :", omegas, "");
-  printf("%-30s %20.6e (%s)\n", "SigEOE2 :", sigeoe2, "");
-  printf("%-30s %20.6e (%s)\n", "SigEOE  :", sqrt(sigeoe2), "");
-  printf("%-30s %20.6e (%s)\n", "eta  :", eta(gamma, gammatr), "");
 
-  printf("%-30s %20.6e (%s)\n", "Sigs  :", sigs[0], "");
-  printf("%-30s %20.6e (%s)\n", "Sigsinf  :", equi[6], "");
+  blue();
+  printf("\nLongitudinal Parameters\n");
+  printf("=======================\n");
+  printf("%-20s : %20.6e (%s)\n", "qs", qs, "");
+  printf("%-20s : %20.6e (%s)\n", "synch freq", omegas, "");
+  printf("%-20s : %20.6e (%s)\n", "SigEOE2", sigeoe2, "");
+  printf("%-20s : %20.6e (%s)\n", "SigEOE", sqrt(sigeoe2), "");
+  printf("%-20s : %20.6e (%s)\n", "eta", eta(gamma, gammatr), "");
+  printf("%-20s : %20.6e (%s)\n", "Sigs", sigs[0], "");
+  printf("%-20s : %20.6e (%s)\n", "Sigsinf", equi[6], "");
+
   double sige0 = sigefromsigs(omega, equi[6], qs, gamma, gammatr);
-  printf("%-30s %20.6e (%s)\n", "Sige0  :", sige0, "");
+  printf("%-20s : %20.6e (%s)\n", "Sige0", sige0, "");
   sige0 = SigeFromRFAndSigs(equi[6], U0, charge, nrf, harmon, voltages, gamma,
                             gammatr, pc, len, phis, false);
-  printf("%-30s %20.6e (%s)\n", "Sige0  :", sige0, "");
-
+  printf("%-20s : %20.6e (%s)\n", "Sige0 - check", sige0, "");
   reset();
+
   sige0 = SigeFromRFAndSigs(sigs[0], U0, charge, nrf, harmon, voltages, gamma,
                             gammatr, pc, len, phis, false);
-  sige.push_back(sige0);
-
+  // write first sige and sige2
   vector<double> sige2;
+  sige.push_back(sige0);
   sige2.push_back(sige[0] * sige[0]);
 
+  // loop variable
   int i = 0;
-
-  vector<double> exx(maxsteps);
-  exx[0] = ex[0];
-
+  // ibs growth rates
   double *ibs;
   double aes, aex, aey;
+
+  // temp emit vectors to allow for correcting with quantum excitation
   vector<double> extemp, eytemp, sige2temp;
   extemp.push_back(ex[0]);
   eytemp.push_back(ey[0]);
   sige2temp.push_back(sige2[0]);
 
+  // initial ibs growth rates
   switch (model) {
   case 1:
     ibs = PiwinskiSmooth(pnumber, ex[0], ey[0], sigs[0], sige[0], twiss, r0);
@@ -173,7 +182,14 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
   }
 
   printouts(ibs);
+
+  /*
+  ================================================================================
+  MAIN LOOP
+  ================================================================================
+  */
   do {
+    // ibs growth rates update
     switch (model) {
     case 1:
       ibs = PiwinskiSmooth(pnumber, ex[i], ey[i], sigs[i], sige[i], twiss, r0);
@@ -266,8 +282,9 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
       aey = ibs[2];
       break;
     }
+    /*
+    // DEBUG
 
-    // double dex, dey, dsige2;
     cyan();
     printf("Previous Values \n");
     printf("================\n");
@@ -276,15 +293,17 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     printf("ey   : %12.6e\n", ey[i]);
     printf("sigs : %12.6e\n\n", sigs[i]);
     reset();
-
+    */
     i++;
+    /*
+    // DEBUG
     printf("IBS amplitude growth rates\n");
     printf("==========================\n");
     printf("step : %10i\n", i);
     printf("aes : %10.6f\n", aes);
     printf("aex : %10.6f\n", aex);
     printf("aey : %10.6f\n\n", aey);
-
+    */
     ex.push_back(extemp[i - 1] * exp(2 * dt * (-1 / tauradx + aex)) +
                  equi[3] * (1 - exp(-2 * dt * i / tauradx)));
     extemp.push_back(extemp[i - 1] * exp(2 * dt * (-1 / tauradx + aex)));
@@ -300,6 +319,8 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     sige.push_back(sqrt(sige2[i]));
     sigs.push_back(sigsfromsige(sige[i], gamma, gammatr, omegas));
 
+    /*
+    // DEBUG
     printf("--------------------\n");
     printf("step : %10i\n", i);
     cyan();
@@ -315,13 +336,14 @@ void ODE(map<string, double> &twiss, map<string, vector<double>> &twissdata,
     printf("eydiff   : %12.6e\n", fabs((ey[i] - ey[i - 1]) / ey[i - 1]));
     printf("sigsdiff : %12.6e\n", fabs((sigs[i] - sigs[i - 1]) / sigs[i - 1]));
     reset();
+    */
   } while (i < maxsteps &&
            (fabs((ex[i] - ex[i - 1]) / ex[i - 1]) > 1e-3 ||
             fabs((ey[i] - ey[i - 1]) / ey[i - 1]) > 1e-3 ||
             fabs((sigs[i] - sigs[i - 1]) / sigs[i - 1]) > 1e-3));
   blue();
-  printf("%20s %12.6e\n", "Final ex :", ex[ex.size() - 1]);
-  printf("%20s %12.6e\n", "Final ey :", ey[ey.size() - 1]);
-  printf("%20s %12.6e\n", "Final sigs :", sigs[sigs.size() - 1]);
+  printf("%-20s : %12.6e\n", "Final ex", ex[ex.size() - 1]);
+  printf("%-20s : %12.6e\n", "Final ey", ey[ey.size() - 1]);
+  printf("%-20s : %12.6e\n", "Final sigs", sigs[sigs.size() - 1]);
   reset();
 }

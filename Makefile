@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named ode
+
+# Build rule for target.
+ode: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ode
+.PHONY : ode
+
+# fast build rule for target.
+ode/fast:
+	$(MAKE) -f CMakeFiles/ode.dir/build.make CMakeFiles/ode.dir/build
+.PHONY : ode/fast
+
+#=============================================================================
 # Target rules for targets named IBSLib
 
 # Build rule for target.
@@ -122,6 +135,19 @@ IBSLib: cmake_check_build_system
 IBSLib/fast:
 	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/build
 .PHONY : IBSLib/fast
+
+#=============================================================================
+# Target rules for targets named DemoODE
+
+# Build rule for target.
+DemoODE: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DemoODE
+.PHONY : DemoODE
+
+# fast build rule for target.
+DemoODE/fast:
+	$(MAKE) -f CMakeFiles/DemoODE.dir/build.make CMakeFiles/DemoODE.dir/build
+.PHONY : DemoODE/fast
 
 #=============================================================================
 # Target rules for targets named models
@@ -226,19 +252,6 @@ DemoIBS: cmake_check_build_system
 DemoIBS/fast:
 	$(MAKE) -f CMakeFiles/DemoIBS.dir/build.make CMakeFiles/DemoIBS.dir/build
 .PHONY : DemoIBS/fast
-
-#=============================================================================
-# Target rules for targets named ode
-
-# Build rule for target.
-ode: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ode
-.PHONY : ode
-
-# fast build rule for target.
-ode/fast:
-	$(MAKE) -f CMakeFiles/ode.dir/build.make CMakeFiles/ode.dir/build
-.PHONY : ode/fast
 
 #=============================================================================
 # Target rules for targets named clog
@@ -610,6 +623,7 @@ libtest.o: libtest.cpp.o
 # target to build an object file
 libtest.cpp.o:
 	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/libtest.cpp.o
+	$(MAKE) -f CMakeFiles/DemoODE.dir/build.make CMakeFiles/DemoODE.dir/libtest.cpp.o
 .PHONY : libtest.cpp.o
 
 libtest.i: libtest.cpp.i
@@ -619,6 +633,7 @@ libtest.i: libtest.cpp.i
 # target to preprocess a source file
 libtest.cpp.i:
 	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/libtest.cpp.i
+	$(MAKE) -f CMakeFiles/DemoODE.dir/build.make CMakeFiles/DemoODE.dir/libtest.cpp.i
 .PHONY : libtest.cpp.i
 
 libtest.s: libtest.cpp.s
@@ -628,6 +643,7 @@ libtest.s: libtest.cpp.s
 # target to generate assembly for a file
 libtest.cpp.s:
 	$(MAKE) -f CMakeFiles/IBSLib.dir/build.make CMakeFiles/IBSLib.dir/libtest.cpp.s
+	$(MAKE) -f CMakeFiles/DemoODE.dir/build.make CMakeFiles/DemoODE.dir/libtest.cpp.s
 .PHONY : libtest.cpp.s
 
 # Help Target
@@ -638,7 +654,9 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... ode"
 	@echo "... IBSLib"
+	@echo "... DemoODE"
 	@echo "... models"
 	@echo "... DemoRadDamping"
 	@echo "... raddamp"
@@ -647,7 +665,6 @@ help:
 	@echo "... DemoNumericFunctions"
 	@echo "... numfunc"
 	@echo "... DemoIBS"
-	@echo "... ode"
 	@echo "... clog"
 	@echo "... integrators"
 	@echo "... twiss"

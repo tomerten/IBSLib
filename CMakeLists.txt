@@ -12,6 +12,7 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_OPENMP_LINK_FLAGS}"
 
 
 add_executable(${PROJECT_NAME} libtest.cpp)
+add_executable(DemoODE  libtest.cpp)
 add_executable(DemoNumericFunctions  ${CMAKE_CURRENT_SOURCE_DIR}/Demos/DemoNumericFunctions.cpp)
 add_executable(DemoRadDamping  ${CMAKE_CURRENT_SOURCE_DIR}/Demos/DemoRadDamping.cpp)
 add_executable(DemoCoulombLog  ${CMAKE_CURRENT_SOURCE_DIR}/Demos/DemoCoulombLog.cpp)
@@ -76,3 +77,4 @@ target_link_libraries(DemoRadDamping numfunc twiss raddamp)
 target_link_libraries(DemoCoulombLog clog numfunc twiss raddamp)
 target_link_libraries(DemoIntegrators integrators clog numfunc twiss raddamp)
 target_link_libraries(DemoIBS models integrators clog numfunc twiss raddamp)
+target_link_libraries(DemoODE models ode integrators clog numfunc twiss raddamp)
