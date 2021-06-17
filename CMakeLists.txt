@@ -14,7 +14,6 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_OPENMP_LINK_FLAGS}"
 SET(MY_PYBIND ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pybind11-2.5.0)
 add_subdirectory(${MY_PYBIND})
 
-
 add_executable(${PROJECT_NAME} libtest.cpp)
 add_executable(DemoODE  libtest.cpp)
 add_executable(DemoNumericFunctions  ${CMAKE_CURRENT_SOURCE_DIR}/Demos/DemoNumericFunctions.cpp)
@@ -83,5 +82,8 @@ target_link_libraries(DemoIntegrators integrators clog numfunc twiss raddamp)
 target_link_libraries(DemoIBS models integrators clog numfunc twiss raddamp)
 target_link_libraries(DemoODE models ode integrators clog numfunc twiss raddamp)
 
-pybind11_add_module(ibslib_pb ibslib_pb.cpp)
-target_link_libraries(ibslib_pb ${PROJECT_NAME})
+pybind11_add_module(ibslib_pb 
+    ibslib_pb.cpp
+    SHARED Twiss/Twiss.cpp
+    )
+#target_link_libraries(ibslib_pb ${PROJECT_NAME})
