@@ -527,6 +527,7 @@ NumericFunctions/NumericFunctions.o: NumericFunctions/NumericFunctions.cpp.o
 
 # target to build an object file
 NumericFunctions/NumericFunctions.cpp.o:
+	$(MAKE) -f CMakeFiles/ibslib_pb.dir/build.make CMakeFiles/ibslib_pb.dir/NumericFunctions/NumericFunctions.cpp.o
 	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/NumericFunctions/NumericFunctions.cpp.o
 .PHONY : NumericFunctions/NumericFunctions.cpp.o
 
@@ -536,6 +537,7 @@ NumericFunctions/NumericFunctions.i: NumericFunctions/NumericFunctions.cpp.i
 
 # target to preprocess a source file
 NumericFunctions/NumericFunctions.cpp.i:
+	$(MAKE) -f CMakeFiles/ibslib_pb.dir/build.make CMakeFiles/ibslib_pb.dir/NumericFunctions/NumericFunctions.cpp.i
 	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/NumericFunctions/NumericFunctions.cpp.i
 .PHONY : NumericFunctions/NumericFunctions.cpp.i
 
@@ -545,6 +547,7 @@ NumericFunctions/NumericFunctions.s: NumericFunctions/NumericFunctions.cpp.s
 
 # target to generate assembly for a file
 NumericFunctions/NumericFunctions.cpp.s:
+	$(MAKE) -f CMakeFiles/ibslib_pb.dir/build.make CMakeFiles/ibslib_pb.dir/NumericFunctions/NumericFunctions.cpp.s
 	$(MAKE) -f CMakeFiles/numfunc.dir/build.make CMakeFiles/numfunc.dir/NumericFunctions/NumericFunctions.cpp.s
 .PHONY : NumericFunctions/NumericFunctions.cpp.s
 

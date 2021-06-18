@@ -85,5 +85,6 @@ target_link_libraries(DemoODE models ode integrators clog numfunc twiss raddamp)
 pybind11_add_module(ibslib_pb 
     ibslib_pb.cpp
     SHARED Twiss/Twiss.cpp
+    SHARED NumericFunctions/NumericFunctions.cpp
     )
 #target_link_libraries(ibslib_pb ${PROJECT_NAME})

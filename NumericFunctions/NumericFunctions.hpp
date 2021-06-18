@@ -21,7 +21,7 @@ const double euler = 0.577215664901533;
 const double erad = 2.8179403262e-15;
 
 // proton radius
-double prad = erad * emass / pmass;
+const double prad = erad * emass / pmass;
 
 double sigefromsigs(double omega0, double sigs, double qs, double gamma,
                     double gammatr);

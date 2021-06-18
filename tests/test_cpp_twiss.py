@@ -6,6 +6,7 @@ Tests for C++ module twiss.
 """
 
 import ibslib_pb as ibslib
+import pandas as pd
 
 
 def test_GetTwissHeader():
